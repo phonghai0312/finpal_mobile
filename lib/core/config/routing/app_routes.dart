@@ -1,5 +1,9 @@
 class AppRoutes {
-  static const String splash = '/';
+  // static const String splash = '/';
+  // Auth
+  static const String login = '/';
+  static const String register = '/register';
+  static const String verifyaccount = '/verifyaccount';
   // Shell user routes
   static const String home = '/home';
   static const String transactions = '/transactions';
