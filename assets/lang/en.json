@@ -1,0 +1,44 @@
+{
+    "app_name": "Fridge to Fork AI",
+    "welcome": "Welcome to Fridge to Fork!",
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "confirm": "Confirm",
+    "cancel": "Cancel",
+    "nav": {
+        "home": "Home",
+        "pantry": "Pantry",
+        "planner": "Planner",
+        "recipes": "Recipes",
+        "profile": "Profile"
+    },
+    "home": {
+        "title": "Home",
+        "subtitle": "Manage your kitchen smartly",
+        "button_explore": "Explore recipes"
+    },
+    "pantry": {
+        "title": "My Pantry",
+        "subtitle": "Track your available ingredients",
+        "add_item": "Add Ingredient",
+        "empty": "Your pantry is empty"
+    },
+    "planner": {
+        "title": "Meal Planner",
+        "subtitle": "Plan your meals for the week",
+        "create_plan": "Create a new plan",
+        "no_plan": "No plans available"
+    },
+    "recipes": {
+        "title": "Recipes",
+        "subtitle": "Discover AI-powered recipes",
+        "search_placeholder": "Search for a recipe",
+        "no_result": "No recipes found"
+    },
+    "profile": {
+        "title": "Profile",
+        "subtitle": "Manage your account and settings",
+        "logout": "Logout",
+        "language": "Language"
+    }
+}

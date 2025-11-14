@@ -1,0 +1,65 @@
+name: fridge_to_fork_ai
+description: "A new Flutter project."
+
+publish_to: 'none' 
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.9.2
+
+
+dependencies:
+  flutter:
+    sdk: flutter
+  # heroicons 
+  heroicons: ^0.11.0
+  # check internet connection
+  internet_connection_checker: ^3.0.1
+  # value equality
+  equatable: ^2.0.7
+  # environment variables
+  flutter_dotenv: ^6.0.0
+  # state management
+  flutter_riverpod: ^2.4.10
+  # navigation
+  go_router: ^16.2.2
+  # http requests
+  http: ^1.5.0
+  # spash screen animated
+  animated_splash_screen: ^1.3.0
+  # font google
+  google_fonts: ^6.3.2
+  # responsive screen
+  flutter_screenutil: ^5.9.3
+  # image svg
+  flutter_svg: ^2.2.1
+  # shared preferences
+  shared_preferences: ^2.5.3
+  # pin input
+  pinput: ^5.0.2
+  # table calendar
+  table_calendar: ^3.2.0
+  # intl
+  intl: ^0.20.2
+  # easy localization
+  easy_localization: ^3.0.8
+  # google  sign in
+  google_sign_in: ^7.2.0
+  # firebase
+  firebase_core: ^4.2.1
+  firebase_auth: ^6.1.2
+  firebase_messaging: ^16.0.4
+  
+  cupertino_icons: ^1.0.8
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+
+flutter:
+
+  uses-material-design: true
+  assets:
+    - assets/lang/

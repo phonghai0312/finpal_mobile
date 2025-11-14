@@ -1,0 +1,44 @@
+{
+    "app_name": "Từ Tủ Lạnh Đến Bàn Ăn AI",
+    "welcome": "Chào mừng bạn đến với Fridge to Fork!",
+    "loading": "Đang tải...",
+    "error": "Đã xảy ra lỗi",
+    "confirm": "Xác nhận",
+    "cancel": "Hủy",
+    "nav": {
+        "home": "Trang chủ",
+        "pantry": "Tủ thực phẩm",
+        "planner": "Kế hoạch",
+        "recipes": "Công thức",
+        "profile": "Hồ sơ"
+    },
+    "home": {
+        "title": "Trang chủ",
+        "subtitle": "Quản lý nhà bếp thông minh",
+        "button_explore": "Khám phá công thức"
+    },
+    "pantry": {
+        "title": "Tủ thực phẩm của tôi",
+        "subtitle": "Theo dõi nguyên liệu bạn có",
+        "add_item": "Thêm nguyên liệu",
+        "empty": "Tủ thực phẩm trống"
+    },
+    "planner": {
+        "title": "Kế hoạch bữa ăn",
+        "subtitle": "Lên kế hoạch ăn uống mỗi tuần",
+        "create_plan": "Tạo kế hoạch mới",
+        "no_plan": "Chưa có kế hoạch nào"
+    },
+    "recipes": {
+        "title": "Công thức nấu ăn",
+        "subtitle": "Khám phá công thức được gợi ý bởi AI",
+        "search_placeholder": "Tìm công thức...",
+        "no_result": "Không tìm thấy công thức nào"
+    },
+    "profile": {
+        "title": "Hồ sơ cá nhân",
+        "subtitle": "Quản lý tài khoản và cài đặt",
+        "logout": "Đăng xuất",
+        "language": "Ngôn ngữ"
+    }
+}
