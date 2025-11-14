@@ -9,11 +9,20 @@ import 'package:fridge_to_fork_ai/features/profile/presentation/profile_page.dar
 import 'package:fridge_to_fork_ai/features/suggestions/presentation/suggestions_page.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../features/auth/presentation/page/login/login_page.dart';
+
 class AppRouter {
   static final customerRouter = GoRouter(
     navigatorKey: rootNavigatorKey,
-    initialLocation: AppRoutes.home,
+    initialLocation: AppRoutes.login,
     routes: [
+      // Auth
+      GoRoute(
+        path: AppRoutes.login,
+        builder: (context, state) => const LoginPage(),
+      ),
+
+      // Shell router have nav bar
       ShellRoute(
         builder: (context, state, child) {
           final int currentIndex = _getUserGuestNavIndex(state.uri.path);
@@ -37,7 +46,7 @@ class AppRouter {
           ),
           GoRoute(
             path: AppRoutes.suggestions,
-            builder: (context, state) => const PlannerPage(),
+            builder: (context, state) => const AnalyticsPage(),
           ),
           GoRoute(
             path: AppRoutes.profile,
