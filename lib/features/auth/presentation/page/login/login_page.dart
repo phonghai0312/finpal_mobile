@@ -132,7 +132,9 @@ class LoginPage extends ConsumerWidget {
                 child: AuthFooter(
                   questionText: "Chưa có tài khoản? ",
                   actionText: 'Tạo tài khoản mới',
-                  onActionPressed: () {},
+                  onActionPressed: () {
+                    notifier.onPressRegister(context);
+                  },
                   imagePath: 'assets/image/logo_finpal.png',
                 ),
               ),
