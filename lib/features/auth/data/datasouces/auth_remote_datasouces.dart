@@ -126,4 +126,10 @@ class AuthRemoteDataSource {
     // Nếu không rơi vào các TH lỗi → thành công
     return;
   }
+
+  Future<void> sendRequest(String username) async {
+    await Future.delayed(const Duration(seconds: 1));
+
+    throw Exception("Mock: email does not exist");
+  }
 }

@@ -32,4 +32,9 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<void> verify(String username, String code, String purpose) {
     return remoteDataSource.verify(username, code, purpose);
   }
+
+  @override
+  Future<void> sendRequest(String username) {
+    return remoteDataSource.sendRequest(username);
+  }
 }

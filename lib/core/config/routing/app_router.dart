@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:fridge_to_fork_ai/core/config/routing/app_routes.dart';
 import 'package:fridge_to_fork_ai/core/presentation/widget/navigation/custom_bottom_navigation.dart';
 import 'package:fridge_to_fork_ai/core/utils/navigation_key.dart';
+import 'package:fridge_to_fork_ai/features/auth/presentation/page/forgotpassword/send_request_page.dart';
 import 'package:fridge_to_fork_ai/features/auth/presentation/page/register/register_page.dart';
 import 'package:fridge_to_fork_ai/features/home/presentation/home_page.dart';
+import 'package:fridge_to_fork_ai/features/onboarding/presentation/page/onboarding_page.dart';
+import 'package:fridge_to_fork_ai/features/onboarding/presentation/page/splash_page.dart';
 import 'package:fridge_to_fork_ai/features/transactions/presentation/transactions_page.dart';
 import 'package:fridge_to_fork_ai/features/analytics/presentation/analytics_page.dart';
 import 'package:fridge_to_fork_ai/features/profile/presentation/profile_page.dart';
@@ -15,8 +18,16 @@ import '../../../features/auth/presentation/page/login/login_page.dart';
 class AppRouter {
   static final customerRouter = GoRouter(
     navigatorKey: rootNavigatorKey,
-    initialLocation: AppRoutes.login,
+    initialLocation: AppRoutes.splash,
     routes: [
+      GoRoute(
+        path: AppRoutes.splash,
+        builder: (context, state) => const SplashPage(),
+      ),
+      GoRoute(
+        path: AppRoutes.onboarding,
+        builder: (context, state) => const OnboardingPage(),
+      ),
       // Auth
       GoRoute(
         path: AppRoutes.login,
@@ -26,7 +37,10 @@ class AppRouter {
         path: AppRoutes.register,
         builder: (context, state) => const RegisterPage(),
       ),
-
+      GoRoute(
+        path: AppRoutes.sendrequest,
+        builder: (context, state) => const SendRequestPage(),
+      ),
       // Shell router have nav bar
       ShellRoute(
         builder: (context, state, child) {
@@ -47,11 +61,11 @@ class AppRouter {
           ),
           GoRoute(
             path: AppRoutes.analytics,
-            builder: (context, state) => const SuggestionsPage(),
+            builder: (context, state) => const AnalyticsPage(),
           ),
           GoRoute(
             path: AppRoutes.suggestions,
-            builder: (context, state) => const AnalyticsPage(),
+            builder: (context, state) => const SuggestionsPage(),
           ),
           GoRoute(
             path: AppRoutes.profile,

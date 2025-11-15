@@ -8,4 +8,5 @@ abstract class AuthRepository {
   Future<void> logout();
   Future<RefreshToken> refreshToken(String refreshToken);
   Future<void> verify(String username, String code, String purpose);
+  Future<void> sendRequest(String username);
 }
