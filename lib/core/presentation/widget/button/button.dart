@@ -28,7 +28,7 @@ class Button extends StatelessWidget {
         style: ElevatedButton.styleFrom(
           backgroundColor: isDisabled
               ? AppColors.bgDisable
-              : (color ?? AppColors.bgPrimary),
+              : (color ?? AppColors.bgDarkGreen),
           padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 8.h),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16.r),

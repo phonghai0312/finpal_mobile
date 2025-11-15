@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:fridge_to_fork_ai/core/config/routing/app_routes.dart';
 import 'package:fridge_to_fork_ai/core/presentation/widget/navigation/custom_bottom_navigation.dart';
 import 'package:fridge_to_fork_ai/core/utils/navigation_key.dart';
+import 'package:fridge_to_fork_ai/features/auth/presentation/page/register/register_page.dart';
 import 'package:fridge_to_fork_ai/features/home/presentation/home_page.dart';
 import 'package:fridge_to_fork_ai/features/transactions/presentation/transactions_page.dart';
 import 'package:fridge_to_fork_ai/features/analytics/presentation/analytics_page.dart';
@@ -20,6 +21,10 @@ class AppRouter {
       GoRoute(
         path: AppRoutes.login,
         builder: (context, state) => const LoginPage(),
+      ),
+      GoRoute(
+        path: AppRoutes.register,
+        builder: (context, state) => const RegisterPage(),
       ),
 
       // Shell router have nav bar
