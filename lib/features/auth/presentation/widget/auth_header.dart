@@ -6,7 +6,7 @@ import '../../../../core/presentation/theme/app_colors.dart';
 
 class AuthHeader extends StatelessWidget {
   final String title;
-  final VoidCallback? onBack;
+  final VoidCallback? onBack; // null = không có nút back
 
   const AuthHeader({super.key, required this.title, this.onBack});
 
@@ -15,25 +15,15 @@ class AuthHeader extends StatelessWidget {
     return Padding(
       padding: EdgeInsets.only(top: 8.h),
       child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          InkWell(
-            borderRadius: BorderRadius.circular(8.r),
-            onTap: () {},
-            child: Icon(
-              Icons.arrow_back_ios_new_rounded,
-              size: 22.sp,
-              color: Colors.black87,
-            ),
-          ),
-
-          SizedBox(width: 6.w),
-
+          /// Tiêu đề
           Text(
             title,
             style: GoogleFonts.poppins(
-              fontSize: 20.sp,
-              fontWeight: FontWeight.w600,
+              fontSize: 25.sp,
+              fontWeight: FontWeight.w700,
               color: AppColors.typoBlack,
             ),
           ),

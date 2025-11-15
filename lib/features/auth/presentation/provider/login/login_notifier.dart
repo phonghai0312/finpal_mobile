@@ -2,7 +2,6 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fridge_to_fork_ai/core/presentation/providers/previous_page_provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -187,6 +186,10 @@ class LoginNotifier extends StateNotifier<LoginState> {
 
   void onPressRegister(BuildContext context) {
     context.go(AppRoutes.register);
+  }
+
+  void onPressForgotPassword(BuildContext context) {
+    context.go(AppRoutes.sendrequest);
   }
 
   @override

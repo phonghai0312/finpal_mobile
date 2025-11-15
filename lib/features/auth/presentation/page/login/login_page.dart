@@ -100,7 +100,9 @@ class LoginPage extends ConsumerWidget {
                   const Spacer(),
 
                   InkWell(
-                    onTap: () {},
+                    onTap: () {
+                      notifier.onPressForgotPassword(context);
+                    },
                     child: Text(
                       'Quên mật khẩu?',
                       style: GoogleFonts.poppins(

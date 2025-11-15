@@ -6,7 +6,6 @@ import 'package:go_router/go_router.dart';
 import 'package:heroicons/heroicons.dart';
 
 import '../../../config/routing/app_routes.dart';
-import '../../theme/app_colors.dart';
 
 class CustomBottomNavBar extends StatefulWidget {
   final int initialIndex;
@@ -22,10 +21,18 @@ class _CustomBottomNavBarState extends State<CustomBottomNavBar> {
 
   final List<HeroIcons> icons = [
     HeroIcons.home,
-    HeroIcons.phone,
-    HeroIcons.clipboardDocumentCheck,
-    HeroIcons.clock,
-    HeroIcons.bell,
+    HeroIcons.currencyDollar,
+    HeroIcons.chartBar,
+    HeroIcons.sparkles,
+    HeroIcons.user,
+  ];
+
+  final List<String> labels = [
+    "Trang chủ",
+    "Giao dịch",
+    "Thống kê",
+    "Gợi ý",
+    "Cá nhân",
   ];
 
   final List<String> routes = [
@@ -45,32 +52,48 @@ class _CustomBottomNavBarState extends State<CustomBottomNavBar> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.symmetric(vertical: 14.h),
+      // 🔥 Sát đáy - không padding ngoài để không bị lơ lửng
+      padding: EdgeInsets.symmetric(vertical: 10.h),
       decoration: BoxDecoration(
-        color: AppColors.bgWhite,
-        boxShadow: [BoxShadow(color: AppColors.bgWhite, blurRadius: 4.r)],
+        color: const Color(0xFF0B6A43), // nền xanh như mẫu
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(32.r),
+          topRight: Radius.circular(32.r),
+        ),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: List.generate(icons.length, (index) {
           final isSelected = index == currentIndex;
+
           return GestureDetector(
             onTap: () {
               setState(() => currentIndex = index);
               context.go(routes[index]);
             },
-            child: Container(
-              padding: EdgeInsets.only(
-                top: 4.w,
-                bottom: 12.w,
-                left: 8.w,
-                right: 8.w,
-              ),
-              child: HeroIcon(
-                icons[index],
-                style: HeroIconStyle.outline,
-                color: isSelected ? AppColors.typoPrimary : AppColors.typoBody,
-                size: 28.w,
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 4.w),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  HeroIcon(
+                    icons[index],
+                    style: HeroIconStyle.solid,
+                    color: isSelected ? Colors.amber : Colors.white,
+                    size: 28.w,
+                  ),
+                  SizedBox(height: 6.h),
+                  Text(
+                    labels[index],
+                    style: TextStyle(
+                      fontSize: 12.sp,
+                      fontWeight: isSelected
+                          ? FontWeight.w600
+                          : FontWeight.normal,
+                      color: isSelected ? Colors.amber : Colors.white,
+                    ),
+                  ),
+                ],
               ),
             ),
           );
