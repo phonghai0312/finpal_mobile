@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:fridge_to_fork_ai/core/presentation/theme/app_colors.dart';
 import 'package:go_router/go_router.dart';
 import 'package:heroicons/heroicons.dart';
 
@@ -38,7 +39,7 @@ class _CustomBottomNavBarState extends State<CustomBottomNavBar> {
   final List<String> routes = [
     AppRoutes.home,
     AppRoutes.transactions,
-    AppRoutes.analytics,
+    AppRoutes.stats,
     AppRoutes.suggestions,
     AppRoutes.profile,
   ];
@@ -52,10 +53,9 @@ class _CustomBottomNavBarState extends State<CustomBottomNavBar> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      // 🔥 Sát đáy - không padding ngoài để không bị lơ lửng
       padding: EdgeInsets.symmetric(vertical: 10.h),
       decoration: BoxDecoration(
-        color: const Color(0xFF0B6A43), // nền xanh như mẫu
+        color: AppColors.bgDarkGreen, // nền xanh như mẫu
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(32.r),
           topRight: Radius.circular(32.r),

@@ -9,11 +9,13 @@ class Button extends StatelessWidget {
     super.key,
     required this.text,
     this.color,
+    this.textColor,
     required this.onPressed,
   });
 
   final String text;
   final Color? color;
+  final Color? textColor;
   final VoidCallback? onPressed;
 
   @override
@@ -40,7 +42,7 @@ class Button extends StatelessWidget {
           style: GoogleFonts.poppins(
             fontSize: 16.sp,
             fontWeight: FontWeight.w600,
-            color: AppColors.typoWhite,
+            color: textColor ?? AppColors.typoWhite,
           ),
         ),
       ),
