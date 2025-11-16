@@ -2,6 +2,8 @@ class AppRoutes {
   // Onboarding
   static const String splash = '/';
   static const String onboarding = '/onboarding';
+  static const String welcome = '/welcome';
+  static const String connectsepay = '/connectsepay';
   // Auth
   static const String login = '/login';
   static const String register = '/register';
@@ -10,7 +12,7 @@ class AppRoutes {
   // Shell user routes
   static const String home = '/home';
   static const String transactions = '/transactions';
-  static const String analytics = '/analytics';
+  static const String stats = '/analytics';
   static const String suggestions = '/suggestions';
   static const String profile = '/profile';
 }

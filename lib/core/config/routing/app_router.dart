@@ -4,13 +4,15 @@ import 'package:fridge_to_fork_ai/core/presentation/widget/navigation/custom_bot
 import 'package:fridge_to_fork_ai/core/utils/navigation_key.dart';
 import 'package:fridge_to_fork_ai/features/auth/presentation/page/forgotpassword/send_request_page.dart';
 import 'package:fridge_to_fork_ai/features/auth/presentation/page/register/register_page.dart';
-import 'package:fridge_to_fork_ai/features/home/presentation/home_page.dart';
+import 'package:fridge_to_fork_ai/features/home/presentation/page/home_page.dart';
 import 'package:fridge_to_fork_ai/features/onboarding/presentation/page/onboarding_page.dart';
 import 'package:fridge_to_fork_ai/features/onboarding/presentation/page/splash_page.dart';
+import 'package:fridge_to_fork_ai/features/stats/presentation/stats_page.dart';
 import 'package:fridge_to_fork_ai/features/transactions/presentation/transactions_page.dart';
-import 'package:fridge_to_fork_ai/features/analytics/presentation/analytics_page.dart';
 import 'package:fridge_to_fork_ai/features/profile/presentation/profile_page.dart';
 import 'package:fridge_to_fork_ai/features/suggestions/presentation/suggestions_page.dart';
+import 'package:fridge_to_fork_ai/features/welcome/presentation/page/connectsepay/connect_sepay_page.dart';
+import 'package:fridge_to_fork_ai/features/welcome/presentation/page/welcome/welcome_page.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../features/auth/presentation/page/login/login_page.dart';
@@ -28,6 +30,15 @@ class AppRouter {
         path: AppRoutes.onboarding,
         builder: (context, state) => const OnboardingPage(),
       ),
+      GoRoute(
+        path: AppRoutes.welcome,
+        builder: (context, state) => const WelcomePage(),
+      ),
+      GoRoute(
+        path: AppRoutes.connectsepay,
+        builder: (context, state) => const ConnectSepayPage(),
+      ),
+
       // Auth
       GoRoute(
         path: AppRoutes.login,
@@ -60,8 +71,8 @@ class AppRouter {
             builder: (context, state) => const TransactionsPage(),
           ),
           GoRoute(
-            path: AppRoutes.analytics,
-            builder: (context, state) => const AnalyticsPage(),
+            path: AppRoutes.stats,
+            builder: (context, state) => const StatsPage(),
           ),
           GoRoute(
             path: AppRoutes.suggestions,
@@ -78,7 +89,7 @@ class AppRouter {
   static int _getUserGuestNavIndex(String path) {
     if (path == AppRoutes.home) return 0;
     if (path.startsWith(AppRoutes.transactions)) return 1;
-    if (path.startsWith(AppRoutes.analytics)) return 2;
+    if (path.startsWith(AppRoutes.stats)) return 2;
     if (path.startsWith(AppRoutes.suggestions)) return 3;
     if (path.startsWith(AppRoutes.profile)) return 4;
     return 0;
