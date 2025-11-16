@@ -141,7 +141,7 @@ class LoginNotifier extends StateNotifier<LoginState> {
 
       _setLoading(false);
 
-      if (context.mounted) context.go(AppRoutes.home);
+      if (context.mounted) context.go(AppRoutes.welcome);
     } catch (e) {
       _setLoading(false);
 

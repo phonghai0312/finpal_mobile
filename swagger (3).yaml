@@ -1,0 +1,1509 @@
+openapi: 3.0.0
+info:
+  title: Vi Thong Minh API
+  version: 1.0.0
+  description: API cho ứng dụng "Ví Thông Minh" – quản lý chi tiêu tự động từ Sepay.
+
+servers:
+  - url: https://api.vithongminh.com
+    description: Production server
+  - url: http://localhost:3000
+    description: Local development server
+
+tags:
+  - name: Auth
+    description: Đăng ký / đăng nhập
+  - name: Users
+    description: Thông tin & cài đặt người dùng
+  - name: Sepay
+    description: Tích hợp Sepay (webhook & cấu hình)
+  - name: Transactions
+    description: Giao dịch & phân loại
+  - name: Stats
+    description: Thống kê
+  - name: Insights
+    description: Báo cáo & gợi ý
+  - name: Webhook
+    description: Endpoint cho Sepay gọi
+  - name: Categories
+    description: Quản lý danh mục
+  - name: Budgets
+    description: Quản lý ngân sách chi tiêu
+
+security:
+  - bearerAuth: []
+
+paths:
+  /auth/register:
+    post:
+      tags:
+        - Auth
+      summary: Đăng ký tài khoản mới
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthRegisterRequest'
+      responses:
+        '201':
+          description: Đăng ký thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
+          description: Dữ liệu không hợp lệ hoặc số điện thoại/email đã tồn tại
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/login:
+    post:
+      tags:
+        - Auth
+      summary: Đăng nhập
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthLoginRequest'
+      responses:
+        '200':
+          description: Đăng nhập thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
+          description: Sai số điện thoại hoặc mật khẩu, hoặc dữ liệu không hợp lệ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Sai số điện thoại hoặc mật khẩu
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/refresh-token:
+    post:
+      tags:
+        - Auth
+      summary: Làm mới Access Token
+      responses:
+        '200':
+          description: Token đã được làm mới thành công
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+        '401':
+          description: Token không hợp lệ hoặc đã hết hạn
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/logout:
+    post:
+      tags:
+        - Auth
+      summary: Đăng xuất (xóa session trên server)
+      responses:
+        '200':
+          description: Đăng xuất thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WebhookOkResponse'
+        '401':
+          description: Chưa đăng nhập hoặc token không hợp lệ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /users/me:
+    get:
+      tags:
+        - Users
+      summary: Lấy thông tin user hiện tại
+      responses:
+        '200':
+          description: Thông tin user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '401':
+          description: Chưa đăng nhập
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /users/me/settings:
+    patch:
+      tags:
+        - Users
+      summary: Cập nhật cài đặt user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserSettingsUpdateRequest'
+      responses:
+        '200':
+          description: Cập nhật thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Dữ liệu không hợp lệ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Chưa đăng nhập
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /sepay/webhook-url:
+    get:
+      tags:
+        - Sepay
+      summary: Lấy URL webhook riêng cho user
+      responses:
+        '200':
+          description: Webhook URL cho user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SepayWebhookUrlResponse'
+        '401':
+          description: Chưa đăng nhập
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /sepay/status:
+    get:
+      tags:
+        - Sepay
+      summary: Kiểm tra trạng thái kết nối Sepay
+      responses:
+        '200':
+          description: Trạng thái kết nối Sepay
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SepayStatusResponse'
+        '401':
+          description: Chưa đăng nhập
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /categories:
+    get:
+      tags:
+        - Categories
+      summary: Lấy danh sách các danh mục của người dùng
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - in: query
+          name: pageSize
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        '200':
+          description: Danh sách danh mục
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CategoryListResponse'
+        '401':
+          description: Chưa đăng nhập
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    post:
+      tags:
+        - Categories
+      summary: Tạo danh mục mới cho người dùng
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - displayName
+              properties:
+                name:
+                  type: string
+                  description: Tên danh mục (sẽ được tự động tạo slug nếu không có)
+                displayName:
+                  type: string
+                  description: Tên hiển thị của danh mục
+                parent:
+                  type: string
+                  nullable: true
+                  description: ID của danh mục cha
+                icon:
+                  type: string
+                  nullable: true
+                  description: Tên icon của danh mục
+      responses:
+        '201':
+          description: Danh mục đã được tạo
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Category'
+        '400':
+          description: Dữ liệu không hợp lệ hoặc tên danh mục đã tồn tại
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Chưa đăng nhập
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /categories/{id}:
+    get:
+      tags:
+        - Categories
+      summary: Lấy chi tiết một danh mục của người dùng
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Chi tiết danh mục
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Category'
+        '401':
+          description: Chưa đăng nhập
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Không tìm thấy danh mục
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    put:
+      tags:
+        - Categories
+      summary: Cập nhật một danh mục của người dùng
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: Tên danh mục mới (sẽ được tự động tạo slug nếu không có)
+                displayName:
+                  type: string
+                  description: Tên hiển thị mới của danh mục
+                parent:
+                  type: string
+                  nullable: true
+                  description: ID của danh mục cha mới
+                icon:
+                  type: string
+                  nullable: true
+                  description: Tên icon mới của danh mục
+      responses:
+        '200':
+          description: Cập nhật thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Category'
+        '400':
+          description: Dữ liệu không hợp lệ hoặc tên danh mục đã tồn tại
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Chưa đăng nhập
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Không tìm thấy danh mục
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    delete:
+      tags:
+        - Categories
+      summary: Xóa một danh mục của người dùng
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Xóa thành công
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Danh mục đã được xóa thành công.
+        '400':
+          description: Không thể xóa danh mục vì có giao dịch đang sử dụng.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Chưa đăng nhập
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Không tìm thấy danh mục
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /transactions:
+    get:
+      tags:
+        - Transactions
+      summary: Lấy danh sách giao dịch
+      parameters:
+        - in: query
+          name: from
+          schema:
+            type: integer
+            description: Thời gian bắt đầu (Unix timestamp)
+        - in: query
+          name: to
+          schema:
+            type: integer
+            description: Thời gian kết thúc (Unix timestamp)
+        - in: query
+          name: type
+          schema:
+            type: string
+            enum: [expense, income, transfer]
+        - in: query
+          name: direction
+          schema:
+            type: string
+            enum: [out, in, transfer]
+        - in: query
+          name: categoryId
+          schema:
+            type: string
+        - in: query
+          name: accountId
+          schema:
+            type: string
+        - in: query
+          name: page
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - in: query
+          name: pageSize
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        '200':
+          description: Danh sách giao dịch
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionListResponse'
+        '401':
+          description: Chưa đăng nhập
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /transactions/{id}:
+    get:
+      tags:
+        - Transactions
+      summary: Lấy chi tiết 1 giao dịch
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Chi tiết giao dịch
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Transaction'
+        '401':
+          description: Chưa đăng nhập
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Không tìm thấy giao dịch
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    put:
+      tags:
+        - Transactions
+      summary: Cập nhật category / ghi chú
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransactionUpdateRequest'
+      responses:
+        '200':
+          description: Cập nhật thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Transaction'
+        '400':
+          description: Dữ liệu không hợp lệ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Chưa đăng nhập
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Không tìm thấy giao dịch
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /stats/overview:
+    get:
+      tags:
+        - Stats
+      summary: Thống kê tổng quan (tổng chi/thu)
+      parameters:
+        - in: query
+          name: from
+          schema:
+            type: integer
+            description: Thời gian bắt đầu (Unix timestamp)
+        - in: query
+          name: to
+          schema:
+            type: integer
+            description: Thời gian kết thúc (Unix timestamp)
+        - in: query
+          name: type
+          schema:
+            type: string
+            enum: [daily, weekly, monthly]
+            default: monthly
+      responses:
+        '200':
+          description: Thống kê tổng quan
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatSummaryOverviewResponse'
+        '401':
+          description: Chưa đăng nhập
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /stats/by-category:
+    get:
+      tags:
+        - Stats
+      summary: Thống kê chi tiêu theo category
+      parameters:
+        - in: query
+          name: from
+          schema:
+            type: integer
+            description: Thời gian bắt đầu (Unix timestamp)
+        - in: query
+          name: to
+          schema:
+            type: integer
+            description: Thời gian kết thúc (Unix timestamp)
+        - in: query
+          name: type
+          schema:
+            type: string
+            enum: [daily, weekly, monthly]
+            default: monthly
+      responses:
+        '200':
+          description: Thống kê theo category
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatSummaryByCategoryResponse'
+        '401':
+          description: Chưa đăng nhập
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /insights:
+    get:
+      tags:
+        - Insights
+      summary: Lấy danh sách báo cáo / gợi ý
+      parameters:
+        - in: query
+          name: type
+          schema:
+            type: string
+            enum: [weekly_summary, monthly_summary, alert, tip]
+        - in: query
+          name: page
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - in: query
+          name: pageSize
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        '200':
+          description: Danh sách insights
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InsightListResponse'
+        '401':
+          description: Chưa đăng nhập
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /insights/{id}:
+    patch:
+      tags:
+        - Insights
+      summary: Cập nhật insight (ví dụ đánh dấu đã đọc)
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InsightUpdateRequest'
+      responses:
+        '200':
+          description: Cập nhật thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Insight'
+        '400':
+          description: Dữ liệu không hợp lệ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Chưa đăng nhập
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Không tìm thấy insight
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /webhook/sepay/{token}:
+    post:
+      tags:
+        - Webhook
+      summary: Endpoint để Sepay gửi giao dịch
+      security: []
+      parameters:
+        - in: path
+          name: token
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SepayWebhookPayload'
+      responses:
+        '200':
+          description: Nhận webhook thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WebhookOkResponse'
+        '400':
+          description: Payload không hợp lệ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /budgets:
+    post:
+      tags:
+        - Budgets
+      summary: Tạo ngân sách mới cho người dùng
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateBudgetRequest'
+      responses:
+        '201':
+          description: Ngân sách đã được tạo
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Budget'
+        '400':
+          description: Dữ liệu không hợp lệ hoặc ngân sách đã tồn tại
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Chưa đăng nhập
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    get:
+      tags:
+        - Budgets
+      summary: Lấy danh sách ngân sách của người dùng
+      parameters:
+        - in: query
+          name: period
+          schema:
+            type: string
+            enum: [monthly, weekly]
+            description: Lọc theo kỳ hạn (monthly hoặc weekly)
+        - in: query
+          name: categoryId
+          schema:
+            type: string
+            description: Lọc theo ID danh mục
+        - in: query
+          name: page
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - in: query
+          name: pageSize
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        '200':
+          description: Danh sách ngân sách
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BudgetListResponse'
+        '401':
+          description: Chưa đăng nhập
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /budgets/{id}:
+    get:
+      tags:
+        - Budgets
+      summary: Lấy chi tiết một ngân sách của người dùng
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Chi tiết ngân sách
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Budget'
+        '401':
+          description: Chưa đăng nhập
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Không tìm thấy ngân sách
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    put:
+      tags:
+        - Budgets
+      summary: Cập nhật một ngân sách của người dùng
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateBudgetRequest'
+      responses:
+        '200':
+          description: Cập nhật thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Budget'
+        '400':
+          description: Dữ liệu không hợp lệ hoặc ngân sách đã tồn tại
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Chưa đăng nhập
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Không tìm thấy ngân sách
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    delete:
+      tags:
+        - Budgets
+      summary: Xóa một ngân sách của người dùng
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Xóa thành công
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Ngân sách đã được xóa thành công.
+        '401':
+          description: Chưa đăng nhập
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Không tìm thấy ngân sách
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+
+    AuthRegisterRequest:
+      type: object
+      required:
+        - phone
+        - password
+      properties:
+        phone:
+          type: string
+          example: '0987654321'
+        password:
+          type: string
+          minLength: 6
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+          nullable: true
+
+    AuthLoginRequest:
+      type: object
+      required:
+        - phone
+        - password
+      properties:
+        phone:
+          type: string
+          example: '0987654321'
+        password:
+          type: string
+
+    AuthResponse:
+      type: object
+      properties:
+        token:
+          type: string
+          description: JWT Access Token
+        tokenType:
+          type: string
+          example: Bearer
+        user:
+          $ref: '#/components/schemas/User'
+
+    UserSettings:
+      type: object
+      properties:
+        currency:
+          type: string
+          example: VND
+        language:
+          type: string
+          example: vi
+        timezone:
+          type: string
+          example: Asia/Ho_Chi_Minh
+        notificationEnabled:
+          type: boolean
+
+    UserSettingsUpdateRequest:
+      type: object
+      properties:
+        currency:
+          type: string
+        language:
+          type: string
+        timezone:
+          type: string
+        notificationEnabled:
+          type: boolean
+
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+        email:
+          type: string
+          nullable: true
+        phone:
+          type: string
+        name:
+          type: string
+        avatarUrl:
+          type: string
+          nullable: true
+        settings:
+          $ref: '#/components/schemas/UserSettings'
+        createdAt:
+          type: integer
+          description: Unix timestamp
+        updatedAt:
+          type: integer
+          description: Unix timestamp
+
+    SepayWebhookUrlResponse:
+      type: object
+      properties:
+        webhookUrl:
+          type: string
+          example: https://api.vithongminh.com/webhook/sepay/USER_TOKEN_123
+
+    SepayStatusResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [connected, not_connected, unknown]
+        lastReceivedAt:
+          type: integer
+          description: Unix timestamp of last webhook received
+          nullable: true
+
+    SepayWebhookPayload:
+      type: object
+      description: Payload từ Sepay, linh hoạt theo định dạng thực tế.
+      additionalProperties: true
+
+    WebhookOkResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        transactionId:
+          type: string
+          description: ID của giao dịch đã tạo
+
+    TransactionNormalized:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        peerName:
+          type: string
+        balanceAfter:
+          type: number
+          nullable: true
+        meta:
+          type: object
+          additionalProperties: true
+
+    TransactionAI:
+      type: object
+      properties:
+        categorySuggestionId:
+          type: string
+          nullable: true
+        confidence:
+          type: number
+          format: float
+          nullable: true
+        model:
+          type: string
+          nullable: true
+        rawResponse:
+          type: object
+          additionalProperties: true
+          nullable: true
+
+    Transaction:
+      type: object
+      properties:
+        id:
+          type: string
+        userId:
+          type: string
+        accountId:
+          type: string
+        amount:
+          type: number
+        currency:
+          type: string
+        direction:
+          type: string
+          enum: [out, in, transfer]
+        type:
+          type: string
+          enum: [expense, income, transfer]
+        categoryId:
+          type: string
+          nullable: true
+        categoryName:
+          type: string
+          nullable: true
+        merchant:
+          type: string
+          nullable: true
+        occurredAt:
+          type: integer
+          description: Unix timestamp
+        rawMessage:
+          type: string
+        normalized:
+          $ref: '#/components/schemas/TransactionNormalized'
+        ai:
+          $ref: '#/components/schemas/TransactionAI'
+        userNote:
+          type: string
+          nullable: true
+        source:
+          type: string
+          enum: [sepay, manual, import]
+        createdAt:
+          type: integer
+          description: Unix timestamp
+        updatedAt:
+          type: integer
+          description: Unix timestamp
+
+    TransactionListResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Transaction'
+        page:
+          type: integer
+        pageSize:
+          type: integer
+        total:
+          type: integer
+
+    TransactionUpdateRequest:
+      type: object
+      properties:
+        categoryId:
+          type: string
+          nullable: true
+        userNote:
+          type: string
+          nullable: true
+
+    Period:
+      type: object
+      properties:
+        from:
+          type: integer
+          description: Unix timestamp
+        to:
+          type: integer
+          description: Unix timestamp
+
+    StatsOverview:
+      type: object
+      properties:
+        period:
+          $ref: '#/components/schemas/Period'
+        currency:
+          type: string
+        totalExpense:
+          type: number
+        totalIncome:
+          type: number
+        totalTransactions:
+          type: integer
+
+    StatsByCategoryItem:
+      type: object
+      properties:
+        categoryId:
+          type: string
+        categoryName:
+          type: string
+        totalAmount:
+          type: number
+        percentage:
+          type: number
+
+    StatsByCategoryResponse:
+      type: object
+      properties:
+        period:
+          $ref: '#/components/schemas/Period'
+        currency:
+          type: string
+        totalExpense:
+          type: number
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/StatsByCategoryItem'
+
+    Insight:
+      type: object
+      properties:
+        id:
+          type: string
+        userId:
+          type: string
+        type:
+          type: string
+          enum: [weekly_summary, monthly_summary, alert, tip]
+        period:
+          $ref: '#/components/schemas/Period'
+        title:
+          type: string
+        message:
+          type: string
+        data:
+          type: object
+          additionalProperties: true
+        read:
+          type: boolean
+        createdAt:
+          type: integer
+          description: Unix timestamp
+        updatedAt:
+          type: integer
+          description: Unix timestamp
+
+    InsightListResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Insight'
+        page:
+          type: integer
+        pageSize:
+          type: integer
+        total:
+          type: integer
+
+    InsightUpdateRequest:
+      type: object
+      properties:
+        read:
+          type: boolean
+
+    Category:
+      type: object
+      properties:
+        id:
+          type: string
+        userId:
+          type: string
+        name:
+          type: string
+        displayName:
+          type: string
+        parent:
+          type: string
+          nullable: true
+        icon:
+          type: string
+          nullable: true
+        createdAt:
+          type: integer
+          description: Unix timestamp
+        updatedAt:
+          type: integer
+          description: Unix timestamp
+
+    CategoryListResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Category'
+        page:
+          type: integer
+        pageSize:
+          type: integer
+        total:
+          type: integer
+
+    Session:
+      type: object
+      properties:
+        id:
+          type: string
+        hash:
+          type: string
+        userId:
+          type: string
+        createdAt:
+          type: integer
+          description: Unix timestamp
+        expireAt:
+          type: integer
+          description: Unix timestamp
+        updatedAt:
+          type: integer
+          description: Unix timestamp
+
+    StatSummary:
+      type: object
+      properties:
+        id:
+          type: string
+        userId:
+          type: string
+        type:
+          type: string
+          enum: [daily, weekly, monthly]
+        period:
+          $ref: '#/components/schemas/Period'
+        totalExpense:
+          type: number
+        totalIncome:
+          type: number
+        totalTransactions:
+          type: integer
+        currency:
+          type: string
+        categorySummaries:
+          type: array
+          items:
+            $ref: '#/components/schemas/StatSummaryCategoryItem'
+        createdAt:
+          type: integer
+          description: Unix timestamp
+        updatedAt:
+          type: integer
+          description: Unix timestamp
+
+    StatSummaryCategoryItem:
+      type: object
+      properties:
+        categoryId:
+          type: string
+        categoryName:
+          type: string
+        totalAmount:
+          type: number
+        percentage:
+          type: number
+
+    StatSummaryOverviewResponse:
+      type: object
+      properties:
+        period:
+          $ref: '#/components/schemas/Period'
+        currency:
+          type: string
+        totalExpense:
+          type: number
+        totalIncome:
+          type: number
+        totalTransactions:
+          type: integer
+
+    StatSummaryByCategoryResponse:
+      type: object
+      properties:
+        period:
+          $ref: '#/components/schemas/Period'
+        currency:
+          type: string
+        totalExpense:
+          type: number
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              categoryId:
+                type: string
+              categoryName:
+                type: string
+              totalAmount:
+                type: number
+              percentage:
+                type: number
+
+    Budget:
+      type: object
+      properties:
+        id:
+          type: string
+        userId:
+          type: string
+        categoryId:
+          type: string
+        categoryName:
+          type: string
+        amount:
+          type: number
+        period:
+          type: string
+          enum: [monthly, weekly]
+        startDate:
+          type: integer
+          description: Unix timestamp
+        endDate:
+          type: integer
+          description: Unix timestamp
+        alertThreshold:
+          type: number
+          minimum: 0
+          maximum: 100
+        createdAt:
+          type: integer
+          description: Unix timestamp
+        updatedAt:
+          type: integer
+          description: Unix timestamp
+
+    CreateBudgetRequest:
+      type: object
+      required:
+        - categoryId
+        - amount
+        - period
+        - startDate
+        - endDate
+      properties:
+        categoryId:
+          type: string
+        amount:
+          type: number
+          minimum: 0
+        period:
+          type: string
+          enum: [monthly, weekly]
+          default: monthly
+        startDate:
+          type: integer
+          description: Unix timestamp
+        endDate:
+          type: integer
+          description: Unix timestamp
+        alertThreshold:
+          type: number
+          minimum: 0
+          maximum: 100
+          default: 80
+
+    UpdateBudgetRequest:
+      type: object
+      properties:
+        categoryId:
+          type: string
+        amount:
+          type: number
+          minimum: 0
+        period:
+          type: string
+          enum: [monthly, weekly]
+        startDate:
+          type: integer
+          description: Unix timestamp
+        endDate:
+          type: integer
+          description: Unix timestamp
+        alertThreshold:
+          type: number
+          minimum: 0
+          maximum: 100
+
+    BudgetListResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Budget'
+        page:
+          type: integer
+        pageSize:
+          type: integer
+        total:
+          type: integer
