@@ -1,6 +1,5 @@
 import '../../domain/entities/transaction.dart';
 import '../../data/models/transaction_model.dart';
-import '../../data/models/transaction_update_request_model.dart';
 
 abstract class TransactionRepository {
   Future<TransactionListResponseModel> getTransactions({
@@ -14,7 +13,7 @@ abstract class TransactionRepository {
     int pageSize,
   });
 
-  Future<TransactionEntity> getTransactionDetail(String id);
+  Future<Transaction> getTransactionDetail(String id);
 
   Future<void> updateTransaction({
     required String id,

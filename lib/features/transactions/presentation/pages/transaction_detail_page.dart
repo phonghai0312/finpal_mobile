@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:fridge_to_fork_ai/core/presentation/theme/app_colors.dart';
+import 'package:fridge_to_fork_ai/features/transactions/domain/entities/transaction.dart';
 import 'package:intl/intl.dart';
 
-import '../../../core/presentation/theme/app_colors.dart';
 import '../provider/transaction_detail_provider.dart';
-import '../../../features/categories/presentation/provider/category_provider.dart';
 
 class TransactionDetailPage extends ConsumerWidget {
   final String transactionId;
@@ -14,44 +14,57 @@ class TransactionDetailPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final transactionAsync = ref.watch(transactionDetailNotifierProvider(transactionId));
+    final state = ref.watch(transactionNotifierProvider(transactionId));
 
+    if (state.isLoading) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    if (state.error != null) {
+      return Scaffold(
+        body: Center(child: Text('Error: ${state.error}')),
+      );
+    }
+
+    final tx = state.data!;
     return Scaffold(
       appBar: AppBar(
         title: const Text('Chi tiết giao dịch'),
         centerTitle: true,
       ),
-      body: transactionAsync.when(
-        data: (transaction) {
-          return SingleChildScrollView(
-            padding: EdgeInsets.all(16.w),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildTransactionSummaryCard(context, transaction),
-                SizedBox(height: 16.h),
-                _buildAIClassificationBanner(context, transaction),
-                SizedBox(height: 16.h),
-                _buildDetailItem(context, Icons.access_time, 'Thời gian', _formatDate(transaction.occurredAt)),
-                _buildDetailItem(context, Icons.category, 'Danh mục', transaction.categoryName ?? 'Không xác định'),
-                _buildDetailItem(context, Icons.credit_card, 'Phương thức', transaction.source ?? 'Không xác định'),
-                _buildDetailItem(context, Icons.location_on, 'Địa điểm', transaction.merchant ?? 'Không xác định'),
-                _buildDetailItem(context, Icons.note, 'Ghi chú', transaction.userNote ?? 'Không có ghi chú'),
-                SizedBox(height: 24.h),
-                _buildActionButtons(context, ref, transaction),
-              ],
-            ),
-          );
-        },
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stack) => Center(child: Text('Error: $error')),
+      body: SingleChildScrollView(
+        padding: EdgeInsets.all(16.w),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildTransactionSummaryCard(context, tx),
+            SizedBox(height: 16.h),
+            _buildAIClassificationBanner(context, tx),
+            SizedBox(height: 16.h),
+            _buildDetailItem(context, Icons.access_time, 'Thời gian',
+                _formatDate(tx.occurredAt)),
+            _buildDetailItem(context, Icons.category, 'Danh mục',
+                tx.categoryName ?? 'Không xác định'),
+            _buildDetailItem(context, Icons.credit_card, 'Phương thức',
+                tx.source ?? 'Không xác định'),
+            _buildDetailItem(context, Icons.location_on, 'Địa điểm',
+                tx.merchant ?? 'Không xác định'),
+            _buildDetailItem(context, Icons.note, 'Ghi chú',
+                tx.userNote ?? 'Không có ghi chú'),
+            SizedBox(height: 24.h),
+            _buildActionButtons(context, ref, tx),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildTransactionSummaryCard(BuildContext context, TransactionEntity transaction) {
+  Widget _buildTransactionSummaryCard(BuildContext context, Transaction tx) {
+    final isIncome = tx.type == 'income';
     return Card(
-      color: transaction.type == 'income' ? AppColors.lightGreen : AppColors.lightRed,
+      color: isIncome ? AppColors.lightGreen : AppColors.lightRed,
       margin: EdgeInsets.zero,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
       child: Padding(
@@ -60,27 +73,27 @@ class TransactionDetailPage extends ConsumerWidget {
           children: [
             CircleAvatar(
               radius: 30.r,
-              backgroundColor: AppColors.white,
+              backgroundColor: AppColors.bgCard,
               child: Icon(
-                transaction.type == 'income' ? Icons.arrow_downward : Icons.arrow_upward,
-                color: transaction.type == 'income' ? AppColors.darkGreen : AppColors.darkRed,
+                isIncome ? Icons.arrow_downward : Icons.arrow_upward,
+                color: isIncome ? AppColors.darkGreen : AppColors.darkRed,
                 size: 30.sp,
               ),
             ),
             SizedBox(height: 12.h),
             Text(
-              '${transaction.type == 'income' ? '+' : '-'}${NumberFormat.currency(locale: 'vi_VN', symbol: '₫').format(transaction.amount)}',
+              '${isIncome ? "+" : "-"}${NumberFormat.currency(locale: "vi_VN", symbol: "₫").format(tx.amount)}',
               style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                color: transaction.type == 'income' ? AppColors.darkGreen : AppColors.darkRed,
+                color: isIncome ? AppColors.darkGreen : AppColors.darkRed,
                 fontSize: 24.sp,
                 fontWeight: FontWeight.bold,
               ),
             ),
             SizedBox(height: 4.h),
             Text(
-              transaction.merchant ?? 'Không xác định',
+              tx.merchant ?? "Không xác định",
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                color: transaction.type == 'income' ? AppColors.darkGreen : AppColors.darkRed,
+                color: isIncome ? AppColors.darkGreen : AppColors.darkRed,
                 fontSize: 14.sp,
               ),
             ),
@@ -90,32 +103,35 @@ class TransactionDetailPage extends ConsumerWidget {
     );
   }
 
-  Widget _buildAIClassificationBanner(BuildContext context, TransactionEntity transaction) {
-    if (transaction.ai?.categorySuggestionId != null && transaction.ai?.confidence != null) {
-      return Container(
-        padding: EdgeInsets.all(12.w),
-        decoration: BoxDecoration(
-          color: AppColors.yellowLight,
-          borderRadius: BorderRadius.circular(8.r),
-        ),
-        child: Row(
-          children: [
-            Icon(Icons.star, color: AppColors.yellowDark, size: 20.sp),
-            SizedBox(width: 8.w),
-            Expanded(
-              child: Text(
-                'Giao dịch này được AI phân loại vào danh mục "${transaction.categoryName ?? 'Không xác định'}" với độ chính xác ${(transaction.ai!.confidence! * 100).toInt()}%',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: AppColors.yellowDark,
-                  fontSize: 12.sp,
-                ),
+  Widget _buildAIClassificationBanner(BuildContext context, Transaction tx) {
+    if (tx.ai?.categorySuggestionId == null || tx.ai?.confidence == null) {
+      return const SizedBox.shrink();
+    }
+
+    return Container(
+      padding: EdgeInsets.all(12.w),
+      decoration: BoxDecoration(
+        color: AppColors.primaryGreen.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(8.r),
+        border: Border.all(color: AppColors.primaryGreen, width: 1),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.star, color: AppColors.primaryGreen, size: 20.sp),
+          SizedBox(width: 8.w),
+          Expanded(
+            child: Text(
+              'AI gợi ý danh mục "${tx.categoryName ?? "Không xác định"}" '
+                  'với độ chính xác ${(tx.ai!.confidence! * 100).toInt()}%',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: AppColors.primaryGreen,
+                fontSize: 12.sp,
               ),
             ),
-          ],
-        ),
-      );
-    }
-    return const SizedBox.shrink();
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _buildDetailItem(BuildContext context, IconData icon, String label, String value) {
@@ -126,61 +142,67 @@ class TransactionDetailPage extends ConsumerWidget {
         children: [
           Icon(icon, size: 20.sp, color: Colors.grey[600]),
           SizedBox(width: 12.w),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                label,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  fontSize: 12.sp,
-                  color: Colors.grey[600],
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(label,
+                    style: TextStyle(
+                      fontSize: 12.sp,
+                      color: Colors.grey[600],
+                    )),
+                SizedBox(height: 4.h),
+                Text(
+                  value,
+                  style: TextStyle(fontSize: 14.sp),
                 ),
-              ),
-              SizedBox(height: 4.h),
-              Text(
-                value,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 14.sp),
-              ),
-            ],
+              ],
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildActionButtons(BuildContext context, WidgetRef ref, TransactionEntity transaction) {
+  Widget _buildActionButtons(BuildContext context, WidgetRef ref, Transaction tx) {
     return Row(
       children: [
         Expanded(
           child: OutlinedButton(
-            onPressed: () {
-              _showEditTransactionDialog(context, ref, transaction);
-            },
+            onPressed: () {},
             style: OutlinedButton.styleFrom(
               side: const BorderSide(color: AppColors.primaryGreen),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12.r),
+              ),
               padding: EdgeInsets.symmetric(vertical: 14.h),
             ),
             child: Text(
               'Chỉnh sửa',
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: AppColors.primaryGreen, fontSize: 14.sp),
+              style: TextStyle(
+                color: AppColors.primaryGreen,
+                fontSize: 14.sp,
+              ),
             ),
           ),
         ),
         SizedBox(width: 16.w),
         Expanded(
           child: ElevatedButton(
-            onPressed: () {
-              // TODO: Implement delete functionality
-            },
+            onPressed: () {},
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.darkRed,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12.r),
+              ),
               padding: EdgeInsets.symmetric(vertical: 14.h),
             ),
             child: Text(
               'Xóa',
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: AppColors.white, fontSize: 14.sp),
+              style: TextStyle(
+                color: AppColors.bgCard,
+                fontSize: 14.sp,
+              ),
             ),
           ),
         ),
@@ -188,97 +210,24 @@ class TransactionDetailPage extends ConsumerWidget {
     );
   }
 
-  String _formatDate(int timestamp) {
-    final dateTime = DateTime.fromMillisecondsSinceEpoch(timestamp * 1000);
+  String _formatDate(int timestampSeconds) {
+    final date = DateTime.fromMillisecondsSinceEpoch(timestampSeconds * 1000);
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
-    final yesterday = DateTime(now.year, now.month, now.day - 1);
 
-    if (dateTime.year == today.year &&
-        dateTime.month == today.month &&
-        dateTime.day == today.day) {
-      return 'Hôm nay, ${DateFormat('HH:mm').format(dateTime)}';
-    } else if (dateTime.year == yesterday.year &&
-        dateTime.month == yesterday.month &&
-        dateTime.day == yesterday.day) {
-      return 'Hôm qua, ${DateFormat('HH:mm').format(dateTime)}';
-    } else {
-      return '${DateFormat('dd/MM/yyyy, HH:mm').format(dateTime)}';
+    if (date.year == today.year &&
+        date.month == today.month &&
+        date.day == today.day) {
+      return 'Hôm nay, ${DateFormat('HH:mm').format(date)}';
     }
-  }
 
-  Future<void> _showEditTransactionDialog(BuildContext context, WidgetRef ref, TransactionEntity transaction) async {
-    final TextEditingController noteController = TextEditingController(text: transaction.userNote);
-    String? selectedCategoryId = transaction.categoryId;
+    final yesterday = today.subtract(const Duration(days: 1));
+    if (date.year == yesterday.year &&
+        date.month == yesterday.month &&
+        date.day == yesterday.day) {
+      return 'Hôm qua, ${DateFormat('HH:mm').format(date)}';
+    }
 
-    final categoriesAsyncValue = ref.watch(categoriesProvider);
-
-    return showDialog<void>(
-      context: context,
-      builder: (BuildContext dialogContext) {
-        return AlertDialog(
-          title: const Text('Chỉnh sửa giao dịch'),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                categoriesAsyncValue.when(
-                  data: (categories) {
-                    return DropdownButtonFormField<String>(
-                      value: selectedCategoryId,
-                      decoration: const InputDecoration(
-                        labelText: 'Danh mục',
-                        border: OutlineInputBorder(),
-                      ),
-                      items: categories.map((category) {
-                        return DropdownMenuItem<String>(
-                          value: category.id,
-                          child: Text(category.displayName),
-                        );
-                      }).toList(),
-                      onChanged: (String? newValue) {
-                        selectedCategoryId = newValue;
-                      },
-                    );
-                  },
-                  loading: () => const CircularProgressIndicator(),
-                  error: (error, stack) => Text('Error loading categories: $error'),
-                ),
-                SizedBox(height: 16.h),
-                TextField(
-                  controller: noteController,
-                  decoration: const InputDecoration(
-                    labelText: 'Ghi chú',
-                    border: OutlineInputBorder(),
-                  ),
-                  maxLines: 3,
-                ),
-              ],
-            ),
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('Hủy'),
-              onPressed: () {
-                Navigator.of(dialogContext).pop();
-              },
-            ),
-            ElevatedButton(
-              child: const Text('Lưu'),
-              onPressed: () async {
-                await ref.read(transactionDetailNotifierProvider(transaction.id).notifier).updateTransaction(
-                      id: transaction.id,
-                      categoryId: selectedCategoryId,
-                      userNote: noteController.text.isEmpty ? null : noteController.text,
-                    );
-                if (dialogContext.mounted) {
-                  Navigator.of(dialogContext).pop();
-                }
-              },
-            ),
-          ],
-        );
-      },
-    );
+    return DateFormat('dd/MM/yyyy, HH:mm').format(date);
   }
 }

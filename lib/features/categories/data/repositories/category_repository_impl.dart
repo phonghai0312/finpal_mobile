@@ -18,7 +18,3 @@ class CategoryRepositoryImpl implements CategoryRepository {
     return response.items.map((model) => model.toEntity()).toList();
   }
 }
-
-final categoryRepositoryProvider = Provider<CategoryRepository>((ref) {
-  return CategoryRepositoryImpl(remoteDataSource: ref.read(categoryRemoteDataSourceProvider));
-});

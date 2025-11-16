@@ -5,7 +5,7 @@ import 'category_remote_datasources.dart';
 class CategoryRemoteDataSourceImpl implements CategoryRemoteDataSource {
   // Mock data for categories
   final List<CategoryModel> _mockCategories = [
-    const CategoryModel(
+    CategoryModel(
       id: 'c001',
       userId: 'u001',
       name: 'an_uong',
@@ -14,7 +14,7 @@ class CategoryRemoteDataSourceImpl implements CategoryRemoteDataSource {
       createdAt: 1678886400,
       updatedAt: 1678886400,
     ),
-    const CategoryModel(
+     CategoryModel(
       id: 'c002',
       userId: 'u001',
       name: 'mua_sam',
@@ -23,7 +23,7 @@ class CategoryRemoteDataSourceImpl implements CategoryRemoteDataSource {
       createdAt: 1678886400,
       updatedAt: 1678886400,
     ),
-    const CategoryModel(
+     CategoryModel(
       id: 'c003',
       userId: 'u001',
       name: 'thu_nhap',
@@ -32,7 +32,7 @@ class CategoryRemoteDataSourceImpl implements CategoryRemoteDataSource {
       createdAt: 1678886400,
       updatedAt: 1678886400,
     ),
-    const CategoryModel(
+     CategoryModel(
       id: 'c004',
       userId: 'u001',
       name: 'di_chuyen',
@@ -41,7 +41,7 @@ class CategoryRemoteDataSourceImpl implements CategoryRemoteDataSource {
       createdAt: 1678886400,
       updatedAt: 1678886400,
     ),
-    const CategoryModel(
+     CategoryModel(
       id: 'c005',
       userId: 'u001',
       name: 'suc_khoe',
@@ -50,7 +50,7 @@ class CategoryRemoteDataSourceImpl implements CategoryRemoteDataSource {
       createdAt: 1678886400,
       updatedAt: 1678886400,
     ),
-    const CategoryModel(
+     CategoryModel(
       id: 'c006',
       userId: 'u001',
       name: 'nha_cua',

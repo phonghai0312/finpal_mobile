@@ -1,10 +1,6 @@
-import 'package:equatable/equatable.dart';
-import 'package:json_annotation/json_annotation.dart';
+import 'package:fridge_to_fork_ai/features/categories/domain/entities/category_entity.dart';
 
-part 'category_model.g.dart';
-
-@JsonSerializable()
-class CategoryModel extends Equatable {
+class CategoryModel {
   final String id;
   final String userId;
   final String name;
@@ -14,7 +10,7 @@ class CategoryModel extends Equatable {
   final int createdAt;
   final int updatedAt;
 
-  const CategoryModel({
+  CategoryModel({
     required this.id,
     required this.userId,
     required this.name,
@@ -25,21 +21,35 @@ class CategoryModel extends Equatable {
     required this.updatedAt,
   });
 
-  factory CategoryModel.fromJson(Map<String, dynamic> json) => _$CategoryModelFromJson(json);
-  Map<String, dynamic> toJson() => _$CategoryModelToJson(this);
+  // Tạo từ JSON
+  factory CategoryModel.fromJson(Map<String, dynamic> json) {
+    return CategoryModel(
+      id: json['id'],
+      userId: json['userId'],
+      name: json['name'],
+      displayName: json['displayName'],
+      parent: json['parent'],
+      icon: json['icon'],
+      createdAt: json['createdAt'],
+      updatedAt: json['updatedAt'],
+    );
+  }
 
-  @override
-  List<Object?> get props => [
-        id,
-        userId,
-        name,
-        displayName,
-        parent,
-        icon,
-        createdAt,
-        updatedAt,
-      ];
+  // Chuyển sang JSON
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'userId': userId,
+      'name': name,
+      'displayName': displayName,
+      'parent': parent,
+      'icon': icon,
+      'createdAt': createdAt,
+      'updatedAt': updatedAt,
+    };
+  }
 
+  // Chuyển sang Entity
   CategoryEntity toEntity() {
     return CategoryEntity(
       id: id,
@@ -54,23 +64,37 @@ class CategoryModel extends Equatable {
   }
 }
 
-@JsonSerializable()
-class CategoryListResponseModel extends Equatable {
+// Nếu cần list response
+class CategoryListResponseModel {
   final List<CategoryModel> items;
   final int page;
   final int pageSize;
   final int total;
 
-  const CategoryListResponseModel({
+  CategoryListResponseModel({
     required this.items,
     required this.page,
     required this.pageSize,
     required this.total,
   });
 
-  factory CategoryListResponseModel.fromJson(Map<String, dynamic> json) => _$CategoryListResponseModelFromJson(json);
-  Map<String, dynamic> toJson() => _$CategoryListResponseModelToJson(this);
+  factory CategoryListResponseModel.fromJson(Map<String, dynamic> json) {
+    return CategoryListResponseModel(
+      items: (json['items'] as List)
+          .map((item) => CategoryModel.fromJson(item))
+          .toList(),
+      page: json['page'],
+      pageSize: json['pageSize'],
+      total: json['total'],
+    );
+  }
 
-  @override
-  List<Object?> get props => [items, page, pageSize, total];
+  Map<String, dynamic> toJson() {
+    return {
+      'items': items.map((e) => e.toJson()).toList(),
+      'page': page,
+      'pageSize': pageSize,
+      'total': total,
+    };
+  }
 }

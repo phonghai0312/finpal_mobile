@@ -1,12 +1,13 @@
-import '../repositories/transaction_repository.dart';
-import '../entities/transaction.dart';
+import 'package:fridge_to_fork_ai/features/transactions/domain/entities/transaction.dart';
 
-class GetTransactionDetailUseCase {
+import '../repositories/transaction_repository.dart';
+
+class GetTransactionDetail {
   final TransactionRepository repository;
 
-  GetTransactionDetailUseCase(this.repository);
+  GetTransactionDetail(this.repository);
 
-  Future<TransactionEntity> call(String id) async {
+  Future<Transaction> call(String id) async {
     return await repository.getTransactionDetail(id);
   }
 }

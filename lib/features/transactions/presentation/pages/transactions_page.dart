@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fridge_to_fork_ai/core/config/routing/app_routes.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -7,7 +8,6 @@ import '../../../../core/presentation/theme/app_colors.dart';
 import '../provider/transaction_notifier.dart';
 import '../provider/transaction_provider.dart';
 import 'package:go_router/go_router.dart';
-import '../../../core/config/routing/app_routes.dart';
 
 class TransactionsPage extends ConsumerWidget {
   const TransactionsPage({super.key});

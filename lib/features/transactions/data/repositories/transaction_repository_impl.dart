@@ -33,9 +33,9 @@ class TransactionRepositoryImpl implements TransactionRepository {
   }
 
   @override
-  Future<TransactionEntity> getTransactionDetail(String id) async {
+  Future<Transaction> getTransactionDetail(String id) async {
     final model = await remoteDataSource.getTransactionDetail(id);
-    return model.toEntity();
+    return model;
   }
 
   @override

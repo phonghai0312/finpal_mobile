@@ -1,50 +1,40 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fridge_to_fork_ai/features/transactions/data/datasources/transaction_remote_datasources.dart';
+import 'package:fridge_to_fork_ai/features/transactions/data/datasources/transaction_remote_datasources_impl.dart';
+import 'package:fridge_to_fork_ai/features/transactions/data/repositories/transaction_repository_impl.dart';
+import 'package:fridge_to_fork_ai/features/transactions/domain/usecase/get_transaction_detail.dart';
+import 'package:fridge_to_fork_ai/features/transactions/presentation/provider/transaction_detail_notifier.dart';
 
-import '../../../domain/entities/transaction.dart';
-import '../../../domain/usecase/get_transaction_detail.dart';
-import '../../../domain/usecase/update_transaction.dart';
-import '../../../data/repositories/transaction_repository_impl.dart';
+/// DataSource
+final transactionRemoteDataSourceProvider =
+Provider<TransactionRemoteDataSource>(
+      (ref) => TransactionRemoteDataSourceImpl(),
+);
 
-final getTransactionDetailUseCaseProvider = Provider<GetTransactionDetailUseCase>((ref) {
-  final repository = ref.read(transactionRepositoryProvider);
-  return GetTransactionDetailUseCase(repository);
-});
+/// Repository
+final transactionRepositoryProvider =
+Provider<TransactionRepositoryImpl>(
+      (ref) => TransactionRepositoryImpl(
+    remoteDataSource: ref.read(transactionRemoteDataSourceProvider),
+  ),
+);
 
-final updateTransactionUseCaseProvider = Provider<UpdateTransactionUseCase>((ref) {
-  final repository = ref.read(transactionRepositoryProvider);
-  return UpdateTransactionUseCase(repository);
-});
+/// UseCase
+final getTransactionDetailUseCaseProvider =
+Provider<GetTransactionDetail>(
+      (ref) => GetTransactionDetail(
+    ref.read(transactionRepositoryProvider),
+  ),
+);
 
-class TransactionDetailNotifier extends StateNotifier<AsyncValue<TransactionEntity>> {
-  final GetTransactionDetailUseCase _getTransactionDetail;
-  final UpdateTransactionUseCase _updateTransactionUseCase;
+/// Notifier Provider (FAMILY)
+final transactionNotifierProvider = StateNotifierProvider.family<
+    TransactionDetailNotifier,
+    TransactionDetailState,
+    String>(
+      (ref, transactionId) {
+    final usecase = ref.read(getTransactionDetailUseCaseProvider);
+    return TransactionDetailNotifier(usecase, transactionId);
+  },
+);
 
-  TransactionDetailNotifier(this._getTransactionDetail, this._updateTransactionUseCase) : super(const AsyncValue.loading());
-
-  Future<void> fetchTransaction(String id) async {
-    state = const AsyncValue.loading();
-    try {
-      final transaction = await _getTransactionDetail.call(id);
-      state = AsyncValue.data(transaction);
-    } catch (e, st) {
-      state = AsyncValue.error(e, st);
-    }
-  }
-
-  Future<void> updateTransaction({required String id, String? categoryId, String? userNote}) async {
-    state = const AsyncValue.loading();
-    try {
-      await _updateTransactionUseCase.call(id: id, categoryId: categoryId, userNote: userNote);
-      // After update, refetch the transaction to ensure UI is up-to-date
-      await fetchTransaction(id);
-    } catch (e, st) {
-      state = AsyncValue.error(e, st);
-    }
-  }
-}
-
-final transactionDetailNotifierProvider = StateNotifierProvider.family<TransactionDetailNotifier, AsyncValue<TransactionEntity>, String>((ref, id) {
-  final getTransactionDetailUseCase = ref.watch(getTransactionDetailUseCaseProvider);
-  final updateTransactionUseCase = ref.watch(updateTransactionUseCaseProvider);
-  return TransactionDetailNotifier(getTransactionDetailUseCase, updateTransactionUseCase);
-});

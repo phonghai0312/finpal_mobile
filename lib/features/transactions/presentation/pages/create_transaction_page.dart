@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:fridge_to_fork_ai/core/presentation/theme/app_colors.dart';
+import 'package:fridge_to_fork_ai/features/categories/presentation/provider/category_provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
-import '../../../core/presentation/theme/app_colors.dart';
-import '../../../features/categories/presentation/provider/category_provider.dart';
-import '../../../features/transactions/domain/entities/transaction.dart';
+
 
 enum TransactionType { expense, income }
 
@@ -21,7 +21,7 @@ class CreateTransactionPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final selectedType = ref.watch(selectedTransactionTypeProvider);
-    final categoriesAsync = ref.watch(categoriesProvider);
+    // final categoriesAsync = ref.watch(categoriesProvider);
     final selectedCategory = ref.watch(selectedCategoryProvider);
     final transactionDate = ref.watch(transactionDateProvider);
     final transactionTime = ref.watch(transactionTimeProvider);
@@ -151,28 +151,28 @@ class CreateTransactionPage extends ConsumerWidget {
               style: Theme.of(context).textTheme.titleMedium?.copyWith(fontSize: 16.sp),
             ),
             SizedBox(height: 8.h),
-            categoriesAsync.when(
-              data: (categories) {
-                return Wrap(
-                  spacing: 8.w,
-                  runSpacing: 8.h,
-                  children: categories.map((category) {
-                    return ChoiceChip(
-                      label: Text(category.displayName),
-                      selected: selectedCategory == category.id,
-                      onSelected: (selected) {
-                        ref.read(selectedCategoryProvider.notifier).state = selected ? category.id : null;
-                      },
-                      selectedColor: AppColors.primaryGreen,
-                      labelStyle: TextStyle(color: selectedCategory == category.id ? Colors.white : Colors.black),
-                      avatar: Icon(_getIconForCategory(category.icon), color: selectedCategory == category.id ? Colors.white : Colors.black),
-                    );
-                  }).toList(),
-                );
-              },
-              loading: () => const CircularProgressIndicator(),
-              error: (error, stack) => Text('Error loading categories: $error'),
-            ),
+            // categoriesAsync.when(
+            //   data: (categories) {
+            //     return Wrap(
+            //       spacing: 8.w,
+            //       runSpacing: 8.h,
+            //       children: categories.map((category) {
+            //         return ChoiceChip(
+            //           // label: Text(category.displayName),
+            //           selected: selectedCategory == category.id,
+            //           onSelected: (selected) {
+            //             ref.read(selectedCategoryProvider.notifier).state = selected ? category.id : null;
+            //           },
+            //           selectedColor: AppColors.primaryGreen,
+            //           labelStyle: TextStyle(color: selectedCategory == category.id ? Colors.white : Colors.black),
+            //           avatar: Icon(_getIconForCategory(category.icon), color: selectedCategory == category.id ? Colors.white : Colors.black),
+            //         );
+            //       }).toList(),
+            //     );
+            //   },
+            //   loading: () => const CircularProgressIndicator(),
+            //   error: (error, stack) => Text('Error loading categories: $error'),
+            // ),
             SizedBox(height: 24.h),
             TextFormField(
               controller: noteController,
@@ -186,18 +186,18 @@ class CreateTransactionPage extends ConsumerWidget {
             Container(
               padding: EdgeInsets.all(12.w),
               decoration: BoxDecoration(
-                color: AppColors.yellowLight,
+                color: AppColors.bgWarning,
                 borderRadius: BorderRadius.circular(8.r),
               ),
               child: Row(
                 children: [
-                  Icon(Icons.star, color: AppColors.yellowDark, size: 20.sp),
+                  Icon(Icons.star, color: AppColors.bgWarning, size: 20.sp),
                   SizedBox(width: 8.w),
                   Expanded(
                     child: Text(
                       'Tự động phân loại các giao dịch tương tự "The Coffee House" vào danh mục "Cà phê" trong tương lai',
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: AppColors.yellowDark,
+                        color: AppColors.bgWarning,
                         fontSize: 12.sp,
                       ),
                     ),
@@ -224,7 +224,7 @@ class CreateTransactionPage extends ConsumerWidget {
                     ),
                     child: Text(
                       'Lưu thay đổi',
-                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: AppColors.white, fontSize: 14.sp),
+                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: AppColors.typoWhite, fontSize: 14.sp),
                     ),
                   ),
                 ),

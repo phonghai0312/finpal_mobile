@@ -1,35 +1,28 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fridge_to_fork_ai/features/categories/data/datasources/category_remote_datasources_impl.dart';
+import 'package:fridge_to_fork_ai/features/categories/presentation/provider/category.notifier.dart';
+import '../../data/datasources/category_remote_datasources.dart';
+import '../../data/repositories/category_repository_impl.dart';
+import '../../domain/usecase/get_categories_usecase.dart';
 
-import '../../../domain/entities/category_entity.dart';
-import '../../../domain/usecase/get_categories_usecase.dart';
-import '../../../data/repositories/category_repository_impl.dart';
+/// DataSource
+final categoryRemoteDataSourceProvider = Provider<CategoryRemoteDataSource>(
+      (ref) => CategoryRemoteDataSourceImpl(),
+);
 
-final getCategoriesUseCaseProvider = Provider<GetCategoriesUseCase>((ref) {
-  final repository = ref.read(categoryRepositoryProvider);
-  return GetCategoriesUseCase(repository);
-});
+/// Repository
+final categoryRepositoryProvider = Provider<CategoryRepositoryImpl>(
+      (ref) => CategoryRepositoryImpl(
+    remoteDataSource: ref.read(categoryRemoteDataSourceProvider),
+  ),
+);
 
-class CategoryNotifier extends StateNotifier<AsyncValue<List<CategoryEntity>>> {
-  final GetCategoriesUseCase _getCategoriesUseCase;
+/// UseCase
+final getCategoriesUseCaseProvider = Provider<GetCategoriesUseCase>(
+      (ref) => GetCategoriesUseCase(ref.read(categoryRepositoryProvider)),
+);
 
-  CategoryNotifier(this._getCategoriesUseCase) : super(const AsyncValue.loading());
-
-  Future<void> fetchCategories() async {
-    state = const AsyncValue.loading();
-    try {
-      final categories = await _getCategoriesUseCase.call();
-      state = AsyncValue.data(categories);
-    } catch (e, st) {
-      state = AsyncValue.error(e, st);
-    }
-  }
-}
-
-final categoryNotifierProvider = StateNotifierProvider<CategoryNotifier, AsyncValue<List<CategoryEntity>>>((ref) {
-  final getCategoriesUseCase = ref.watch(getCategoriesUseCaseProvider);
-  return CategoryNotifier(getCategoriesUseCase);
-});
-
-final categoriesProvider = FutureProvider<List<CategoryEntity>>((ref) async {
-  return ref.watch(categoryNotifierProvider.notifier)._getCategoriesUseCase.call();
-});
+/// Notifier Provider
+final categoryNotifierProvider = StateNotifierProvider<CategoryNotifier, CategoryState>(
+      (ref) => CategoryNotifier(ref.read(getCategoriesUseCaseProvider)),
+);
