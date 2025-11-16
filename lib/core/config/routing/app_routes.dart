@@ -10,6 +10,8 @@ class AppRoutes {
   // Shell user routes
   static const String home = '/home';
   static const String transactions = '/transactions';
+  static const String transactionDetail = '/transactions/:id';
+  static const String createTransaction = '/transactions/create';
   static const String analytics = '/analytics';
   static const String suggestions = '/suggestions';
   static const String profile = '/profile';

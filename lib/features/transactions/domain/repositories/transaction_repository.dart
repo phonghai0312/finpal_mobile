@@ -14,10 +14,11 @@ abstract class TransactionRepository {
     int pageSize,
   });
 
-  Future<Transaction> getTransactionDetail(String id);
+  Future<TransactionEntity> getTransactionDetail(String id);
 
-  Future<Transaction> updateTransaction(
-    String id,
-    TransactionUpdateRequestModel request,
-  );
+  Future<void> updateTransaction({
+    required String id,
+    String? categoryId,
+    String? userNote,
+  });
 }

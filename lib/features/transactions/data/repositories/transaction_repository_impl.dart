@@ -33,15 +33,21 @@ class TransactionRepositoryImpl implements TransactionRepository {
   }
 
   @override
-  Future<Transaction> getTransactionDetail(String id) async {
-    return await remoteDataSource.getTransactionDetail(id);
+  Future<TransactionEntity> getTransactionDetail(String id) async {
+    final model = await remoteDataSource.getTransactionDetail(id);
+    return model.toEntity();
   }
 
   @override
-  Future<Transaction> updateTransaction(
-    String id,
-    TransactionUpdateRequestModel request,
-  ) async {
-    return await remoteDataSource.updateTransaction(id, request);
+  Future<void> updateTransaction({
+    required String id,
+    String? categoryId,
+    String? userNote,
+  }) async {
+    final request = TransactionUpdateRequestModel(
+      categoryId: categoryId,
+      userNote: userNote,
+    );
+    await remoteDataSource.updateTransaction(id, request);
   }
 }

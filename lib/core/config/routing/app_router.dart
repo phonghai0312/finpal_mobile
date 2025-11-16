@@ -14,6 +14,8 @@ import 'package:fridge_to_fork_ai/features/suggestions/presentation/suggestions_
 import 'package:go_router/go_router.dart';
 
 import '../../../features/auth/presentation/page/login/login_page.dart';
+import 'package:fridge_to_fork_ai/features/transactions/presentation/pages/transaction_detail_page.dart';
+import 'package:fridge_to_fork_ai/features/transactions/presentation/pages/create_transaction_page.dart';
 
 class AppRouter {
   static final customerRouter = GoRouter(
@@ -40,6 +42,17 @@ class AppRouter {
       GoRoute(
         path: AppRoutes.sendrequest,
         builder: (context, state) => const SendRequestPage(),
+      ),
+      GoRoute(
+        path: AppRoutes.transactionDetail,
+        builder: (context, state) {
+          final transactionId = state.pathParameters['id']!;
+          return TransactionDetailPage(transactionId: transactionId);
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.createTransaction,
+        builder: (context, state) => const CreateTransactionPage(),
       ),
       // Shell router have nav bar
       ShellRoute(

@@ -6,6 +6,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/presentation/theme/app_colors.dart';
 import '../provider/transaction_notifier.dart';
 import '../provider/transaction_provider.dart';
+import 'package:go_router/go_router.dart';
+import '../../../core/config/routing/app_routes.dart';
 
 class TransactionsPage extends ConsumerWidget {
   const TransactionsPage({super.key});
@@ -36,7 +38,7 @@ class TransactionsPage extends ConsumerWidget {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          // TODO: Implement add new transaction
+          context.go(AppRoutes.createTransaction);
         },
         backgroundColor: AppColors.primaryGreen,
         child: const Icon(Icons.add, color: Colors.white),
@@ -231,7 +233,9 @@ class TransactionsPage extends ConsumerWidget {
                 fontSize: 14.sp,
               ),
             ),
-            onTap: () {},
+            onTap: () {
+              context.go('${AppRoutes.transactions}/${transaction.id}');
+            },
           ),
         );
       },

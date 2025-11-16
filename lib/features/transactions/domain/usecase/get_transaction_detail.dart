@@ -1,12 +1,12 @@
-import '../entities/transaction.dart';
 import '../repositories/transaction_repository.dart';
+import '../entities/transaction.dart';
 
-class GetTransactionDetail {
+class GetTransactionDetailUseCase {
   final TransactionRepository repository;
 
-  GetTransactionDetail(this.repository);
+  GetTransactionDetailUseCase(this.repository);
 
-  Future<Transaction> call(String id) async {
+  Future<TransactionEntity> call(String id) async {
     return await repository.getTransactionDetail(id);
   }
 }

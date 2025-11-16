@@ -1,16 +1,11 @@
-import '../../data/models/transaction_update_request_model.dart';
-import '../entities/transaction.dart';
 import '../repositories/transaction_repository.dart';
 
-class UpdateTransaction {
+class UpdateTransactionUseCase {
   final TransactionRepository repository;
 
-  UpdateTransaction(this.repository);
+  UpdateTransactionUseCase(this.repository);
 
-  Future<Transaction> call(
-    String id,
-    TransactionUpdateRequestModel request,
-  ) async {
-    return await repository.updateTransaction(id, request);
+  Future<void> call({required String id, String? categoryId, String? userNote}) async {
+    await repository.updateTransaction(id: id, categoryId: categoryId, userNote: userNote);
   }
 }
