@@ -1,0 +1,131 @@
+🗂 Giải thích từng phần
+🔹 lib/
+
+Thư mục chính của app.
+
+1️⃣ core/
+
+Nơi chứa các thành phần dùng chung cho toàn dự án → không phụ thuộc vào feature nào.
+
+core/config/
+
+Config chung của app: môi trường, API base url, theme, route global…
+
+Không chứa logic business.
+
+core/presentation/
+
+Widget, component UI dùng chung như: Button, Loading, EmptyView…
+
+Layout, theme, styles dùng chung.
+
+core/utils/
+
+Hàm tiện ích: validator, date util, logger, mapper…
+
+Không chứa logic phức tạp.
+
+💡 Ý nghĩa tổng thể:
+core/ = “Common dependencies” toàn app.
+
+2️⃣ features/
+
+Mỗi feature là một module độc lập.
+Ví dụ: auth, analytics, transaction, budget…
+
+→ Mỗi feature tự chứa UI – Usecase – Repository – Model của chính nó.
+
+Dễ maintain, dễ mở rộng.
+
+3️⃣ features/auth/
+
+Module xử lý Authentication: login, register, refresh token…
+
+Bên trong module auth được chia 3 lớp: data → domain → presentation.
+
+📌 A. data/
+
+Chứa logic làm việc với nguồn dữ liệu: API, Firebase, Local storage…
+
+data/datasources/
+
+Giao tiếp API thật, Firebase, LocalDatabase.
+
+Ví dụ:
+
+remote_auth_datasource.dart
+
+local_auth_datasource.dart
+
+→ “Nơi duy nhất gọi HTTP hoặc Firebase”.
+
+data/models/
+
+Model data nhận từ API (JSON).
+
+Model DTO để convert sang domain entity.
+
+→ Tách model của API ra khỏi model domain.
+
+data/repositories/
+
+Implement repository (implements domain repository interface).
+
+Chuyển dữ liệu từ datasource → domain entity.
+
+Ví dụ:
+
+class AuthRepositoryImpl implements AuthRepository { ... }
+
+📌 B. domain/
+
+“Lõi business logic”, không phụ thuộc Flutter, không phụ thuộc API.
+
+domain/entities/
+
+Model thuần business.
+
+Không chứa JSON, không chứa UI.
+
+Ví dụ: UserEntity, AuthToken.
+
+domain/repositories/
+
+Interface repository.
+
+Không biết data đến từ đâu (API, DB, Firebase...).
+
+→ Tạo abstraction → dễ test + dễ thay thế datasource.
+
+domain/usecase/
+
+Nơi viết logic nghiệp vụ: login, register, verify OTP…
+
+Là cầu nối giữa UI → domain.
+
+Ví dụ:
+
+class LoginUseCase {
+  final AuthRepository repo;
+  call(email, pass) => repo.login(email, pass);
+}
+
+📌 C. presentation/
+
+Phần UI + logic bind UI (Provider / Bloc / Riverpod).
+
+presentation/page/
+
+Màn hình: LoginScreen, RegisterScreen, ForgotPasswordScreen…
+
+presentation/provider/
+
+State management: Bloc / Cubit / Provider / Riverpod.
+
+Điều khiển UI, gọi usecase.
+
+presentation/widget/
+
+Widget riêng của feature auth.
+
+Ví dụ: LoginButton, SocialLoginOptions…

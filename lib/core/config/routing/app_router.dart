@@ -7,7 +7,7 @@ import 'package:fridge_to_fork_ai/features/auth/presentation/page/register/regis
 import 'package:fridge_to_fork_ai/features/home/presentation/home_page.dart';
 import 'package:fridge_to_fork_ai/features/onboarding/presentation/page/onboarding_page.dart';
 import 'package:fridge_to_fork_ai/features/onboarding/presentation/page/splash_page.dart';
-import 'package:fridge_to_fork_ai/features/transactions/presentation/transactions_page.dart';
+import 'package:fridge_to_fork_ai/features/transactions/presentation/pages/transactions_page.dart';
 import 'package:fridge_to_fork_ai/features/analytics/presentation/analytics_page.dart';
 import 'package:fridge_to_fork_ai/features/profile/presentation/profile_page.dart';
 import 'package:fridge_to_fork_ai/features/suggestions/presentation/suggestions_page.dart';

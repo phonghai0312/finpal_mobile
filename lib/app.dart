@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import 'core/config/routing/app_router.dart';
+import 'package:fridge_to_fork_ai/core/config/routing/app_router.dart';
+import 'package:fridge_to_fork_ai/core/presentation/theme/app_theme.dart';
 
 class MyApp extends ConsumerWidget {
   const MyApp({super.key});
@@ -18,7 +19,7 @@ class MyApp extends ConsumerWidget {
         return MaterialApp.router(
           title: 'Fin Pal',
           debugShowCheckedModeBanner: false,
-          theme: ThemeData(useMaterial3: true, colorSchemeSeed: Colors.green),
+          theme: AppTheme.lightTheme,
           routerConfig: AppRouter.customerRouter,
           locale: context.locale,
           supportedLocales: context.supportedLocales,
