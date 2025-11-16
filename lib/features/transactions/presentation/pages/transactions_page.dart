@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../core/presentation/theme/app_colors.dart';
+import '../provider/transaction_notifier.dart';
 import '../provider/transaction_provider.dart';
-import '../provider/transaction_state.dart';
 
 class TransactionsPage extends ConsumerWidget {
   const TransactionsPage({super.key});
@@ -21,18 +22,18 @@ class TransactionsPage extends ConsumerWidget {
       body: transactionState.isLoading
           ? const Center(child: CircularProgressIndicator())
           : transactionState.errorMessage != null
-              ? Center(child: Text('Error: ${transactionState.errorMessage}'))
-              : Column(
-                  children: [
-                    _buildSummaryCards(context, transactionState),
-                    _buildSearchBar(context),
-                    _buildFilterButtons(context, ref),
-                    _buildCategorySection(context),
-                    Expanded(
-                      child: _buildTransactionList(context, transactionState),
-                    ),
-                  ],
-                ),
+          ? Center(child: Text('Error: ${transactionState.errorMessage}'))
+          : Column(
+        children: [
+          _buildSummaryCards(context, transactionState),
+          _buildSearchBar(context),
+          _buildFilterButtons(context, ref),
+          _buildCategorySection(context),
+          Expanded(
+            child: _buildTransactionList(context, transactionState),
+          ),
+        ],
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           // TODO: Implement add new transaction
@@ -41,58 +42,55 @@ class TransactionsPage extends ConsumerWidget {
         child: const Icon(Icons.add, color: Colors.white),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-      bottomNavigationBar: _buildBottomNavigationBar(context),
     );
   }
 
   Widget _buildSummaryCards(BuildContext context, TransactionState state) {
     return Padding(
-      padding: const EdgeInsets.all(16.0),
+      padding: EdgeInsets.all(16.w), // dùng screenutil
       child: Row(
         children: [
           Expanded(
             child: Card(
               color: AppColors.lightGreen,
               child: Padding(
-                padding: const EdgeInsets.all(16.0),
+                padding: EdgeInsets.all(16.w),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       'Tổng thu',
                       style: Theme.of(context).textTheme.titleMedium
-                          ?.copyWith(color: AppColors.darkGreen),
+                          ?.copyWith(color: AppColors.darkGreen, fontSize: 14.sp),
                     ),
                     Text(
-                      '+${NumberFormat.currency(locale: 'vi_VN', symbol: '₫')
-                          .format(state.totalIncome)}',
+                      '+${NumberFormat.currency(locale: 'vi_VN', symbol: '₫').format(state.totalIncome)}',
                       style: Theme.of(context).textTheme.headlineSmall
-                          ?.copyWith(color: AppColors.darkGreen),
+                          ?.copyWith(color: AppColors.darkGreen, fontSize: 18.sp),
                     ),
                   ],
                 ),
               ),
             ),
           ),
-          const SizedBox(width: 16),
+          SizedBox(width: 16.w),
           Expanded(
             child: Card(
               color: AppColors.lightRed,
               child: Padding(
-                padding: const EdgeInsets.all(16.0),
+                padding: EdgeInsets.all(16.w),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       'Tổng chi',
                       style: Theme.of(context).textTheme.titleMedium
-                          ?.copyWith(color: AppColors.darkRed),
+                          ?.copyWith(color: AppColors.darkRed, fontSize: 14.sp),
                     ),
                     Text(
-                      '-${NumberFormat.currency(locale: 'vi_VN', symbol: '₫')
-                          .format(state.totalExpense)}',
+                      '-${NumberFormat.currency(locale: 'vi_VN', symbol: '₫').format(state.totalExpense)}',
                       style: Theme.of(context).textTheme.headlineSmall
-                          ?.copyWith(color: AppColors.darkRed),
+                          ?.copyWith(color: AppColors.darkRed, fontSize: 18.sp),
                     ),
                   ],
                 ),
@@ -106,13 +104,13 @@ class TransactionsPage extends ConsumerWidget {
 
   Widget _buildSearchBar(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
       child: TextField(
         decoration: InputDecoration(
           hintText: 'Tìm kiếm giao dịch...',
           prefixIcon: const Icon(Icons.search),
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(12.r),
             borderSide: BorderSide.none,
           ),
           filled: true,
@@ -124,63 +122,56 @@ class TransactionsPage extends ConsumerWidget {
 
   Widget _buildFilterButtons(BuildContext context, WidgetRef ref) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
       child: Row(
         children: [
           FilterChip(
             label: const Text('Tất cả'),
-            selected: true, // Assuming default to "Tất cả"
-            onSelected: (selected) {
-              // TODO: Implement filter for all transactions
-            },
+            selected: true,
+            onSelected: (selected) {},
             selectedColor: AppColors.primaryGreen,
             labelStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
               color: Colors.white,
+              fontSize: 12.sp,
             ),
             backgroundColor: Colors.grey[300],
           ),
-          const SizedBox(width: 8),
+          SizedBox(width: 8.w),
           FilterChip(
             label: const Text('Thu nhập'),
             selected: false,
             onSelected: (selected) {
-              ref
-                  .read(transactionNotifierProvider.notifier)
-                  .fetchTransactions(type: 'income');
+              ref.read(transactionNotifierProvider.notifier).fetchTransactions(type: 'income');
             },
             selectedColor: AppColors.primaryGreen,
             labelStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
               color: Colors.white,
+              fontSize: 12.sp,
             ),
             backgroundColor: Colors.grey[300],
           ),
-          const SizedBox(width: 8),
+          SizedBox(width: 8.w),
           FilterChip(
             label: const Text('Chi tiêu'),
             selected: false,
             onSelected: (selected) {
-              ref
-                  .read(transactionNotifierProvider.notifier)
-                  .fetchTransactions(type: 'expense');
+              ref.read(transactionNotifierProvider.notifier).fetchTransactions(type: 'expense');
             },
             selectedColor: AppColors.primaryGreen,
             labelStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
               color: Colors.white,
+              fontSize: 12.sp,
             ),
             backgroundColor: Colors.grey[300],
           ),
           const Spacer(),
           IconButton(
-            onPressed: () {
-              // TODO: Implement calendar filter
-            },
-            icon: const Icon(Icons.calendar_today),
+            onPressed: () {},
+            icon: Icon(Icons.calendar_today, size: 20.sp),
           ),
           IconButton(
-            onPressed: () {
-              // TODO: Implement more filters
-            },
-            icon: const Icon(Icons.filter_list),
+            onPressed: () {},
+            icon: Icon(Icons.filter_list, size: 20.sp),
           ),
         ],
       ),
@@ -189,21 +180,19 @@ class TransactionsPage extends ConsumerWidget {
 
   Widget _buildCategorySection(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
       child: Row(
         children: [
-          const Icon(Icons.folder_open),
-          const SizedBox(width: 8),
+          Icon(Icons.folder_open, size: 20.sp),
+          SizedBox(width: 8.w),
           Text(
             'Xem danh mục',
-            style: Theme.of(context).textTheme.titleMedium,
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(fontSize: 14.sp),
           ),
           const Spacer(),
           IconButton(
-            onPressed: () {
-              // TODO: Implement category view
-            },
-            icon: const Icon(Icons.arrow_forward_ios),
+            onPressed: () {},
+            icon: Icon(Icons.arrow_forward_ios, size: 20.sp),
           ),
         ],
       ),
@@ -216,39 +205,33 @@ class TransactionsPage extends ConsumerWidget {
       itemBuilder: (context, index) {
         final transaction = state.transactions[index];
         return Card(
-          margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
+          margin: EdgeInsets.symmetric(horizontal: 16.w, vertical: 4.h),
           child: ListTile(
             leading: CircleAvatar(
-              backgroundColor: transaction.type == 'income'
-                  ? AppColors.lightGreen
-                  : AppColors.lightRed,
+              radius: 20.r,
+              backgroundColor: transaction.type == 'income' ? AppColors.lightGreen : AppColors.lightRed,
               child: Icon(
                 transaction.type == 'income' ? Icons.arrow_downward : Icons.arrow_upward,
-                color: transaction.type == 'income'
-                    ? AppColors.darkGreen
-                    : AppColors.darkRed,
+                color: transaction.type == 'income' ? AppColors.darkGreen : AppColors.darkRed,
+                size: 20.sp,
               ),
             ),
             title: Text(
               transaction.normalized.title ?? 'Không có tiêu đề',
-              style: Theme.of(context).textTheme.titleMedium,
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(fontSize: 14.sp),
             ),
             subtitle: Text(
               '${transaction.categoryName ?? 'Không xác định'} • ${_formatDate(transaction.occurredAt)}',
-              style: Theme.of(context).textTheme.bodySmall,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(fontSize: 12.sp),
             ),
             trailing: Text(
-              '${transaction.type == 'income' ? '+' : '-'}${NumberFormat.currency(locale: 'vi_VN', symbol: '₫')
-                  .format(transaction.amount)}',
+              '${transaction.type == 'income' ? '+' : '-'}${NumberFormat.currency(locale: 'vi_VN', symbol: '₫').format(transaction.amount)}',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                color: transaction.type == 'income'
-                    ? AppColors.darkGreen
-                    : AppColors.darkRed,
+                color: transaction.type == 'income' ? AppColors.darkGreen : AppColors.darkRed,
+                fontSize: 14.sp,
               ),
             ),
-            onTap: () {
-              // TODO: Implement navigation to transaction detail page
-            },
+            onTap: () {},
           ),
         );
       },
@@ -274,38 +257,4 @@ class TransactionsPage extends ConsumerWidget {
     }
   }
 
-  Widget _buildBottomNavigationBar(BuildContext context) {
-    return BottomNavigationBar(
-      type: BottomNavigationBarType.fixed,
-      backgroundColor: Colors.white,
-      selectedItemColor: AppColors.primaryGreen,
-      unselectedItemColor: Colors.grey,
-      currentIndex: 1, // 'Giao dịch' tab
-      onTap: (index) {
-        // TODO: Implement navigation for bottom navigation bar
-      },
-      items: const [
-        BottomNavigationBarItem(
-          icon: Icon(Icons.home),
-          label: 'Trang chủ',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.currency_exchange),
-          label: 'Giao dịch',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.bar_chart),
-          label: 'Thống kê',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.lightbulb_outline),
-          label: 'Gợi ý',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.person),
-          label: 'Cá nhân',
-        ),
-      ],
-    );
-  }
 }
