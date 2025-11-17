@@ -2,18 +2,24 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fridge_to_fork_ai/core/presentation/theme/app_colors.dart';
+import 'package:fridge_to_fork_ai/core/presentation/widget/header/header_with_back.dart';
 import 'package:fridge_to_fork_ai/features/categories/presentation/provider/category_provider.dart';
+import 'package:fridge_to_fork_ai/features/transactions/presentation/provider/transaction_detail_provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
-
-
 enum TransactionType { expense, income }
 
-final selectedTransactionTypeProvider = StateProvider<TransactionType>((ref) => TransactionType.expense);
+final selectedTransactionTypeProvider = StateProvider<TransactionType>(
+  (ref) => TransactionType.expense,
+);
 final selectedCategoryProvider = StateProvider<String?>((ref) => null);
-final transactionDateProvider = StateProvider<DateTime>((ref) => DateTime.now());
-final transactionTimeProvider = StateProvider<TimeOfDay>((ref) => TimeOfDay.now());
+final transactionDateProvider = StateProvider<DateTime>(
+  (ref) => DateTime.now(),
+);
+final transactionTimeProvider = StateProvider<TimeOfDay>(
+  (ref) => TimeOfDay.now(),
+);
 
 class CreateTransactionPage extends ConsumerWidget {
   const CreateTransactionPage({super.key});
@@ -21,6 +27,9 @@ class CreateTransactionPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final selectedType = ref.watch(selectedTransactionTypeProvider);
+
+    final notifier = ref.read(transactionDetailNotifierProvider.notifier);
+
     // final categoriesAsync = ref.watch(categoriesProvider);
     final selectedCategory = ref.watch(selectedCategoryProvider);
     final transactionDate = ref.watch(transactionDateProvider);
@@ -53,9 +62,9 @@ class CreateTransactionPage extends ConsumerWidget {
     }
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Tạo giao dịch mới'),
-        centerTitle: true,
+      appBar: HeaderWithBack(
+        title: 'Tạo giao dịch mới',
+        onBack: () => notifier.onBack(context),
       ),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(16.w),
@@ -64,7 +73,9 @@ class CreateTransactionPage extends ConsumerWidget {
           children: [
             Text(
               'Loại giao dịch',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(fontSize: 16.sp),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontSize: 16.sp),
             ),
             SizedBox(height: 8.h),
             Row(
@@ -75,11 +86,18 @@ class CreateTransactionPage extends ConsumerWidget {
                     selected: selectedType == TransactionType.expense,
                     onSelected: (selected) {
                       if (selected) {
-                        ref.read(selectedTransactionTypeProvider.notifier).state = TransactionType.expense;
+                        ref
+                                .read(selectedTransactionTypeProvider.notifier)
+                                .state =
+                            TransactionType.expense;
                       }
                     },
                     selectedColor: AppColors.darkRed,
-                    labelStyle: TextStyle(color: selectedType == TransactionType.expense ? Colors.white : Colors.black),
+                    labelStyle: TextStyle(
+                      color: selectedType == TransactionType.expense
+                          ? Colors.white
+                          : Colors.black,
+                    ),
                   ),
                 ),
                 SizedBox(width: 16.w),
@@ -89,11 +107,18 @@ class CreateTransactionPage extends ConsumerWidget {
                     selected: selectedType == TransactionType.income,
                     onSelected: (selected) {
                       if (selected) {
-                        ref.read(selectedTransactionTypeProvider.notifier).state = TransactionType.income;
+                        ref
+                                .read(selectedTransactionTypeProvider.notifier)
+                                .state =
+                            TransactionType.income;
                       }
                     },
                     selectedColor: AppColors.darkGreen,
-                    labelStyle: TextStyle(color: selectedType == TransactionType.income ? Colors.white : Colors.black),
+                    labelStyle: TextStyle(
+                      color: selectedType == TransactionType.income
+                          ? Colors.white
+                          : Colors.black,
+                    ),
                   ),
                 ),
               ],
@@ -104,7 +129,9 @@ class CreateTransactionPage extends ConsumerWidget {
               keyboardType: TextInputType.number,
               decoration: InputDecoration(
                 labelText: 'Số tiền',
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12.r)),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12.r),
+                ),
               ),
             ),
             SizedBox(height: 16.h),
@@ -112,7 +139,9 @@ class CreateTransactionPage extends ConsumerWidget {
               controller: descriptionController,
               decoration: InputDecoration(
                 labelText: 'Mô tả',
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12.r)),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12.r),
+                ),
               ),
             ),
             SizedBox(height: 16.h),
@@ -121,11 +150,15 @@ class CreateTransactionPage extends ConsumerWidget {
                 Expanded(
                   child: TextFormField(
                     readOnly: true,
-                    controller: TextEditingController(text: DateFormat('dd/MM/yyyy').format(transactionDate)),
+                    controller: TextEditingController(
+                      text: DateFormat('dd/MM/yyyy').format(transactionDate),
+                    ),
                     onTap: () => _selectDate(context),
                     decoration: InputDecoration(
                       labelText: 'Ngày',
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12.r)),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12.r),
+                      ),
                       suffixIcon: const Icon(Icons.calendar_today),
                     ),
                   ),
@@ -134,11 +167,15 @@ class CreateTransactionPage extends ConsumerWidget {
                 Expanded(
                   child: TextFormField(
                     readOnly: true,
-                    controller: TextEditingController(text: transactionTime.format(context)),
+                    controller: TextEditingController(
+                      text: transactionTime.format(context),
+                    ),
                     onTap: () => _selectTime(context),
                     decoration: InputDecoration(
                       labelText: 'Giờ',
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12.r)),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12.r),
+                      ),
                       suffixIcon: const Icon(Icons.access_time),
                     ),
                   ),
@@ -148,7 +185,9 @@ class CreateTransactionPage extends ConsumerWidget {
             SizedBox(height: 24.h),
             Text(
               'Chọn danh mục',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(fontSize: 16.sp),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontSize: 16.sp),
             ),
             SizedBox(height: 8.h),
             // categoriesAsync.when(
@@ -178,7 +217,9 @@ class CreateTransactionPage extends ConsumerWidget {
               controller: noteController,
               decoration: InputDecoration(
                 labelText: 'Ghi chú (không bắt buộc)',
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12.r)),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12.r),
+                ),
               ),
               maxLines: 3,
             ),
@@ -214,17 +255,26 @@ class CreateTransactionPage extends ConsumerWidget {
                       // TODO: Implement save new transaction functionality
                       // Need API for this
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Save functionality not implemented yet.')),
+                        const SnackBar(
+                          content: Text(
+                            'Save functionality not implemented yet.',
+                          ),
+                        ),
                       );
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primaryGreen,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12.r),
+                      ),
                       padding: EdgeInsets.symmetric(vertical: 14.h),
                     ),
                     child: Text(
                       'Lưu thay đổi',
-                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: AppColors.typoWhite, fontSize: 14.sp),
+                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        color: AppColors.typoWhite,
+                        fontSize: 14.sp,
+                      ),
                     ),
                   ),
                 ),
@@ -236,12 +286,17 @@ class CreateTransactionPage extends ConsumerWidget {
                     },
                     style: OutlinedButton.styleFrom(
                       side: const BorderSide(color: Colors.grey),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12.r),
+                      ),
                       padding: EdgeInsets.symmetric(vertical: 14.h),
                     ),
                     child: Text(
                       'Hủy',
-                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: Colors.black, fontSize: 14.sp),
+                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        color: Colors.black,
+                        fontSize: 14.sp,
+                      ),
                     ),
                   ),
                 ),

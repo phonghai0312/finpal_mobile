@@ -1,4 +1,7 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fridge_to_fork_ai/core/config/routing/app_routes.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../domain/entities/transaction.dart';
 import '../../domain/usecase/get_transactions.dart';
@@ -35,6 +38,7 @@ class TransactionState {
     );
   }
 }
+
 
 class TransactionNotifier extends StateNotifier<TransactionState> {
   final GetTransactions getTransactionsUseCase;
@@ -85,5 +89,9 @@ class TransactionNotifier extends StateNotifier<TransactionState> {
     } catch (e) {
       state = state.copyWith(isLoading: false, errorMessage: e.toString());
     }
+  }
+
+  void onPress(BuildContext context)   {
+    context.go(AppRoutes.createTransaction);
   }
 }

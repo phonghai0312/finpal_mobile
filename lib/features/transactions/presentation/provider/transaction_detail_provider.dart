@@ -7,34 +7,29 @@ import 'package:fridge_to_fork_ai/features/transactions/presentation/provider/tr
 
 /// DataSource
 final transactionRemoteDataSourceProvider =
-Provider<TransactionRemoteDataSource>(
+    Provider<TransactionRemoteDataSource>(
       (ref) => TransactionRemoteDataSourceImpl(),
-);
+    );
 
 /// Repository
-final transactionRepositoryProvider =
-Provider<TransactionRepositoryImpl>(
-      (ref) => TransactionRepositoryImpl(
+final transactionRepositoryProvider = Provider<TransactionRepositoryImpl>(
+  (ref) => TransactionRepositoryImpl(
     remoteDataSource: ref.read(transactionRemoteDataSourceProvider),
   ),
 );
 
 /// UseCase
-final getTransactionDetailUseCaseProvider =
-Provider<GetTransactionDetail>(
-      (ref) => GetTransactionDetail(
-    ref.read(transactionRepositoryProvider),
-  ),
+final getTransactionDetailUseCaseProvider = Provider<GetTransactionDetail>(
+  (ref) => GetTransactionDetail(ref.read(transactionRepositoryProvider)),
 );
 
-/// Notifier Provider (FAMILY)
-final transactionNotifierProvider = StateNotifierProvider.family<
-    TransactionDetailNotifier,
-    TransactionDetailState,
-    String>(
-      (ref, transactionId) {
-    final usecase = ref.read(getTransactionDetailUseCaseProvider);
-    return TransactionDetailNotifier(usecase, transactionId);
-  },
-);
+/// Notifier Provider
+final transactionDetailNotifierProvider =
+    StateNotifierProvider<TransactionDetailNotifier, TransactionDetailState>((
+      ref,
+    ) {
+      final usecase = ref.read(getTransactionDetailUseCaseProvider);
+      return TransactionDetailNotifier(usecase, ref);
+    });
 
+//Trong riverPod: notifier: la class that, co bien state, ham fetchDetail de lay chi eite tu tuUsecase, onBack(). Day la noi de viet logic. Provider: (transactionDetailNotifierProvider) là cái nhãn để Riverpod biết muốn dùng norifier nyà tthì lấy ở đâu

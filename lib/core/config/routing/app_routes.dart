@@ -3,19 +3,20 @@ class AppRoutes {
   static const String splash = '/';
   static const String onboarding = '/onboarding';
   static const String welcome = '/welcome';
-  static const String connectsepay = '/connectsepay';
+  static const String connectsepay = '/connectSepay';
   // Auth
   static const String login = '/login';
   static const String register = '/register';
-  static const String verifyaccount = '/verifyaccount';
-  static const String sendrequest = '/sendrequest';
-  // Shell user routes
+  static const String verifyaccount = '/verifyAccount';
+  static const String sendrequest = '/sendRequest';
+  // Transactions
+  static const String transactionDetail = '/transactionsDetail';
+  static const String createTransaction = '/transactionsCreate';
+
+  //Shell
   static const String home = '/home';
   static const String transactions = '/transactions';
-  static const String transactionDetail = '/transactions/:id';
-  static const String createTransaction = '/transactions/create';
-  static const String analytics = '/analytics';
-  static const String stats = '/analytics';
   static const String suggestions = '/suggestions';
+  static const String stats = '/stats';
   static const String profile = '/profile';
 }

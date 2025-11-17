@@ -9,7 +9,6 @@ import 'package:fridge_to_fork_ai/features/onboarding/presentation/page/onboardi
 import 'package:fridge_to_fork_ai/features/onboarding/presentation/page/splash_page.dart';
 import 'package:fridge_to_fork_ai/features/transactions/presentation/pages/transactions_page.dart';
 import 'package:fridge_to_fork_ai/features/stats/presentation/stats_page.dart';
-import 'package:fridge_to_fork_ai/features/transactions/presentation/pages/transactions_page.dart';
 import 'package:fridge_to_fork_ai/features/profile/presentation/profile_page.dart';
 import 'package:fridge_to_fork_ai/features/suggestions/presentation/suggestions_page.dart';
 import 'package:fridge_to_fork_ai/features/welcome/presentation/page/connectsepay/connect_sepay_page.dart';
@@ -56,6 +55,18 @@ class AppRouter {
         builder: (context, state) => const SendRequestPage(),
       ),
 
+      // Transactions
+      GoRoute(
+        path: AppRoutes.transactionDetail,
+        builder: (context, state) {
+          return TransactionDetailPage();
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.createTransaction,
+        builder: (context, state) => const CreateTransactionPage(),
+      ),
+
       // Shell router have nav bar
       ShellRoute(
         builder: (context, state, child) {
@@ -73,17 +84,6 @@ class AppRouter {
           GoRoute(
             path: AppRoutes.transactions,
             builder: (context, state) => const TransactionsPage(),
-          ),
-          GoRoute(
-            path: AppRoutes.transactionDetail,
-            builder: (context, state) {
-              final transactionId = state.pathParameters['id']!;
-              return TransactionDetailPage(transactionId: transactionId);
-            },
-          ),
-          GoRoute(
-            path: AppRoutes.createTransaction,
-            builder: (context, state) => const CreateTransactionPage(),
           ),
           GoRoute(
             path: AppRoutes.stats,

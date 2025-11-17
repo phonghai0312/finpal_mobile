@@ -2,37 +2,38 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fridge_to_fork_ai/core/presentation/theme/app_colors.dart';
+import 'package:fridge_to_fork_ai/core/presentation/widget/header/header_with_back.dart';
 import 'package:fridge_to_fork_ai/features/transactions/domain/entities/transaction.dart';
+import 'package:fridge_to_fork_ai/features/transactions/presentation/provider/transaction_detail_provider.dart';
 import 'package:intl/intl.dart';
 
-import '../provider/transaction_detail_provider.dart';
-
 class TransactionDetailPage extends ConsumerWidget {
-  final String transactionId;
-
-  const TransactionDetailPage({super.key, required this.transactionId});
+  const TransactionDetailPage({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final state = ref.watch(transactionNotifierProvider(transactionId));
+    final state = ref.watch(transactionDetailNotifierProvider);
+    final notifier = ref.read(transactionDetailNotifierProvider.notifier);
+
+    // gọi init sau frame đầu tiên để đảm bảo selectedTransactionId đã set
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      notifier.init();
+    });
 
     if (state.isLoading) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      );
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
     if (state.error != null) {
-      return Scaffold(
-        body: Center(child: Text('Error: ${state.error}')),
-      );
+      return Scaffold(body: Center(child: Text('Error: ${state.error}')));
     }
 
     final tx = state.data!;
+
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Chi tiết giao dịch'),
-        centerTitle: true,
+      appBar: HeaderWithBack(
+        title: 'Chi tiết giao dịch',
+        onBack: () => notifier.onBack(context),
       ),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(16.w),
@@ -43,16 +44,36 @@ class TransactionDetailPage extends ConsumerWidget {
             SizedBox(height: 16.h),
             _buildAIClassificationBanner(context, tx),
             SizedBox(height: 16.h),
-            _buildDetailItem(context, Icons.access_time, 'Thời gian',
-                _formatDate(tx.occurredAt)),
-            _buildDetailItem(context, Icons.category, 'Danh mục',
-                tx.categoryName ?? 'Không xác định'),
-            _buildDetailItem(context, Icons.credit_card, 'Phương thức',
-                tx.source ?? 'Không xác định'),
-            _buildDetailItem(context, Icons.location_on, 'Địa điểm',
-                tx.merchant ?? 'Không xác định'),
-            _buildDetailItem(context, Icons.note, 'Ghi chú',
-                tx.userNote ?? 'Không có ghi chú'),
+            _buildDetailItem(
+              context,
+              Icons.access_time,
+              'Thời gian',
+              _formatDate(tx.occurredAt),
+            ),
+            _buildDetailItem(
+              context,
+              Icons.category,
+              'Danh mục',
+              tx.categoryName ?? 'Không xác định',
+            ),
+            _buildDetailItem(
+              context,
+              Icons.credit_card,
+              'Phương thức',
+              tx.source ?? 'Không xác định',
+            ),
+            _buildDetailItem(
+              context,
+              Icons.location_on,
+              'Địa điểm',
+              tx.merchant ?? 'Không xác định',
+            ),
+            _buildDetailItem(
+              context,
+              Icons.note,
+              'Ghi chú',
+              tx.userNote ?? 'Không có ghi chú',
+            ),
             SizedBox(height: 24.h),
             _buildActionButtons(context, ref, tx),
           ],
@@ -63,6 +84,7 @@ class TransactionDetailPage extends ConsumerWidget {
 
   Widget _buildTransactionSummaryCard(BuildContext context, Transaction tx) {
     final isIncome = tx.type == 'income';
+
     return Card(
       color: isIncome ? AppColors.lightGreen : AppColors.lightRed,
       margin: EdgeInsets.zero,
@@ -121,8 +143,7 @@ class TransactionDetailPage extends ConsumerWidget {
           SizedBox(width: 8.w),
           Expanded(
             child: Text(
-              'AI gợi ý danh mục "${tx.categoryName ?? "Không xác định"}" '
-                  'với độ chính xác ${(tx.ai!.confidence! * 100).toInt()}%',
+              'AI gợi ý danh mục "${tx.categoryName ?? "Không xác định"}" với độ chính xác ${(tx.ai!.confidence! * 100).toInt()}%',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 color: AppColors.primaryGreen,
                 fontSize: 12.sp,
@@ -134,7 +155,12 @@ class TransactionDetailPage extends ConsumerWidget {
     );
   }
 
-  Widget _buildDetailItem(BuildContext context, IconData icon, String label, String value) {
+  Widget _buildDetailItem(
+    BuildContext context,
+    IconData icon,
+    String label,
+    String value,
+  ) {
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 8.h),
       child: Row(
@@ -146,16 +172,12 @@ class TransactionDetailPage extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(label,
-                    style: TextStyle(
-                      fontSize: 12.sp,
-                      color: Colors.grey[600],
-                    )),
-                SizedBox(height: 4.h),
                 Text(
-                  value,
-                  style: TextStyle(fontSize: 14.sp),
+                  label,
+                  style: TextStyle(fontSize: 12.sp, color: Colors.grey[600]),
                 ),
+                SizedBox(height: 4.h),
+                Text(value, style: TextStyle(fontSize: 14.sp)),
               ],
             ),
           ),
@@ -164,12 +186,18 @@ class TransactionDetailPage extends ConsumerWidget {
     );
   }
 
-  Widget _buildActionButtons(BuildContext context, WidgetRef ref, Transaction tx) {
+  Widget _buildActionButtons(
+    BuildContext context,
+    WidgetRef ref,
+    Transaction tx,
+  ) {
     return Row(
       children: [
         Expanded(
           child: OutlinedButton(
-            onPressed: () {},
+            onPressed: () => ref
+                .read(transactionDetailNotifierProvider.notifier),
+                // .onEdit(context, tx),
             style: OutlinedButton.styleFrom(
               side: const BorderSide(color: AppColors.primaryGreen),
               shape: RoundedRectangleBorder(
@@ -179,17 +207,16 @@ class TransactionDetailPage extends ConsumerWidget {
             ),
             child: Text(
               'Chỉnh sửa',
-              style: TextStyle(
-                color: AppColors.primaryGreen,
-                fontSize: 14.sp,
-              ),
+              style: TextStyle(color: AppColors.primaryGreen, fontSize: 14.sp),
             ),
           ),
         ),
         SizedBox(width: 16.w),
         Expanded(
           child: ElevatedButton(
-            onPressed: () {},
+            onPressed: () => ref
+                .read(transactionDetailNotifierProvider.notifier),
+                // .onDelete(context, tx),
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.darkRed,
               shape: RoundedRectangleBorder(
@@ -199,10 +226,7 @@ class TransactionDetailPage extends ConsumerWidget {
             ),
             child: Text(
               'Xóa',
-              style: TextStyle(
-                color: AppColors.bgCard,
-                fontSize: 14.sp,
-              ),
+              style: TextStyle(color: AppColors.bgCard, fontSize: 14.sp),
             ),
           ),
         ),

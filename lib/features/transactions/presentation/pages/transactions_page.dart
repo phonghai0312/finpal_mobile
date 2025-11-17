@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fridge_to_fork_ai/core/config/routing/app_routes.dart';
+import 'package:fridge_to_fork_ai/features/transactions/presentation/provider/transaction_detail_notifier.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -12,34 +13,30 @@ import 'package:go_router/go_router.dart';
 class TransactionsPage extends ConsumerWidget {
   const TransactionsPage({super.key});
 
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final transactionState = ref.watch(transactionNotifierProvider);
-
+    final notifier = ref.read(transactionNotifierProvider.notifier);
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Giao dịch'),
-        centerTitle: true,
-      ),
+      appBar: AppBar(title: const Text('Giao dịch'), centerTitle: true),
       body: transactionState.isLoading
           ? const Center(child: CircularProgressIndicator())
           : transactionState.errorMessage != null
           ? Center(child: Text('Error: ${transactionState.errorMessage}'))
           : Column(
-        children: [
-          _buildSummaryCards(context, transactionState),
-          _buildSearchBar(context),
-          _buildFilterButtons(context, ref),
-          _buildCategorySection(context),
-          Expanded(
-            child: _buildTransactionList(context, transactionState),
-          ),
-        ],
-      ),
+              children: [
+                _buildSummaryCards(context, transactionState),
+                _buildSearchBar(context),
+                _buildFilterButtons(context, ref),
+                _buildCategorySection(context),
+                Expanded(
+                  child: _buildTransactionList(context, transactionState, ref),
+                ),
+              ],
+            ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          context.go(AppRoutes.createTransaction);
-        },
+        onPressed: () => notifier.onPress(context),
         backgroundColor: AppColors.primaryGreen,
         child: const Icon(Icons.add, color: Colors.white),
       ),
@@ -62,13 +59,18 @@ class TransactionsPage extends ConsumerWidget {
                   children: [
                     Text(
                       'Tổng thu',
-                      style: Theme.of(context).textTheme.titleMedium
-                          ?.copyWith(color: AppColors.darkGreen, fontSize: 14.sp),
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        color: AppColors.darkGreen,
+                        fontSize: 14.sp,
+                      ),
                     ),
                     Text(
                       '+${NumberFormat.currency(locale: 'vi_VN', symbol: '₫').format(state.totalIncome)}',
                       style: Theme.of(context).textTheme.headlineSmall
-                          ?.copyWith(color: AppColors.darkGreen, fontSize: 18.sp),
+                          ?.copyWith(
+                            color: AppColors.darkGreen,
+                            fontSize: 18.sp,
+                          ),
                     ),
                   ],
                 ),
@@ -86,8 +88,10 @@ class TransactionsPage extends ConsumerWidget {
                   children: [
                     Text(
                       'Tổng chi',
-                      style: Theme.of(context).textTheme.titleMedium
-                          ?.copyWith(color: AppColors.darkRed, fontSize: 14.sp),
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        color: AppColors.darkRed,
+                        fontSize: 14.sp,
+                      ),
                     ),
                     Text(
                       '-${NumberFormat.currency(locale: 'vi_VN', symbol: '₫').format(state.totalExpense)}',
@@ -143,7 +147,9 @@ class TransactionsPage extends ConsumerWidget {
             label: const Text('Thu nhập'),
             selected: false,
             onSelected: (selected) {
-              ref.read(transactionNotifierProvider.notifier).fetchTransactions(type: 'income');
+              ref
+                  .read(transactionNotifierProvider.notifier)
+                  .fetchTransactions(type: 'income');
             },
             selectedColor: AppColors.primaryGreen,
             labelStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
@@ -157,7 +163,9 @@ class TransactionsPage extends ConsumerWidget {
             label: const Text('Chi tiêu'),
             selected: false,
             onSelected: (selected) {
-              ref.read(transactionNotifierProvider.notifier).fetchTransactions(type: 'expense');
+              ref
+                  .read(transactionNotifierProvider.notifier)
+                  .fetchTransactions(type: 'expense');
             },
             selectedColor: AppColors.primaryGreen,
             labelStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
@@ -189,7 +197,9 @@ class TransactionsPage extends ConsumerWidget {
           SizedBox(width: 8.w),
           Text(
             'Xem danh mục',
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(fontSize: 14.sp),
+            style: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(fontSize: 14.sp),
           ),
           const Spacer(),
           IconButton(
@@ -201,7 +211,52 @@ class TransactionsPage extends ConsumerWidget {
     );
   }
 
-  Widget _buildTransactionList(BuildContext context, TransactionState state) {
+  //👉 BuildContext thuộc về Flutter, không liên quan đến Riverpod.
+  //
+  // Nó dùng để:
+  //
+  // truy cập cây widget (widget tree)
+  //
+  // lấy theme, mediaQuery, navigator
+  //
+  // mở dialog, push trang, pop trang
+  //
+  // lấy các widget ancestor (ví dụ ScaffoldMessenger, Theme, InheritedWidget)
+  //
+  // Nói ngắn gọn:
+  //
+  // BuildContext = "vị trí của widget trong cây UI".
+  //
+  // Ví dụ dùng context:
+  //
+  // Navigator.push(context, ...);
+  // Theme.of(context);
+  // MediaQuery.of(context);
+  // ScaffoldMessenger.of(context).showSnackBar(...)
+  //
+  // 🎯 2. WidgetRef là gì?
+  //
+  // 👉 WidgetRef thuộc về Riverpod, hoàn toàn không liên quan đến Flutter UI.
+  //
+  // Nó dùng để:
+  //
+  // đọc provider → ref.read()
+  //
+  // lắng nghe provider → ref.watch()
+  //
+  // subscribe, dispose provider
+  //
+  // tạo listener khi state thay đổi
+  //
+  // Nói ngắn gọn:
+  //
+  // WidgetRef = cách để yêu cầu, đọc, theo dõi provider của Riverpod.
+  //
+  Widget _buildTransactionList(
+    BuildContext context,
+    TransactionState state,
+    WidgetRef ref,
+  ) {
     return ListView.builder(
       itemCount: state.transactions.length,
       itemBuilder: (context, index) {
@@ -211,30 +266,43 @@ class TransactionsPage extends ConsumerWidget {
           child: ListTile(
             leading: CircleAvatar(
               radius: 20.r,
-              backgroundColor: transaction.type == 'income' ? AppColors.lightGreen : AppColors.lightRed,
+              backgroundColor: transaction.type == 'income'
+                  ? AppColors.lightGreen
+                  : AppColors.lightRed,
               child: Icon(
-                transaction.type == 'income' ? Icons.arrow_downward : Icons.arrow_upward,
-                color: transaction.type == 'income' ? AppColors.darkGreen : AppColors.darkRed,
+                transaction.type == 'income'
+                    ? Icons.arrow_downward
+                    : Icons.arrow_upward,
+                color: transaction.type == 'income'
+                    ? AppColors.darkGreen
+                    : AppColors.darkRed,
                 size: 20.sp,
               ),
             ),
             title: Text(
               transaction.normalized.title ?? 'Không có tiêu đề',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(fontSize: 14.sp),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontSize: 14.sp),
             ),
             subtitle: Text(
               '${transaction.categoryName ?? 'Không xác định'} • ${_formatDate(transaction.occurredAt)}',
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(fontSize: 12.sp),
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall?.copyWith(fontSize: 12.sp),
             ),
             trailing: Text(
               '${transaction.type == 'income' ? '+' : '-'}${NumberFormat.currency(locale: 'vi_VN', symbol: '₫').format(transaction.amount)}',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                color: transaction.type == 'income' ? AppColors.darkGreen : AppColors.darkRed,
+                color: transaction.type == 'income'
+                    ? AppColors.darkGreen
+                    : AppColors.darkRed,
                 fontSize: 14.sp,
               ),
             ),
             onTap: () {
-              context.go('${AppRoutes.transactions}/${transaction.id}');
+              ref.read(selectedTransactionIdProvider.notifier).state = transaction.id;
+              context.go('${AppRoutes.transactionDetail}');
             },
           ),
         );
@@ -260,5 +328,4 @@ class TransactionsPage extends ConsumerWidget {
       return '${DateFormat('dd/MM/yyyy, HH:mm').format(dateTime)}';
     }
   }
-
 }

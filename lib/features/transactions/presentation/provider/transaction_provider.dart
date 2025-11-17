@@ -7,6 +7,8 @@ import '../../domain/usecase/get_transactions.dart';
 import 'transaction_notifier.dart';
 
 /// DataSource
+///
+/// //note: ref la doi tuong m Riverpod cung cap cho moi provider, dung ref de doc cac provider khac: ref.read(), lắng nghe provider khac: ref.watch().
 final transactionRemoteDataSourceProvider = Provider<TransactionRemoteDataSource>(
   (ref) => TransactionRemoteDataSourceImpl(),
 );
@@ -25,5 +27,5 @@ final getTransactionsUseCaseProvider = Provider<GetTransactions>(
 
 /// Notifier
 final transactionNotifierProvider = StateNotifierProvider<TransactionNotifier, TransactionState>(
-  (ref) => TransactionNotifier(ref.read(getTransactionsUseCaseProvider)),
+  (ref) => TransactionNotifier(ref.read(getTransactionsUseCaseProvider))
 );
