@@ -42,7 +42,6 @@ class _HomePageState extends ConsumerState<HomePage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                /// 🔥 HEADER FULL WIDTH — KHÔNG padding
                 HomeHeader(
                   userName: state.userName,
                   totalIncomeText: "+${state.overview?.totalIncome ?? 0}đ",
@@ -50,7 +49,6 @@ class _HomePageState extends ConsumerState<HomePage> {
                   onNotificationTap: () {},
                 ),
 
-                /// 🔥 Padding chỉ áp dụng cho các phần bên dưới
                 Padding(
                   padding: EdgeInsets.symmetric(
                     horizontal: 16.w,

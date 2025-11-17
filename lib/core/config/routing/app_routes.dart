@@ -12,7 +12,7 @@ class AppRoutes {
   // Shell user routes
   static const String home = '/home';
   static const String transactions = '/transactions';
-  static const String stats = '/analytics';
+  static const String stats = '/stats';
   static const String suggestions = '/suggestions';
   static const String profile = '/profile';
 }
