@@ -16,7 +16,9 @@ abstract class TransactionRemoteDataSource {
   Future<TransactionModel> getTransactionDetail(String id);
 
   Future<TransactionModel> updateTransaction(
-    String id,
+     String id,
     TransactionUpdateRequestModel request,
   );
+
+  Future<void> deleteTransaction(String id);
 }

@@ -209,4 +209,10 @@ class TransactionRemoteDataSourceImpl implements TransactionRemoteDataSource {
     _mockTransactions[index] = updatedTransaction;
     return updatedTransaction;
   }
+
+  @override
+  Future<void> deleteTransaction(String id) async {
+    await Future.delayed(const Duration(milliseconds: 300));
+    _mockTransactions.removeWhere((transaction) => transaction.id == id);
+  }
 }

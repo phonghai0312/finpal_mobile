@@ -50,4 +50,9 @@ class TransactionRepositoryImpl implements TransactionRepository {
     );
     await remoteDataSource.updateTransaction(id, request);
   }
+
+  @override
+  Future<void> deleteTransaction(String id) async {
+    await remoteDataSource.deleteTransaction(id);
+  }
 }

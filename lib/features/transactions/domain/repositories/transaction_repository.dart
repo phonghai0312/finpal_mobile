@@ -20,4 +20,6 @@ abstract class TransactionRepository {
     String? categoryId,
     String? userNote,
   });
+
+  Future<void> deleteTransaction(String id);
 }

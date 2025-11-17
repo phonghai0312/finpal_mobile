@@ -89,8 +89,9 @@ class TransactionDetailPage extends ConsumerWidget {
       color: isIncome ? AppColors.lightGreen : AppColors.lightRed,
       margin: EdgeInsets.zero,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
+      elevation: 4, // Add elevation for a subtle shadow
       child: Padding(
-        padding: EdgeInsets.all(20.w),
+        padding: EdgeInsets.symmetric(vertical: 24.h, horizontal: 20.w), // Adjust padding
         child: Column(
           children: [
             CircleAvatar(
@@ -102,21 +103,21 @@ class TransactionDetailPage extends ConsumerWidget {
                 size: 30.sp,
               ),
             ),
-            SizedBox(height: 12.h),
+            SizedBox(height: 16.h), // Adjust spacing
             Text(
               '${isIncome ? "+" : "-"}${NumberFormat.currency(locale: "vi_VN", symbol: "₫").format(tx.amount)}',
               style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                 color: isIncome ? AppColors.darkGreen : AppColors.darkRed,
-                fontSize: 24.sp,
+                fontSize: 28.sp, // Increase font size
                 fontWeight: FontWeight.bold,
               ),
             ),
-            SizedBox(height: 4.h),
+            SizedBox(height: 8.h), // Adjust spacing
             Text(
               tx.merchant ?? "Không xác định",
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                 color: isIncome ? AppColors.darkGreen : AppColors.darkRed,
-                fontSize: 14.sp,
+                fontSize: 16.sp, // Increase font size
               ),
             ),
           ],
@@ -131,22 +132,23 @@ class TransactionDetailPage extends ConsumerWidget {
     }
 
     return Container(
-      padding: EdgeInsets.all(12.w),
+      padding: EdgeInsets.all(16.w), // Increased padding
       decoration: BoxDecoration(
-        color: AppColors.primaryGreen.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(8.r),
-        border: Border.all(color: AppColors.primaryGreen, width: 1),
+        color: AppColors.primaryGreen.withOpacity(0.15), // Slightly darker opacity
+        borderRadius: BorderRadius.circular(12.r), // More rounded corners
+        border: Border.all(color: AppColors.primaryGreen, width: 1.5), // Thicker border
       ),
       child: Row(
         children: [
-          Icon(Icons.star, color: AppColors.primaryGreen, size: 20.sp),
-          SizedBox(width: 8.w),
+          Icon(Icons.auto_awesome, color: AppColors.primaryGreen, size: 24.sp), // Changed icon and size
+          SizedBox(width: 12.w), // Increased spacing
           Expanded(
             child: Text(
               'AI gợi ý danh mục "${tx.categoryName ?? "Không xác định"}" với độ chính xác ${(tx.ai!.confidence! * 100).toInt()}%',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 color: AppColors.primaryGreen,
-                fontSize: 12.sp,
+                fontSize: 14.sp, // Increased font size
+                fontWeight: FontWeight.w600, // Added bold font weight
               ),
             ),
           ),
@@ -161,28 +163,34 @@ class TransactionDetailPage extends ConsumerWidget {
     String label,
     String value,
   ) {
-    return Padding(
-      padding: EdgeInsets.symmetric(vertical: 8.h),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(icon, size: 20.sp, color: Colors.grey[600]),
-          SizedBox(width: 12.w),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  label,
-                  style: TextStyle(fontSize: 12.sp, color: Colors.grey[600]),
+    return Column(
+      children: [
+        Padding(
+          padding: EdgeInsets.symmetric(vertical: 12.h),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(icon, size: 20.sp, color: AppColors.primaryGreen), // Changed icon color
+              SizedBox(width: 16.w), // Increased spacing
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      label,
+                      style: TextStyle(
+                          fontSize: 12.sp, color: Colors.grey[600]),
+                    ),
+                    SizedBox(height: 6.h), // Increased spacing
+                    Text(value, style: TextStyle(fontSize: 15.sp)), // Increased font size
+                  ],
                 ),
-                SizedBox(height: 4.h),
-                Text(value, style: TextStyle(fontSize: 14.sp)),
-              ],
-            ),
+              ),
+            ],
           ),
-        ],
-      ),
+        ),
+        Divider(height: 1.h, color: Colors.grey[200]), // Add a divider
+      ],
     );
   }
 
@@ -196,18 +204,17 @@ class TransactionDetailPage extends ConsumerWidget {
         Expanded(
           child: OutlinedButton(
             onPressed: () => ref
-                .read(transactionDetailNotifierProvider.notifier),
-                // .onEdit(context, tx),
+                .read(transactionDetailNotifierProvider.notifier).onEdit(context, tx),
             style: OutlinedButton.styleFrom(
               side: const BorderSide(color: AppColors.primaryGreen),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12.r),
               ),
-              padding: EdgeInsets.symmetric(vertical: 14.h),
+              padding: EdgeInsets.symmetric(vertical: 16.h), // Increased vertical padding
             ),
             child: Text(
               'Chỉnh sửa',
-              style: TextStyle(color: AppColors.primaryGreen, fontSize: 14.sp),
+              style: TextStyle(color: AppColors.primaryGreen, fontSize: 16.sp), // Increased font size
             ),
           ),
         ),
@@ -215,18 +222,17 @@ class TransactionDetailPage extends ConsumerWidget {
         Expanded(
           child: ElevatedButton(
             onPressed: () => ref
-                .read(transactionDetailNotifierProvider.notifier),
-                // .onDelete(context, tx),
+                .read(transactionDetailNotifierProvider.notifier).onDelete(context, tx),
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.darkRed,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12.r),
               ),
-              padding: EdgeInsets.symmetric(vertical: 14.h),
+              padding: EdgeInsets.symmetric(vertical: 16.h), // Increased vertical padding
             ),
             child: Text(
               'Xóa',
-              style: TextStyle(color: AppColors.bgCard, fontSize: 14.sp),
+              style: TextStyle(color: AppColors.bgCard, fontSize: 16.sp), // Increased font size
             ),
           ),
         ),

@@ -12,6 +12,7 @@ class AppRoutes {
   // Transactions
   static const String transactionDetail = '/transactionsDetail';
   static const String createTransaction = '/transactionsCreate';
+  static const String editTransaction = '/transactionsEdit';
 
   //Shell
   static const String home = '/home';
