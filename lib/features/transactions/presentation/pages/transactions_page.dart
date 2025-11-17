@@ -17,7 +17,6 @@ class TransactionsPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final transactionState = ref.watch(transactionNotifierProvider);
-    final notifier = ref.read(transactionNotifierProvider.notifier);
     return Scaffold(
       appBar: AppBar(title: const Text('Giao dịch'), centerTitle: true),
       body: transactionState.isLoading
@@ -28,7 +27,7 @@ class TransactionsPage extends ConsumerWidget {
               children: [
                 _buildSummaryCards(context, transactionState),
                 _buildSearchBar(context),
-                _buildFilterButtons(context, ref),
+                _buildFilterButtons(context, ref, transactionState),
                 _buildCategorySection(context),
                 Expanded(
                   child: _buildTransactionList(context, transactionState, ref),
@@ -36,7 +35,7 @@ class TransactionsPage extends ConsumerWidget {
               ],
             ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => notifier.onPress(context),
+        onPressed: () => ref.read(transactionNotifierProvider.notifier).onPress(context),
         backgroundColor: AppColors.primaryGreen,
         child: const Icon(Icons.add, color: Colors.white),
       ),
@@ -126,18 +125,22 @@ class TransactionsPage extends ConsumerWidget {
     );
   }
 
-  Widget _buildFilterButtons(BuildContext context, WidgetRef ref) {
+  Widget _buildFilterButtons(BuildContext context, WidgetRef ref, TransactionState transactionState) {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
       child: Row(
         children: [
           FilterChip(
             label: const Text('Tất cả'),
-            selected: true,
-            onSelected: (selected) {},
+            selected: transactionState.selectedFilterType == 'all',
+            onSelected: (selected) {
+              if (selected) {
+                ref.read(transactionNotifierProvider.notifier).fetchTransactions();
+              }
+            },
             selectedColor: AppColors.primaryGreen,
             labelStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Colors.white,
+              color: transactionState.selectedFilterType == 'all' ? Colors.white : Colors.black,
               fontSize: 12.sp,
             ),
             backgroundColor: Colors.grey[300],
@@ -145,15 +148,17 @@ class TransactionsPage extends ConsumerWidget {
           SizedBox(width: 8.w),
           FilterChip(
             label: const Text('Thu nhập'),
-            selected: false,
+            selected: transactionState.selectedFilterType == 'income',
             onSelected: (selected) {
-              ref
-                  .read(transactionNotifierProvider.notifier)
-                  .fetchTransactions(type: 'income');
+              if (selected) {
+                ref
+                    .read(transactionNotifierProvider.notifier)
+                    .fetchTransactions(type: 'income');
+              }
             },
             selectedColor: AppColors.primaryGreen,
             labelStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Colors.white,
+              color: transactionState.selectedFilterType == 'income' ? Colors.white : Colors.black,
               fontSize: 12.sp,
             ),
             backgroundColor: Colors.grey[300],
@@ -161,15 +166,17 @@ class TransactionsPage extends ConsumerWidget {
           SizedBox(width: 8.w),
           FilterChip(
             label: const Text('Chi tiêu'),
-            selected: false,
+            selected: transactionState.selectedFilterType == 'expense',
             onSelected: (selected) {
-              ref
-                  .read(transactionNotifierProvider.notifier)
-                  .fetchTransactions(type: 'expense');
+              if (selected) {
+                ref
+                    .read(transactionNotifierProvider.notifier)
+                    .fetchTransactions(type: 'expense');
+              }
             },
             selectedColor: AppColors.primaryGreen,
             labelStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Colors.white,
+              color: transactionState.selectedFilterType == 'expense' ? Colors.white : Colors.black,
               fontSize: 12.sp,
             ),
             backgroundColor: Colors.grey[300],

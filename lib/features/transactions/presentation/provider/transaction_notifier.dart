@@ -13,6 +13,7 @@ class TransactionState {
   final String? errorMessage;
   final double totalIncome;
   final double totalExpense;
+  final String? selectedFilterType; // 'all', 'income', 'expense'
 
   const TransactionState({
     this.transactions = const [],
@@ -20,6 +21,7 @@ class TransactionState {
     this.errorMessage,
     this.totalIncome = 0.0,
     this.totalExpense = 0.0,
+    this.selectedFilterType = 'all',
   });
 
   TransactionState copyWith({
@@ -28,6 +30,7 @@ class TransactionState {
     String? errorMessage,
     double? totalIncome,
     double? totalExpense,
+    String? selectedFilterType,
   }) {
     return TransactionState(
       transactions: transactions ?? this.transactions,
@@ -35,6 +38,7 @@ class TransactionState {
       errorMessage: errorMessage,
       totalIncome: totalIncome ?? this.totalIncome,
       totalExpense: totalExpense ?? this.totalExpense,
+      selectedFilterType: selectedFilterType ?? this.selectedFilterType,
     );
   }
 }
@@ -85,6 +89,7 @@ class TransactionNotifier extends StateNotifier<TransactionState> {
         isLoading: false,
         totalIncome: totalIncome,
         totalExpense: totalExpense,
+        selectedFilterType: type ?? 'all',
       );
     } catch (e) {
       state = state.copyWith(isLoading: false, errorMessage: e.toString());
