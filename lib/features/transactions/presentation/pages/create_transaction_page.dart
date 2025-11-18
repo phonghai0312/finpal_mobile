@@ -163,9 +163,9 @@ class CreateTransactionPageState extends ConsumerState<CreateTransactionPage> {
   // TYPE SELECTOR (expense / income)
   // ============================================================
   Widget _typeSelector(
-    CreateTransactionState state,
-    CreateTransactionNotifier notifier,
-  ) {
+      CreateTransactionState state,
+      CreateTransactionNotifier notifier,
+      ) {
     return Row(
       children: [
         Expanded(
@@ -247,10 +247,10 @@ class CreateTransactionPageState extends ConsumerState<CreateTransactionPage> {
   // DATE + TIME PICKERS
   // ============================================================
   Widget _dateTimeRow(
-    BuildContext context,
-    CreateTransactionState state,
-    CreateTransactionNotifier notifier,
-  ) {
+      BuildContext context,
+      CreateTransactionState state,
+      CreateTransactionNotifier notifier,
+      ) {
     return Row(
       children: [
         Expanded(
@@ -312,9 +312,9 @@ class CreateTransactionPageState extends ConsumerState<CreateTransactionPage> {
   // CATEGORY SELECTOR
   // ============================================================
   Widget _categorySelector(
-    CreateTransactionState state,
-    CreateTransactionNotifier notifier,
-  ) {
+      CreateTransactionState state,
+      CreateTransactionNotifier notifier,
+      ) {
     final categories = [
       ("c001", "Ăn uống", Icons.fastfood),
       ("c008", "Cà phê", Icons.coffee),
@@ -360,7 +360,7 @@ class CreateTransactionPageState extends ConsumerState<CreateTransactionPage> {
       ),
       child: const Text(
         "✨ Áp dụng quy tắc tự động\n"
-        "Tự động phân loại các giao dịch tương tự vào danh mục này trong tương lai.",
+            "Tự động phân loại các giao dịch tương tự vào danh mục này trong tương lai.",
         style: TextStyle(fontSize: 13),
       ),
     );
@@ -370,10 +370,10 @@ class CreateTransactionPageState extends ConsumerState<CreateTransactionPage> {
   // BUTTONS
   // ============================================================
   Widget _buttons(
-    BuildContext context,
-    CreateTransactionNotifier notifier,
-    CreateTransactionState state,
-  ) {
+      BuildContext context,
+      CreateTransactionNotifier notifier,
+      CreateTransactionState state,
+      ) {
     return Row(
       children: [
         Expanded(

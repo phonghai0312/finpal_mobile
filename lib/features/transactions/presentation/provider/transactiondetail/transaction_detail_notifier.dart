@@ -1,171 +1,117 @@
-// ignore_for_file: use_build_context_synchronously, deprecated_member_use
+// ignore_for_file: use_build_context_synchronously
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fridge_to_fork_ai/core/config/routing/app_routes.dart';
 import 'package:fridge_to_fork_ai/features/transactions/presentation/provider/transaction/transaction_provider.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../../core/config/routing/app_routes.dart';
-import '../../../../../core/presentation/theme/app_colors.dart';
 import '../../../domain/entities/transaction.dart';
+import '../../../domain/usecase/delete_transaction.dart';
 import '../../../domain/usecase/get_transaction_detail.dart';
 
-/// ===============================
-/// STATE
-/// ===============================
 class TransactionDetailState {
-  final Transaction? detail;
   final bool isLoading;
-  final bool isRefreshing;
-  final String? currentId;
-  final String? errorMessage;
+  final String? error;
+  final Transaction? data;
 
   const TransactionDetailState({
-    this.detail,
     this.isLoading = false,
-    this.isRefreshing = false,
-    this.currentId,
-    this.errorMessage,
+    this.error,
+    this.data,
   });
 
   TransactionDetailState copyWith({
-    Transaction? detail,
     bool? isLoading,
-    bool? isRefreshing,
-    String? currentId,
-    String? errorMessage,
+    String? error,
+    Transaction? data,
   }) {
     return TransactionDetailState(
-      detail: detail ?? this.detail,
       isLoading: isLoading ?? this.isLoading,
-      isRefreshing: isRefreshing ?? this.isRefreshing,
-      currentId: currentId ?? this.currentId,
-      errorMessage: errorMessage,
+      error: error,
+      data: data ?? this.data,
     );
   }
 }
 
-/// ===============================
-/// NOTIFIER
-/// ===============================
 class TransactionDetailNotifier extends StateNotifier<TransactionDetailState> {
   final GetTransactionDetail _getTransactionDetail;
+  final DeleteTransaction _deleteTransaction;
   final Ref ref;
 
-  TransactionDetailNotifier(this._getTransactionDetail, this.ref)
-    : super(const TransactionDetailState());
+  /// cờ để đảm bảo init chỉ chạy 1 lần / 1 notifier instance
+  bool _initialized = false;
 
-  /// ===============================
-  /// INIT SCREEN
-  /// ===============================
-  Future<void> init(BuildContext context) async {
-    final listNotifier = ref.read(transactionNotifierProvider.notifier);
-    final id = listNotifier.selectedTransactionId;
-    if (id == null) return;
+  TransactionDetailNotifier(
+      this._getTransactionDetail,
+      this._deleteTransaction,
+      this.ref,
+      ) : super(const TransactionDetailState());
 
-    await load(context, id);
-  }
+  /// gọi trong `addPostFrameCallback` ở page
+  Future<void> init() async {
+    if (_initialized) return;
+    _initialized = true;
 
-  /// ===============================
-  /// LOAD DETAIL
-  /// ===============================
-  Future<void> load(BuildContext context, String id) async {
-    if (state.currentId != id) {
-      state = state.copyWith(
-        currentId: id,
-        detail: null,
-        isLoading: true,
-        isRefreshing: false,
-        errorMessage: null,
-      );
-    }
+    // LẤY ID TỪ TransactionNotifier
+    final transactionNotifier =
+    ref.read(transactionNotifierProvider.notifier);
+    final selectedId = transactionNotifier.selectedTransactionId;
 
-    try {
-      final detail = await _getTransactionDetail(id);
-
-      state = state.copyWith(
-        detail: detail,
-        isLoading: false,
-        isRefreshing: false,
-      );
-    } catch (e) {
-      _handleFailure(context, e.toString());
-    }
-  }
-
-  /// ===============================
-  /// INIT LOAD (Avoid reload)
-  /// ===============================
-  Future<void> initLoad(BuildContext context) async {
-    final listNotifier = ref.read(transactionNotifierProvider.notifier);
-    final id = listNotifier.selectedTransactionId;
-
-    if (id == null) {
-      state = const TransactionDetailState(detail: null);
+    if (selectedId == null || selectedId.isEmpty) {
+      state = state.copyWith(error: 'Không có giao dịch được chọn');
       return;
     }
 
-    // Đã load data rồi → không cần fetch lại
-    if (state.currentId == id && state.detail != null) return;
-
-    await load(context, id);
-  }
-
-  /// ===============================
-  /// REFRESH
-  /// ===============================
-  Future<void> refresh(BuildContext context) async {
-    if (state.currentId == null) return;
-
-    state = state.copyWith(isRefreshing: true);
-
     try {
-      final detail = await _getTransactionDetail(state.currentId!);
-      state = state.copyWith(detail: detail, isRefreshing: false);
+      state = state.copyWith(isLoading: true, error: null);
+      final tx = await _getTransactionDetail(selectedId);
+      state = state.copyWith(isLoading: false, data: tx);
     } catch (e) {
-      _handleFailure(context, e.toString());
+      state = state.copyWith(
+        isLoading: false,
+        error: e.toString(),
+      );
     }
   }
 
-  /// ===============================
-  /// HANDLE ERROR
-  /// ===============================
-  void _handleFailure(BuildContext context, String message) {
-    state = state.copyWith(
-      isLoading: false,
-      isRefreshing: false,
-      errorMessage: message,
-    );
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.red,
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
-  }
-
-  /// ===============================
-  /// BACK
-  /// ===============================
   void onBack(BuildContext context) {
     context.go(AppRoutes.transactions);
   }
 
-  /// ===============================
-  /// STATUS CATEGORIES UI MAPPING
-  /// ===============================
-  Map<String, dynamic> getStatusDesign(String type) {
-    switch (type.toLowerCase()) {
-      case 'income':
-        return {'text': 'Income', 'color': AppColors.bgSuccess};
-      case 'expense':
-        return {'text': 'Expense', 'color': AppColors.bgError.withOpacity(0.6)};
-      case 'transfer':
-        return {'text': 'Transfer', 'color': AppColors.bgWarning};
-      default:
-        return {'text': 'Unknown', 'color': const Color(0xFF9E9E9E)};
+  /// TransactionDetailPage:
+  /// `onPressed: () => notifier.onPressEdit(context, tx)`
+  void onPressEdit(BuildContext context, Transaction tx) {
+    context.go(
+      AppRoutes.editTransaction,
+      extra: tx,
+    );
+  }
+
+  Future<void> onDelete(BuildContext context, Transaction tx) async {
+    try {
+      state = state.copyWith(isLoading: true, error: null);
+      await _deleteTransaction(tx.id);
+
+      // quay về list + show snackbar
+      context.go(AppRoutes.transactions);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Đã xoá giao dịch'),
+        ),
+      );
+    } catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        error: e.toString(),
+      );
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Lỗi xoá: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
   }
 }

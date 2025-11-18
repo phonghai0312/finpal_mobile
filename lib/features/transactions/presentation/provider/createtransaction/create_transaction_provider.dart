@@ -9,15 +9,15 @@ import 'create_transaction_notifier.dart';
 /// DATASOURCE PROVIDER
 /// ===============================
 final createTransactionRemoteDataSourceProvider =
-    Provider<TransactionRemoteDataSource>(
+Provider<TransactionRemoteDataSource>(
       (ref) => TransactionRemoteDataSource(),
-    );
+);
 
 /// ===============================
 /// REPOSITORY PROVIDER
 /// ===============================
 final createTransactionRepositoryProvider = Provider<TransactionRepositoryImpl>(
-  (ref) => TransactionRepositoryImpl(
+      (ref) => TransactionRepositoryImpl(
     ref.read(createTransactionRemoteDataSourceProvider),
   ),
 );
@@ -26,14 +26,14 @@ final createTransactionRepositoryProvider = Provider<TransactionRepositoryImpl>(
 /// USECASE PROVIDER
 /// ===============================
 final createTransactionUsecaseProvider = Provider<CreateTransaction>(
-  (ref) => CreateTransaction(ref.read(createTransactionRepositoryProvider)),
+      (ref) => CreateTransaction(ref.read(createTransactionRepositoryProvider)),
 );
 
 /// ===============================
 /// NOTIFIER PROVIDER
 /// ===============================
 final createTransactionNotifierProvider =
-    StateNotifierProvider<CreateTransactionNotifier, CreateTransactionState>(
+StateNotifierProvider<CreateTransactionNotifier, CreateTransactionState>(
       (ref) =>
-          CreateTransactionNotifier(ref.read(createTransactionUsecaseProvider)),
-    );
+      CreateTransactionNotifier(ref.read(createTransactionUsecaseProvider)),
+);

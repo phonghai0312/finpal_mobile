@@ -134,4 +134,7 @@ class TransactionNotifier extends StateNotifier<TransactionState> {
       context,
     ).showSnackBar(SnackBar(content: Text(msg), backgroundColor: Colors.red));
   }
+  void onPressEdit(BuildContext context) {
+    context.go(AppRoutes.editTransaction);
+  }
 }

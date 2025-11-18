@@ -279,7 +279,7 @@ class TransactionRemoteDataSource {
     await Future.delayed(const Duration(milliseconds: 300));
 
     return _mock.firstWhere(
-      (t) => t.id == id,
+          (t) => t.id == id,
       orElse: () => throw Exception('Transaction not found'),
     );
   }
@@ -288,10 +288,10 @@ class TransactionRemoteDataSource {
   /// UPDATE TRANSACTION  ← KHỚP REPO
   /// ============================
   Future<void> updateTransaction(
-    String id, {
-    String? categoryId,
-    String? userNote,
-  }) async {
+      String id, {
+        String? categoryId,
+        String? userNote,
+      }) async {
     await Future.delayed(const Duration(milliseconds: 300));
 
     final index = _mock.indexWhere((t) => t.id == id);

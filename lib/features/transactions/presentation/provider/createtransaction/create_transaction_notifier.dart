@@ -63,9 +63,9 @@ class CreateTransactionNotifier extends StateNotifier<CreateTransactionState> {
   final CreateTransaction _createTransaction;
 
   CreateTransactionNotifier(this._createTransaction)
-    : super(
-        CreateTransactionState(date: DateTime.now(), time: TimeOfDay.now()),
-      );
+      : super(
+    CreateTransactionState(date: DateTime.now(), time: TimeOfDay.now()),
+  );
 
   void setType(String value) {
     state = state.copyWith(type: value);
@@ -117,7 +117,7 @@ class CreateTransactionNotifier extends StateNotifier<CreateTransactionState> {
             state.time.hour,
             state.time.minute,
           ).millisecondsSinceEpoch ~/
-          1000;
+              1000;
 
       await _createTransaction(
         amount: state.amount!,
