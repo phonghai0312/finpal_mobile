@@ -10,18 +10,4 @@ class TransactionAI {
     this.model,
     this.rawResponse,
   });
-
-  TransactionAI copyWith({
-    String? categorySuggestionId,
-    double? confidence,
-    String? model,
-    Map<String, dynamic>? rawResponse,
-  }) {
-    return TransactionAI(
-      categorySuggestionId: categorySuggestionId ?? this.categorySuggestionId,
-      confidence: confidence ?? this.confidence,
-      model: model ?? this.model,
-      rawResponse: rawResponse ?? this.rawResponse,
-    );
-  }
 }

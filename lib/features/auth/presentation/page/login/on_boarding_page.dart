@@ -1,5 +1,4 @@
 import 'package:fridge_to_fork_ai/core/config/routing/app_routes.dart';
-import 'package:fridge_to_fork_ai/core/presentation/widget/button/button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -34,24 +33,24 @@ class OnBoardingPage extends StatelessWidget {
               const Text(
                 'Quản lý tài chính cá nhân thông minh & an toàn',
                 textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.grey,
-                ),
+                style: TextStyle(fontSize: 16, color: Colors.grey),
               ),
               const SizedBox(height: 32),
               _buildFeatureCard(
-                iconPath: 'assets/icons/category_service/ai_sparkle.svg', // Placeholder
+                iconPath:
+                    'assets/icons/category_service/ai_sparkle.svg', // Placeholder
                 text: 'Phân loại tự động với AI',
               ),
               const SizedBox(height: 16),
               _buildFeatureCard(
-                iconPath: 'assets/icons/category_service/chart_up.svg', // Placeholder
+                iconPath:
+                    'assets/icons/category_service/chart_up.svg', // Placeholder
                 text: 'Thống kê chi tiêu thông minh',
               ),
               const SizedBox(height: 16),
               _buildFeatureCard(
-                iconPath: 'assets/icons/category_service/shield_check.svg', // Placeholder
+                iconPath:
+                    'assets/icons/category_service/shield_check.svg', // Placeholder
                 text: 'Kết nối Sepay an toàn',
               ),
               const Spacer(),
@@ -81,9 +80,7 @@ class OnBoardingPage extends StatelessWidget {
   Widget _buildFeatureCard({required String iconPath, required String text}) {
     return Card(
       elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
         child: Row(
@@ -92,7 +89,10 @@ class OnBoardingPage extends StatelessWidget {
               iconPath,
               height: 24,
               width: 24,
-              colorFilter: const ColorFilter.mode(Color(0xFF22573B), BlendMode.srcIn),
+              colorFilter: const ColorFilter.mode(
+                Color(0xFF22573B),
+                BlendMode.srcIn,
+              ),
             ),
             const SizedBox(width: 16),
             Expanded(

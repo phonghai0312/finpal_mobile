@@ -1,338 +1,395 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fridge_to_fork_ai/core/config/routing/app_routes.dart';
-import 'package:fridge_to_fork_ai/features/transactions/presentation/provider/transaction_detail_notifier.dart';
-import 'package:intl/intl.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:intl/intl.dart';
 
 import '../../../../core/presentation/theme/app_colors.dart';
-import '../provider/transaction_notifier.dart';
-import '../provider/transaction_provider.dart';
-import 'package:go_router/go_router.dart';
+import '../../../../core/presentation/widget/header/header_simple.dart';
+import '../../domain/entities/transaction.dart';
+import '../provider/transaction/transaction_provider.dart';
+import '../provider/transaction/transaction_notifier.dart';
 
-class TransactionsPage extends ConsumerWidget {
+class TransactionsPage extends ConsumerStatefulWidget {
   const TransactionsPage({super.key});
 
+  @override
+  TransactionsPageState createState() => TransactionsPageState();
+}
+
+class TransactionsPageState extends ConsumerState<TransactionsPage> {
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(() async {
+      await ref.read(transactionNotifierProvider.notifier).init(context);
+    });
+  }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final transactionState = ref.watch(transactionNotifierProvider);
+  Widget build(BuildContext context) {
+    final state = ref.watch(transactionNotifierProvider);
+    final notifier = ref.read(transactionNotifierProvider.notifier);
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Giao dịch'), centerTitle: true),
-      body: transactionState.isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : transactionState.errorMessage != null
-          ? Center(child: Text('Error: ${transactionState.errorMessage}'))
-          : Column(
-              children: [
-                _buildSummaryCards(context, transactionState),
-                _buildSearchBar(context),
-                _buildFilterButtons(context, ref, transactionState),
-                _buildCategorySection(context),
-                Expanded(
-                  child: _buildTransactionList(context, transactionState, ref),
-                ),
-              ],
-            ),
+      backgroundColor: Colors.grey.shade50,
+      appBar: const HeaderSimple(title: 'Giao dịch', onMore: null),
+
       floatingActionButton: FloatingActionButton(
-        onPressed: () => ref.read(transactionNotifierProvider.notifier).onPress(context),
         backgroundColor: AppColors.primaryGreen,
+        onPressed: () => notifier.onPressAdd(context),
         child: const Icon(Icons.add, color: Colors.white),
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-    );
-  }
 
-  Widget _buildSummaryCards(BuildContext context, TransactionState state) {
-    return Padding(
-      padding: EdgeInsets.all(16.w), // dùng screenutil
-      child: Row(
-        children: [
-          Expanded(
-            child: Card(
-              color: AppColors.lightGreen,
-              child: Padding(
-                padding: EdgeInsets.all(16.w),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Tổng thu',
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: AppColors.darkGreen,
-                        fontSize: 14.sp,
-                      ),
-                    ),
-                    Text(
-                      '+${NumberFormat.currency(locale: 'vi_VN', symbol: '₫').format(state.totalIncome)}',
-                      style: Theme.of(context).textTheme.headlineSmall
-                          ?.copyWith(
-                            color: AppColors.darkGreen,
-                            fontSize: 18.sp,
-                          ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          SizedBox(width: 16.w),
-          Expanded(
-            child: Card(
-              color: AppColors.lightRed,
-              child: Padding(
-                padding: EdgeInsets.all(16.w),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Tổng chi',
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: AppColors.darkRed,
-                        fontSize: 14.sp,
-                      ),
-                    ),
-                    Text(
-                      '-${NumberFormat.currency(locale: 'vi_VN', symbol: '₫').format(state.totalExpense)}',
-                      style: Theme.of(context).textTheme.headlineSmall
-                          ?.copyWith(color: AppColors.darkRed, fontSize: 18.sp),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSearchBar(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
-      child: TextField(
-        decoration: InputDecoration(
-          hintText: 'Tìm kiếm giao dịch...',
-          prefixIcon: const Icon(Icons.search),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12.r),
-            borderSide: BorderSide.none,
-          ),
-          filled: true,
-          fillColor: Colors.grey[200],
+      body: RefreshIndicator(
+        color: AppColors.primaryGreen,
+        onRefresh: () async => notifier.refresh(context),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildSummaryCards(context, state),
+            _buildSearchBar(context),
+            _buildFilterBar(context, state, notifier),
+            _buildCategoryButton(),
+            Expanded(child: _buildTransactionList(context, state, notifier)),
+          ],
         ),
       ),
     );
   }
 
-  Widget _buildFilterButtons(BuildContext context, WidgetRef ref, TransactionState transactionState) {
+  // ---------------------------------------------------------------------------
+  // SUMMARY CARDS
+  // ---------------------------------------------------------------------------
+
+  Widget _buildSummaryCards(BuildContext context, TransactionState state) {
+    double income = 0;
+    double expense = 0;
+
+    for (var t in state.all) {
+      if (t.type == "income") income += t.amount;
+      if (t.type == "expense") expense += t.amount;
+    }
+
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+      padding: EdgeInsets.all(16.w),
       child: Row(
         children: [
-          FilterChip(
-            label: const Text('Tất cả'),
-            selected: transactionState.selectedFilterType == 'all',
-            onSelected: (selected) {
-              if (selected) {
-                ref.read(transactionNotifierProvider.notifier).fetchTransactions();
-              }
-            },
-            selectedColor: AppColors.primaryGreen,
-            labelStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: transactionState.selectedFilterType == 'all' ? Colors.white : Colors.black,
-              fontSize: 12.sp,
-            ),
-            backgroundColor: Colors.grey[300],
-          ),
-          SizedBox(width: 8.w),
-          FilterChip(
-            label: const Text('Thu nhập'),
-            selected: transactionState.selectedFilterType == 'income',
-            onSelected: (selected) {
-              if (selected) {
-                ref
-                    .read(transactionNotifierProvider.notifier)
-                    .fetchTransactions(type: 'income');
-              }
-            },
-            selectedColor: AppColors.primaryGreen,
-            labelStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: transactionState.selectedFilterType == 'income' ? Colors.white : Colors.black,
-              fontSize: 12.sp,
-            ),
-            backgroundColor: Colors.grey[300],
-          ),
-          SizedBox(width: 8.w),
-          FilterChip(
-            label: const Text('Chi tiêu'),
-            selected: transactionState.selectedFilterType == 'expense',
-            onSelected: (selected) {
-              if (selected) {
-                ref
-                    .read(transactionNotifierProvider.notifier)
-                    .fetchTransactions(type: 'expense');
-              }
-            },
-            selectedColor: AppColors.primaryGreen,
-            labelStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: transactionState.selectedFilterType == 'expense' ? Colors.white : Colors.black,
-              fontSize: 12.sp,
-            ),
-            backgroundColor: Colors.grey[300],
-          ),
-          const Spacer(),
-          IconButton(
-            onPressed: () {},
-            icon: Icon(Icons.calendar_today, size: 20.sp),
-          ),
-          IconButton(
-            onPressed: () {},
-            icon: Icon(Icons.filter_list, size: 20.sp),
-          ),
+          _summaryCard(label: "Tổng thu", amount: income, isIncome: true),
+          SizedBox(width: 12.w),
+          _summaryCard(label: "Tổng chi", amount: expense, isIncome: false),
         ],
       ),
     );
   }
 
-  Widget _buildCategorySection(BuildContext context) {
+  Widget _summaryCard({
+    required String label,
+    required double amount,
+    required bool isIncome,
+  }) {
+    final color = isIncome ? AppColors.lightGreen : AppColors.lightRed;
+    final arrowColor = isIncome ? AppColors.darkGreen : AppColors.darkRed;
+
+    return Expanded(
+      child: Container(
+        padding: EdgeInsets.all(16.w),
+        decoration: BoxDecoration(
+          color: color,
+          borderRadius: BorderRadius.circular(16.r),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 13.sp,
+                color: arrowColor,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            SizedBox(height: 4.h),
+            Row(
+              children: [
+                Icon(
+                  isIncome ? Icons.arrow_downward : Icons.arrow_upward,
+                  size: 16.sp,
+                  color: arrowColor,
+                ),
+                SizedBox(width: 4.w),
+                Text(
+                  NumberFormat.currency(
+                    locale: 'vi_VN',
+                    symbol: '₫',
+                  ).format(amount),
+                  style: TextStyle(
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.bold,
+                    color: arrowColor,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // SEARCH BAR
+  // ---------------------------------------------------------------------------
+
+  Widget _buildSearchBar(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 16.w),
+      child: TextField(
+        decoration: InputDecoration(
+          hintText: "Tìm kiếm giao dịch...",
+          prefixIcon: const Icon(Icons.search),
+          filled: true,
+          fillColor: Colors.grey[200],
+          contentPadding: EdgeInsets.symmetric(vertical: 10.h),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12.r),
+            borderSide: BorderSide.none,
+          ),
+        ),
+        onChanged: (value) {},
+      ),
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // FILTER BAR (Tất cả - Thu nhập - Chi tiêu)
+  // ---------------------------------------------------------------------------
+
+  Widget _buildFilterBar(
+    BuildContext context,
+    TransactionState state,
+    TransactionNotifier notifier,
+  ) {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
       child: Row(
         children: [
-          Icon(Icons.folder_open, size: 20.sp),
+          _chip(
+            "Tất cả",
+            state.currentFilter == "all",
+            () => notifier.filter("all"),
+          ),
           SizedBox(width: 8.w),
+          _chip(
+            "Thu nhập",
+            state.currentFilter == "income",
+            () => notifier.filter("income"),
+          ),
+          SizedBox(width: 8.w),
+          _chip(
+            "Chi tiêu",
+            state.currentFilter == "expense",
+            () => notifier.filter("expense"),
+          ),
+          const Spacer(),
+          _iconButton(Icons.calendar_today),
+          SizedBox(width: 8.w),
+          _iconButton(Icons.filter_list),
+        ],
+      ),
+    );
+  }
+
+  Widget _chip(String text, bool selected, VoidCallback onTap) {
+    Color bg;
+    Color fg;
+
+    if (text == "Tất cả" && selected) {
+      bg = AppColors.darkGreen;
+      fg = Colors.white;
+    } else if (text == "Thu nhập" && selected) {
+      bg = AppColors.lightGreen;
+      fg = AppColors.darkGreen;
+    } else if (text == "Chi tiêu" && selected) {
+      bg = AppColors.lightRed;
+      fg = AppColors.darkRed;
+    } else {
+      bg = Colors.grey[300]!;
+      fg = Colors.black;
+    }
+
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
+        decoration: BoxDecoration(
+          color: bg,
+          borderRadius: BorderRadius.circular(20.r),
+        ),
+        child: Text(
+          text,
+          style: TextStyle(
+            color: fg,
+            fontSize: 13.sp,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _iconButton(IconData icon) {
+    return Container(
+      width: 38.w,
+      height: 38.w,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        border: Border.all(color: Colors.grey.shade400),
+      ),
+      child: Icon(icon, size: 18.sp),
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // CATEGORY BUTTON
+  // ---------------------------------------------------------------------------
+
+  Widget _buildCategoryButton() {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 4.h),
+      child: Row(
+        children: [
+          Container(
+            padding: EdgeInsets.all(10.w),
+            decoration: const BoxDecoration(
+              shape: BoxShape.circle,
+              color: AppColors.darkGreen,
+            ),
+            child: const Icon(Icons.folder_open, color: Colors.white),
+          ),
+          SizedBox(width: 12.w),
           Text(
-            'Xem danh mục',
-            style: Theme.of(
-              context,
-            ).textTheme.titleMedium?.copyWith(fontSize: 14.sp),
-          ),
-          const Spacer(),
-          IconButton(
-            onPressed: () {},
-            icon: Icon(Icons.arrow_forward_ios, size: 20.sp),
+            "Xem danh mục",
+            style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w600),
           ),
         ],
       ),
     );
   }
 
-  //👉 BuildContext thuộc về Flutter, không liên quan đến Riverpod.
-  //
-  // Nó dùng để:
-  //
-  // truy cập cây widget (widget tree)
-  //
-  // lấy theme, mediaQuery, navigator
-  //
-  // mở dialog, push trang, pop trang
-  //
-  // lấy các widget ancestor (ví dụ ScaffoldMessenger, Theme, InheritedWidget)
-  //
-  // Nói ngắn gọn:
-  //
-  // BuildContext = "vị trí của widget trong cây UI".
-  //
-  // Ví dụ dùng context:
-  //
-  // Navigator.push(context, ...);
-  // Theme.of(context);
-  // MediaQuery.of(context);
-  // ScaffoldMessenger.of(context).showSnackBar(...)
-  //
-  // 🎯 2. WidgetRef là gì?
-  //
-  // 👉 WidgetRef thuộc về Riverpod, hoàn toàn không liên quan đến Flutter UI.
-  //
-  // Nó dùng để:
-  //
-  // đọc provider → ref.read()
-  //
-  // lắng nghe provider → ref.watch()
-  //
-  // subscribe, dispose provider
-  //
-  // tạo listener khi state thay đổi
-  //
-  // Nói ngắn gọn:
-  //
-  // WidgetRef = cách để yêu cầu, đọc, theo dõi provider của Riverpod.
-  //
+  // ---------------------------------------------------------------------------
+  // TRANSACTION LIST
+  // ---------------------------------------------------------------------------
+
   Widget _buildTransactionList(
     BuildContext context,
     TransactionState state,
-    WidgetRef ref,
+    TransactionNotifier notifier,
   ) {
+    if (state.isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (state.filtered.isEmpty) {
+      return Center(
+        child: Text("Không có giao dịch", style: TextStyle(fontSize: 14.sp)),
+      );
+    }
+
     return ListView.builder(
-      itemCount: state.transactions.length,
+      physics: const BouncingScrollPhysics(),
+      itemCount: state.filtered.length,
+      padding: EdgeInsets.all(16.w),
       itemBuilder: (context, index) {
-        final transaction = state.transactions[index];
-        return Card(
-          margin: EdgeInsets.symmetric(horizontal: 16.w, vertical: 4.h),
-          child: ListTile(
-            leading: CircleAvatar(
-              radius: 20.r,
-              backgroundColor: transaction.type == 'income'
-                  ? AppColors.lightGreen
-                  : AppColors.lightRed,
-              child: Icon(
-                transaction.type == 'income'
-                    ? Icons.arrow_downward
-                    : Icons.arrow_upward,
-                color: transaction.type == 'income'
-                    ? AppColors.darkGreen
-                    : AppColors.darkRed,
-                size: 20.sp,
-              ),
-            ),
-            title: Text(
-              transaction.normalized.title ?? 'Không có tiêu đề',
-              style: Theme.of(
-                context,
-              ).textTheme.titleMedium?.copyWith(fontSize: 14.sp),
-            ),
-            subtitle: Text(
-              '${transaction.categoryName ?? 'Không xác định'} • ${_formatDate(transaction.occurredAt)}',
-              style: Theme.of(
-                context,
-              ).textTheme.bodySmall?.copyWith(fontSize: 12.sp),
-            ),
-            trailing: Text(
-              '${transaction.type == 'income' ? '+' : '-'}${NumberFormat.currency(locale: 'vi_VN', symbol: '₫').format(transaction.amount)}',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                color: transaction.type == 'income'
-                    ? AppColors.darkGreen
-                    : AppColors.darkRed,
-                fontSize: 14.sp,
-              ),
-            ),
-            onTap: () {
-              ref.read(selectedTransactionIdProvider.notifier).state = transaction.id;
-              context.go('${AppRoutes.transactionDetail}');
-            },
-          ),
+        final tx = state.filtered[index];
+        return Padding(
+          padding: EdgeInsets.only(bottom: 12.h),
+          child: _transactionItem(context, tx, notifier),
         );
       },
     );
   }
 
-  String _formatDate(int timestamp) {
-    final dateTime = DateTime.fromMillisecondsSinceEpoch(timestamp * 1000);
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    final yesterday = DateTime(now.year, now.month, now.day - 1);
+  Widget _transactionItem(
+    BuildContext context,
+    Transaction tx,
+    TransactionNotifier notifier,
+  ) {
+    final isIncome = tx.type == "income";
+    final arrowColor = isIncome ? AppColors.darkGreen : AppColors.darkRed;
+    final bgColor = isIncome ? AppColors.lightGreen : AppColors.lightRed;
 
-    if (dateTime.year == today.year &&
-        dateTime.month == today.month &&
-        dateTime.day == today.day) {
-      return 'Hôm nay, ${DateFormat('HH:mm').format(dateTime)}';
-    } else if (dateTime.year == yesterday.year &&
-        dateTime.month == yesterday.month &&
-        dateTime.day == yesterday.day) {
-      return 'Hôm qua, ${DateFormat('HH:mm').format(dateTime)}';
-    } else {
-      return '${DateFormat('dd/MM/yyyy, HH:mm').format(dateTime)}';
-    }
+    final dateString = DateFormat(
+      "dd/MM/yyyy, HH:mm",
+    ).format(DateTime.fromMillisecondsSinceEpoch(tx.occurredAt * 1000));
+
+    return InkWell(
+      borderRadius: BorderRadius.circular(14.r),
+      onTap: () => notifier.onTransactionSelected(context, tx),
+      child: Container(
+        padding: EdgeInsets.all(14.w),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16.r),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black12,
+              blurRadius: 5.r,
+              offset: const Offset(0, 3),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            CircleAvatar(
+              radius: 20.r,
+              backgroundColor: bgColor,
+              child: Icon(
+                isIncome ? Icons.arrow_downward : Icons.arrow_upward,
+                color: arrowColor,
+                size: 20.sp,
+              ),
+            ),
+
+            SizedBox(width: 12.w),
+
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    tx.normalized.title ?? "Không có tiêu đề",
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14.sp,
+                    ),
+                  ),
+                  SizedBox(height: 4.h),
+                  Text(
+                    "${tx.categoryName ?? 'Không xác định'} • $dateString",
+                    style: TextStyle(
+                      fontSize: 12.sp,
+                      color: Colors.grey.shade600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            SizedBox(width: 8.w),
+
+            Text(
+              "${isIncome ? '+' : '-'}${NumberFormat.currency(locale: 'vi_VN', symbol: '₫').format(tx.amount)}",
+              style: TextStyle(
+                fontSize: 14.sp,
+                fontWeight: FontWeight.bold,
+                color: arrowColor,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
