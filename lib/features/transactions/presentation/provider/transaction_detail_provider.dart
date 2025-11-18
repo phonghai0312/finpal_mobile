@@ -6,6 +6,7 @@ import 'package:fridge_to_fork_ai/features/transactions/domain/usecase/get_trans
 import 'package:fridge_to_fork_ai/features/transactions/presentation/provider/transaction_detail_notifier.dart';
 import 'package:fridge_to_fork_ai/features/transactions/domain/usecase/delete_transaction.dart';
 import 'package:fridge_to_fork_ai/features/transactions/domain/usecase/update_transaction.dart';
+import 'package:fridge_to_fork_ai/features/transactions/domain/usecase/create_transaction.dart';
 
 /// DataSource
 final transactionRemoteDataSourceProvider =
@@ -33,6 +34,10 @@ final updateTransactionUseCaseProvider = Provider<UpdateTransactionUseCase>(
   (ref) => UpdateTransactionUseCase(ref.read(transactionRepositoryProvider)),
 );
 
+final createTransactionUseCaseProvider = Provider<CreateTransactionUseCase>(
+  (ref) => CreateTransactionUseCase(ref.read(transactionRepositoryProvider)),
+);
+
 /// Notifier Provider
 final transactionDetailNotifierProvider =
     StateNotifierProvider<TransactionDetailNotifier, TransactionDetailState>((
@@ -41,7 +46,8 @@ final transactionDetailNotifierProvider =
       final usecase = ref.read(getTransactionDetailUseCaseProvider);
       final deleteUseCase = ref.read(deleteTransactionUseCaseProvider);
       final updateUseCase = ref.read(updateTransactionUseCaseProvider);
-      return TransactionDetailNotifier(usecase, deleteUseCase, updateUseCase, ref);
+      final createUseCase = ref.read(createTransactionUseCaseProvider);
+      return TransactionDetailNotifier(usecase, deleteUseCase, updateUseCase, createUseCase, ref);
     });
 
 //Trong riverPod: notifier: la class that, co bien state, ham fetchDetail de lay chi eite tu tuUsecase, onBack(). Day la noi de viet logic. Provider: (transactionDetailNotifierProvider) là cái nhãn để Riverpod biết muốn dùng norifier nyà tthì lấy ở đâu

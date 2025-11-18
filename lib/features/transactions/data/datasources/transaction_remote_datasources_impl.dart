@@ -1,5 +1,6 @@
 import 'package:fridge_to_fork_ai/features/transactions/data/models/transaction_model.dart';
 import 'package:fridge_to_fork_ai/features/transactions/data/models/transaction_update_request_model.dart';
+import 'package:fridge_to_fork_ai/features/transactions/data/models/transaction_creation_request_model.dart';
 
 import 'transaction_remote_datasources.dart';
 
@@ -214,5 +215,37 @@ class TransactionRemoteDataSourceImpl implements TransactionRemoteDataSource {
   Future<void> deleteTransaction(String id) async {
     await Future.delayed(const Duration(milliseconds: 300));
     _mockTransactions.removeWhere((transaction) => transaction.id == id);
+  }
+
+  @override
+  Future<void> createTransaction(TransactionCreationRequestModel transaction) async {
+    await Future.delayed(const Duration(milliseconds: 300));
+    final newId = 't'+(_mockTransactions.length + 1).toString().padLeft(3, '0');
+    final now = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+    final newTransaction = TransactionModel(
+      id: newId,
+      userId: 'u001', // Mock user ID
+      accountId: 'a001', // Mock account ID
+      amount: transaction.amount,
+      currency: 'VND', // Default currency
+      direction: transaction.type == 'expense' ? 'out' : 'in', // Derived from type
+      type: transaction.type,
+      categoryId: transaction.categoryId,
+      categoryName: transaction.categoryId == 'c001' ? 'Ăn uống' : 'Khác', // Mock category name
+      merchant: transaction.description ?? 'N/A',
+      occurredAt: transaction.occurredAt,
+      rawMessage: transaction.description ?? '',
+      normalized: TransactionNormalizedModel(
+        title: transaction.description ?? '',
+        description: transaction.description ?? '',
+        peerName: transaction.description ?? '',
+      ),
+      ai: const TransactionAIModel(categorySuggestionId: 'c001', confidence: 0.8), // Mock AI data
+      userNote: transaction.userNote,
+      source: 'manual', // Mock source
+      createdAt: now,
+      updatedAt: now,
+    );
+    _mockTransactions.add(newTransaction);
   }
 }

@@ -2,6 +2,7 @@ import '../../domain/repositories/transaction_repository.dart';
 import '../datasources/transaction_remote_datasources.dart';
 import '../models/transaction_model.dart';
 import '../models/transaction_update_request_model.dart';
+import '../models/transaction_creation_request_model.dart';
 import '../../domain/entities/transaction.dart';
 
 class TransactionRepositoryImpl implements TransactionRepository {
@@ -54,5 +55,9 @@ class TransactionRepositoryImpl implements TransactionRepository {
   @override
   Future<void> deleteTransaction(String id) async {
     await remoteDataSource.deleteTransaction(id);
+  }
+  @override
+  Future<void> createTransaction(TransactionCreationRequestModel transaction) async {
+    await remoteDataSource.createTransaction(transaction);
   }
 }

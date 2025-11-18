@@ -1,5 +1,6 @@
 import '../../domain/entities/transaction.dart';
 import '../../data/models/transaction_model.dart';
+import '../../data/models/transaction_creation_request_model.dart';
 
 abstract class TransactionRepository {
   Future<TransactionListResponseModel> getTransactions({
@@ -22,4 +23,5 @@ abstract class TransactionRepository {
   });
 
   Future<void> deleteTransaction(String id);
+  Future<void> createTransaction(TransactionCreationRequestModel transaction);
 }

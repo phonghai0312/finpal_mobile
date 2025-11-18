@@ -1,5 +1,6 @@
 import '../../data/models/transaction_model.dart';
 import '../../data/models/transaction_update_request_model.dart';
+import '../models/transaction_creation_request_model.dart';
 
 abstract class TransactionRemoteDataSource {
   Future<TransactionListResponseModel> getTransactions({
@@ -21,4 +22,5 @@ abstract class TransactionRemoteDataSource {
   );
 
   Future<void> deleteTransaction(String id);
+  Future<void> createTransaction(TransactionCreationRequestModel transaction);
 }

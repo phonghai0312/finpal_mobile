@@ -4,70 +4,133 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fridge_to_fork_ai/core/presentation/theme/app_colors.dart';
 import 'package:fridge_to_fork_ai/core/presentation/widget/header/header_with_back.dart';
 import 'package:fridge_to_fork_ai/features/categories/presentation/provider/category_provider.dart';
+import 'package:fridge_to_fork_ai/features/transactions/presentation/provider/transaction_detail_notifier.dart';
 import 'package:fridge_to_fork_ai/features/transactions/presentation/provider/transaction_detail_provider.dart';
-import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
-enum TransactionType { expense, income }
+// Removed: enum TransactionType { expense, income }
+// Removed: selectedTransactionTypeProvider
+// Removed: selectedCategoryProvider
+// Removed: transactionDateProvider
+// Removed: transactionTimeProvider
 
-final selectedTransactionTypeProvider = StateProvider<TransactionType>(
-  (ref) => TransactionType.expense,
-);
-final selectedCategoryProvider = StateProvider<String?>((ref) => null);
-final transactionDateProvider = StateProvider<DateTime>(
-  (ref) => DateTime.now(),
-);
-final transactionTimeProvider = StateProvider<TimeOfDay>(
-  (ref) => TimeOfDay.now(),
-);
-
-class CreateTransactionPage extends ConsumerWidget {
+class CreateTransactionPage extends ConsumerStatefulWidget {
   const CreateTransactionPage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final selectedType = ref.watch(selectedTransactionTypeProvider);
+  ConsumerState<CreateTransactionPage> createState() => _CreateTransactionPageState();
+}
 
+class _CreateTransactionPageState extends ConsumerState<CreateTransactionPage> {
+  final TextEditingController _amountController = TextEditingController();
+  final TextEditingController _descriptionController = TextEditingController();
+  final TextEditingController _noteController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(transactionDetailNotifierProvider.notifier).init();
+    });
+  }
+
+  @override
+  void didUpdateWidget(covariant CreateTransactionPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final transactionDetailState = ref.read(transactionDetailNotifierProvider);
+    _amountController.text = transactionDetailState.form.amount > 0
+        ? transactionDetailState.form.amount.toString()
+        : '';
+    _descriptionController.text = transactionDetailState.form.description ?? '';
+    _noteController.text = transactionDetailState.form.userNote ?? '';
+  }
+
+  @override
+  void dispose() {
+    _amountController.dispose();
+    _descriptionController.dispose();
+    _noteController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final transactionDetailState = ref.watch(transactionDetailNotifierProvider);
     final notifier = ref.read(transactionDetailNotifierProvider.notifier);
+    final categoriesState = ref.watch(categoryNotifierProvider);
 
-    // final categoriesAsync = ref.watch(categoriesProvider);
-    final selectedCategory = ref.watch(selectedCategoryProvider);
-    final transactionDate = ref.watch(transactionDateProvider);
-    final transactionTime = ref.watch(transactionTimeProvider);
-
-    final TextEditingController amountController = TextEditingController();
-    final TextEditingController descriptionController = TextEditingController();
-    final TextEditingController noteController = TextEditingController();
+    _amountController.text = transactionDetailState.form.amount > 0
+        ? transactionDetailState.form.amount.toString()
+        : '';
+    _descriptionController.text = transactionDetailState.form.description ?? '';
+    _noteController.text = transactionDetailState.form.userNote ?? '';
 
     Future<void> _selectDate(BuildContext context) async {
       final DateTime? picked = await showDatePicker(
         context: context,
-        initialDate: transactionDate,
+        initialDate: transactionDetailState.form.occurredAtDate,
         firstDate: DateTime(2000),
         lastDate: DateTime(2101),
+        builder: (context, child) {
+          return Theme(
+            data: Theme.of(context).copyWith(
+              colorScheme: ColorScheme.light(
+                primary: AppColors.primaryGreen, // header background color
+                onPrimary: AppColors.typoWhite, // header text color
+                onSurface: AppColors.typoBlack, // body text color
+              ),
+              textButtonTheme: TextButtonThemeData(
+                style: TextButton.styleFrom(
+                  foregroundColor: AppColors.primaryGreen, // button text color
+                ),
+              ),
+            ),
+            child: child!,
+          );
+        },
       );
-      if (picked != null && picked != transactionDate) {
-        ref.read(transactionDateProvider.notifier).state = picked;
+      if (picked != null && picked != transactionDetailState.form.occurredAtDate) {
+        notifier.updateOccurredAtDate(picked);
       }
     }
 
     Future<void> _selectTime(BuildContext context) async {
       final TimeOfDay? picked = await showTimePicker(
         context: context,
-        initialTime: transactionTime,
+        initialTime: transactionDetailState.form.occurredAtTime,
+        builder: (context, child) {
+          return Theme(
+            data: Theme.of(context).copyWith(
+              colorScheme: ColorScheme.light(
+                primary: AppColors.primaryGreen, // header background color
+                onPrimary: AppColors.typoWhite, // header text color
+                onSurface: AppColors.typoBlack, // body text color
+              ),
+              textButtonTheme: TextButtonThemeData(
+                style: TextButton.styleFrom(
+                  foregroundColor: AppColors.primaryGreen, // button text color
+                ),
+              ),
+            ),
+            child: child!,
+          );
+        },
       );
-      if (picked != null && picked != transactionTime) {
-        ref.read(transactionTimeProvider.notifier).state = picked;
+      if (picked != null && picked != transactionDetailState.form.occurredAtTime) {
+        notifier.updateOccurredAtTime(picked);
       }
     }
 
     return Scaffold(
+      backgroundColor: AppColors.bgSecondary,
       appBar: HeaderWithBack(
-        title: 'Tạo giao dịch mới',
+        title: transactionDetailState.data == null
+            ? 'Tạo giao dịch mới'
+            : 'Chỉnh sửa giao dịch',
         onBack: () => notifier.onBack(context),
       ),
       body: SingleChildScrollView(
-        padding: EdgeInsets.all(16.w),
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 24.h),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -75,49 +138,73 @@ class CreateTransactionPage extends ConsumerWidget {
               'Loại giao dịch',
               style: Theme.of(
                 context,
-              ).textTheme.titleMedium?.copyWith(fontSize: 16.sp),
+              ).textTheme.titleMedium?.copyWith(
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.typoHeading,
+                  ),
             ),
-            SizedBox(height: 8.h),
+            SizedBox(height: 12.h),
             Row(
               children: [
                 Expanded(
                   child: ChoiceChip(
-                    label: const Text('Chi tiêu'),
-                    selected: selectedType == TransactionType.expense,
+                    label: Padding( // Added Padding
+                      padding: EdgeInsets.symmetric(vertical: 4.h, horizontal: 8.w), // Added Padding
+                      child: const Text('Chi tiêu'),
+                    ),
+                    selected: transactionDetailState.form.type == TransactionType.expense,
                     onSelected: (selected) {
                       if (selected) {
-                        ref
-                                .read(selectedTransactionTypeProvider.notifier)
-                                .state =
-                            TransactionType.expense;
+                        notifier.updateType(TransactionType.expense);
                       }
                     },
                     selectedColor: AppColors.darkRed,
-                    labelStyle: TextStyle(
-                      color: selectedType == TransactionType.expense
-                          ? Colors.white
-                          : Colors.black,
+                    backgroundColor: AppColors.bgWhite,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12.r),
+                      side: BorderSide(
+                        color: transactionDetailState.form.type == TransactionType.expense
+                            ? AppColors.darkRed
+                            : AppColors.bgGray.withOpacity(0.5),
+                      ),
+                    ),
+                    labelStyle: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      color: transactionDetailState.form.type == TransactionType.expense
+                          ? AppColors.typoWhite
+                          : AppColors.typoBody,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                 ),
                 SizedBox(width: 16.w),
                 Expanded(
                   child: ChoiceChip(
-                    label: const Text('Thu nhập'),
-                    selected: selectedType == TransactionType.income,
+                    label: Padding( // Added Padding
+                      padding: EdgeInsets.symmetric(vertical: 4.h, horizontal: 8.w), // Added Padding
+                      child: const Text('Thu nhập'),
+                    ),
+                    selected: transactionDetailState.form.type == TransactionType.income,
                     onSelected: (selected) {
                       if (selected) {
-                        ref
-                                .read(selectedTransactionTypeProvider.notifier)
-                                .state =
-                            TransactionType.income;
+                        notifier.updateType(TransactionType.income);
                       }
                     },
                     selectedColor: AppColors.darkGreen,
-                    labelStyle: TextStyle(
-                      color: selectedType == TransactionType.income
-                          ? Colors.white
-                          : Colors.black,
+                    backgroundColor: AppColors.bgWhite,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12.r),
+                      side: BorderSide(
+                        color: transactionDetailState.form.type == TransactionType.income
+                            ? AppColors.darkGreen
+                            : AppColors.bgGray.withOpacity(0.5),
+                      ),
+                    ),
+                    labelStyle: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      color: transactionDetailState.form.type == TransactionType.income
+                          ? AppColors.typoWhite
+                          : AppColors.typoBody,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                 ),
@@ -125,23 +212,55 @@ class CreateTransactionPage extends ConsumerWidget {
             ),
             SizedBox(height: 24.h),
             TextFormField(
-              controller: amountController,
+              controller: _amountController,
               keyboardType: TextInputType.number,
+              onChanged: notifier.updateAmount,
+              style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: AppColors.typoHeading),
               decoration: InputDecoration(
                 labelText: 'Số tiền',
+                labelStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(color: AppColors.typoBody),
+                floatingLabelBehavior: FloatingLabelBehavior.always,
+                filled: true,
+                fillColor: AppColors.bgWhite,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12.r),
+                  borderSide: BorderSide.none,
                 ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12.r),
+                  borderSide: BorderSide(color: AppColors.bgGray.withOpacity(0.5)),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12.r),
+                  borderSide: BorderSide(color: AppColors.primaryGreen, width: 2.w),
+                ),
+                contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
               ),
             ),
             SizedBox(height: 16.h),
             TextFormField(
-              controller: descriptionController,
+              controller: _descriptionController,
+              onChanged: notifier.updateDescription,
+              style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: AppColors.typoHeading),
               decoration: InputDecoration(
                 labelText: 'Mô tả',
+                labelStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(color: AppColors.typoBody),
+                floatingLabelBehavior: FloatingLabelBehavior.always,
+                filled: true,
+                fillColor: AppColors.bgWhite,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12.r),
+                  borderSide: BorderSide.none,
                 ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12.r),
+                  borderSide: BorderSide(color: AppColors.bgGray.withOpacity(0.5)),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12.r),
+                  borderSide: BorderSide(color: AppColors.primaryGreen, width: 2.w),
+                ),
+                contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
               ),
             ),
             SizedBox(height: 16.h),
@@ -151,15 +270,30 @@ class CreateTransactionPage extends ConsumerWidget {
                   child: TextFormField(
                     readOnly: true,
                     controller: TextEditingController(
-                      text: DateFormat('dd/MM/yyyy').format(transactionDate),
+                      text: DateFormat('dd/MM/yyyy').format(transactionDetailState.form.occurredAtDate),
                     ),
                     onTap: () => _selectDate(context),
+                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: AppColors.typoHeading),
                     decoration: InputDecoration(
                       labelText: 'Ngày',
+                      labelStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(color: AppColors.typoBody),
+                      floatingLabelBehavior: FloatingLabelBehavior.always,
+                      filled: true,
+                      fillColor: AppColors.bgWhite,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12.r),
+                        borderSide: BorderSide.none,
                       ),
-                      suffixIcon: const Icon(Icons.calendar_today),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12.r),
+                        borderSide: BorderSide(color: AppColors.bgGray.withOpacity(0.5)),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12.r),
+                        borderSide: BorderSide(color: AppColors.primaryGreen, width: 2.w),
+                      ),
+                      contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+                      suffixIcon: Icon(Icons.calendar_today, color: AppColors.typoBody),
                     ),
                   ),
                 ),
@@ -168,15 +302,30 @@ class CreateTransactionPage extends ConsumerWidget {
                   child: TextFormField(
                     readOnly: true,
                     controller: TextEditingController(
-                      text: transactionTime.format(context),
+                      text: transactionDetailState.form.occurredAtTime.format(context),
                     ),
                     onTap: () => _selectTime(context),
+                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: AppColors.typoHeading),
                     decoration: InputDecoration(
                       labelText: 'Giờ',
+                      labelStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(color: AppColors.typoBody),
+                      floatingLabelBehavior: FloatingLabelBehavior.always,
+                      filled: true,
+                      fillColor: AppColors.bgWhite,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12.r),
+                        borderSide: BorderSide.none,
                       ),
-                      suffixIcon: const Icon(Icons.access_time),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12.r),
+                        borderSide: BorderSide(color: AppColors.bgGray.withOpacity(0.5)),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12.r),
+                        borderSide: BorderSide(color: AppColors.primaryGreen, width: 2.w),
+                      ),
+                      contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+                      suffixIcon: Icon(Icons.access_time, color: AppColors.typoBody),
                     ),
                   ),
                 ),
@@ -187,93 +336,126 @@ class CreateTransactionPage extends ConsumerWidget {
               'Chọn danh mục',
               style: Theme.of(
                 context,
-              ).textTheme.titleMedium?.copyWith(fontSize: 16.sp),
+              ).textTheme.titleMedium?.copyWith(
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.typoHeading,
+                  ),
             ),
-            SizedBox(height: 8.h),
-            // categoriesAsync.when(
-            //   data: (categories) {
-            //     return Wrap(
-            //       spacing: 8.w,
-            //       runSpacing: 8.h,
-            //       children: categories.map((category) {
-            //         return ChoiceChip(
-            //           // label: Text(category.displayName),
-            //           selected: selectedCategory == category.id,
-            //           onSelected: (selected) {
-            //             ref.read(selectedCategoryProvider.notifier).state = selected ? category.id : null;
-            //           },
-            //           selectedColor: AppColors.primaryGreen,
-            //           labelStyle: TextStyle(color: selectedCategory == category.id ? Colors.white : Colors.black),
-            //           avatar: Icon(_getIconForCategory(category.icon), color: selectedCategory == category.id ? Colors.white : Colors.black),
-            //         );
-            //       }).toList(),
-            //     );
-            //   },
-            //   loading: () => const CircularProgressIndicator(),
-            //   error: (error, stack) => Text('Error loading categories: $error'),
-            // ),
+            SizedBox(height: 12.h),
+            categoriesState.isLoading
+                ? const CircularProgressIndicator()
+                : categoriesState.errorMessage != null
+                    ? Text('Error loading categories: ${categoriesState.errorMessage}')
+                    : Wrap(
+                        spacing: 8.w,
+                        runSpacing: 8.h,
+                        children: categoriesState.categories.map((category) {
+                          return ChoiceChip(
+                            label: Padding( // Added Padding
+                              padding: EdgeInsets.symmetric(vertical: 4.h, horizontal: 8.w), // Added Padding
+                              child: Text(category.displayName),
+                            ),
+                            selected: transactionDetailState.form.categoryId == category.id,
+                            onSelected: (selected) {
+                              notifier.updateCategory(selected ? category.id : null);
+                            },
+                            selectedColor: AppColors.primaryGreen,
+                            backgroundColor: AppColors.bgWhite,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12.r),
+                              side: BorderSide(
+                                color: transactionDetailState.form.categoryId == category.id
+                                    ? AppColors.primaryGreen
+                                    : AppColors.bgGray.withOpacity(0.5),
+                              ),
+                            ),
+                            labelStyle: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                              color: transactionDetailState.form.categoryId == category.id ? AppColors.typoWhite : AppColors.typoBody,
+                              fontWeight: FontWeight.w600,
+                            ),
+                            avatar: (category.icon != null)
+                                ? Icon(_getIconForCategory(category.icon), color: transactionDetailState.form.categoryId == category.id ? AppColors.typoWhite : AppColors.typoBody)
+                                : null,
+                          );
+                        }).toList(),
+                      ),
             SizedBox(height: 24.h),
             TextFormField(
-              controller: noteController,
+              controller: _noteController,
+              onChanged: notifier.updateUserNote,
+              style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: AppColors.typoHeading),
               decoration: InputDecoration(
                 labelText: 'Ghi chú (không bắt buộc)',
+                labelStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(color: AppColors.typoBody),
+                floatingLabelBehavior: FloatingLabelBehavior.always,
+                filled: true,
+                fillColor: AppColors.bgWhite,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12.r),
+                  borderSide: BorderSide.none,
                 ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12.r),
+                  borderSide: BorderSide(color: AppColors.bgGray.withOpacity(0.5)),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12.r),
+                  borderSide: BorderSide(color: AppColors.primaryGreen, width: 2.w),
+                ),
+                contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
               ),
               maxLines: 3,
             ),
-            SizedBox(height: 16.h),
+            SizedBox(height: 24.h), // Increased spacing
             Container(
-              padding: EdgeInsets.all(12.w),
+              padding: EdgeInsets.all(16.w), // Increased padding
               decoration: BoxDecoration(
-                color: AppColors.bgWarning,
-                borderRadius: BorderRadius.circular(8.r),
+                color: AppColors.bgInfo.withOpacity(0.1), // Changed to bgInfo with opacity
+                borderRadius: BorderRadius.circular(12.r), // Increased border radius
+                border: Border.all(color: AppColors.bgInfo), // Added border
               ),
               child: Row(
                 children: [
-                  Icon(Icons.star, color: AppColors.bgWarning, size: 20.sp),
-                  SizedBox(width: 8.w),
+                  Icon(Icons.lightbulb_outline, color: AppColors.bgInfo, size: 24.sp), // Changed icon and size
+                  SizedBox(width: 12.w), // Increased spacing
                   Expanded(
                     child: Text(
-                      'Tự động phân loại các giao dịch tương tự "The Coffee House" vào danh mục "Cà phê" trong tương lai',
+                      'Mẹo: Tự động phân loại các giao dịch tương tự vào danh mục này trong tương lai.',
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: AppColors.bgWarning,
-                        fontSize: 12.sp,
+                        color: AppColors.typoBody,
+                        fontSize: 13.sp, // Adjusted font size
                       ),
                     ),
                   ),
                 ],
               ),
             ),
-            SizedBox(height: 24.h),
+            SizedBox(height: 32.h), // Increased spacing
             Row(
               children: [
                 Expanded(
                   child: ElevatedButton(
-                    onPressed: () {
-                      // TODO: Implement save new transaction functionality
-                      // Need API for this
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text(
-                            'Save functionality not implemented yet.',
-                          ),
-                        ),
-                      );
-                    },
+                    onPressed: transactionDetailState.isLoading
+                        ? null
+                        : () => notifier.saveTransaction(context),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primaryGreen,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12.r),
                       ),
-                      padding: EdgeInsets.symmetric(vertical: 14.h),
+                      padding: EdgeInsets.symmetric(vertical: 16.h), // Increased padding
+                      elevation: 4, // Added elevation
+                      shadowColor: AppColors.primaryGreen.withOpacity(0.3), // Added shadow color
                     ),
                     child: Text(
-                      'Lưu thay đổi',
-                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      transactionDetailState.data == null
+                          ? 'Tạo giao dịch'
+                          : 'Lưu thay đổi',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         color: AppColors.typoWhite,
-                        fontSize: 14.sp,
+                        fontSize: 16.sp, // Adjusted font size
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),
@@ -282,20 +464,21 @@ class CreateTransactionPage extends ConsumerWidget {
                 Expanded(
                   child: OutlinedButton(
                     onPressed: () {
-                      context.pop();
+                      notifier.onBack(context);
                     },
                     style: OutlinedButton.styleFrom(
-                      side: const BorderSide(color: Colors.grey),
+                      side: BorderSide(color: AppColors.bgGray.withOpacity(0.5)), // Adjusted border color
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12.r),
                       ),
-                      padding: EdgeInsets.symmetric(vertical: 14.h),
+                      padding: EdgeInsets.symmetric(vertical: 16.h), // Increased padding
                     ),
                     child: Text(
                       'Hủy',
-                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: Colors.black,
-                        fontSize: 14.sp,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        color: AppColors.typoBody,
+                        fontSize: 16.sp, // Adjusted font size
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),

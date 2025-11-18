@@ -66,10 +66,10 @@ class AppRouter {
         path: AppRoutes.createTransaction,
         builder: (context, state) => const CreateTransactionPage(),
       ),
-      // GoRoute(
-      //   path: AppRoutes.editTransaction,
-      //   builder: (context, state) => const EditTransactionPage(),
-      // ),
+      GoRoute(
+        path: AppRoutes.editTransaction,
+        builder: (context, state) => const CreateTransactionPage(),
+      ),
 
       // Shell router have nav bar
       ShellRoute(
