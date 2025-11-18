@@ -1,17 +1,7 @@
 import '../../domain/entities/transaction.dart';
-import '../../data/models/transaction_model.dart';
 
 abstract class TransactionRepository {
-  Future<TransactionListResponseModel> getTransactions({
-    int? from,
-    int? to,
-    String? type,
-    String? direction,
-    String? categoryId,
-    String? accountId,
-    int page,
-    int pageSize,
-  });
+  Future<List<Transaction>> getTransactions();
 
   Future<Transaction> getTransactionDetail(String id);
 
@@ -19,5 +9,14 @@ abstract class TransactionRepository {
     required String id,
     String? categoryId,
     String? userNote,
+  });
+
+  Future<void> createTransaction({
+    required double amount,
+    required String type, // income | expense
+    required String categoryId,
+    required String description,
+    required int occurredAt, // unix timestamp
+    String? note,
   });
 }

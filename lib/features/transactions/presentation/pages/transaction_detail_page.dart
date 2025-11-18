@@ -1,152 +1,183 @@
+// ignore_for_file: deprecated_member_use, dead_code, use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:fridge_to_fork_ai/core/presentation/theme/app_colors.dart';
-import 'package:fridge_to_fork_ai/core/presentation/widget/header/header_with_back.dart';
-import 'package:fridge_to_fork_ai/features/transactions/domain/entities/transaction.dart';
-import 'package:fridge_to_fork_ai/features/transactions/presentation/provider/transaction_detail_provider.dart';
 import 'package:intl/intl.dart';
 
-class TransactionDetailPage extends ConsumerWidget {
+import '../../../../../core/presentation/theme/app_colors.dart';
+import '../../../../../core/presentation/widget/header/header_with_back.dart';
+import '../../domain/entities/transaction.dart';
+import '../provider/transactiondetail/transaction_detail_provider.dart';
+
+class TransactionDetailPage extends ConsumerStatefulWidget {
   const TransactionDetailPage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  TransactionDetailPageState createState() => TransactionDetailPageState();
+}
+
+class TransactionDetailPageState extends ConsumerState<TransactionDetailPage> {
+  @override
+  void initState() {
+    super.initState();
+
+    /// giống BookingDetailPage
+    Future.microtask(() async {
+      await ref
+          .read(transactionDetailNotifierProvider.notifier)
+          .initLoad(context);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final state = ref.watch(transactionDetailNotifierProvider);
     final notifier = ref.read(transactionDetailNotifierProvider.notifier);
-
-    // gọi init sau frame đầu tiên để đảm bảo selectedTransactionId đã set
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      notifier.init();
-    });
-
-    if (state.isLoading) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
-    }
-
-    if (state.error != null) {
-      return Scaffold(body: Center(child: Text('Error: ${state.error}')));
-    }
-
-    final tx = state.data!;
 
     return Scaffold(
       appBar: HeaderWithBack(
         title: 'Chi tiết giao dịch',
         onBack: () => notifier.onBack(context),
       ),
-      body: SingleChildScrollView(
-        padding: EdgeInsets.all(16.w),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildTransactionSummaryCard(context, tx),
-            SizedBox(height: 16.h),
-            _buildAIClassificationBanner(context, tx),
-            SizedBox(height: 16.h),
-            _buildDetailItem(
-              context,
-              Icons.access_time,
-              'Thời gian',
-              _formatDate(tx.occurredAt),
-            ),
-            _buildDetailItem(
-              context,
-              Icons.category,
-              'Danh mục',
-              tx.categoryName ?? 'Không xác định',
-            ),
-            _buildDetailItem(
-              context,
-              Icons.credit_card,
-              'Phương thức',
-              tx.source ?? 'Không xác định',
-            ),
-            _buildDetailItem(
-              context,
-              Icons.location_on,
-              'Địa điểm',
-              tx.merchant ?? 'Không xác định',
-            ),
-            _buildDetailItem(
-              context,
-              Icons.note,
-              'Ghi chú',
-              tx.userNote ?? 'Không có ghi chú',
-            ),
-            SizedBox(height: 24.h),
-            _buildActionButtons(context, ref, tx),
-          ],
-        ),
+      body: Builder(
+        builder: (_) {
+          if (state.isLoading) {
+            return const Center(
+              child: CircularProgressIndicator(color: AppColors.bgPrimary),
+            );
+          }
+
+          if (state.detail == null) {
+            return const SizedBox.shrink();
+          }
+
+          return RefreshIndicator(
+            color: AppColors.bgPrimary,
+            onRefresh: () async => notifier.refresh(context),
+            child: _buildDetailView(state.detail!, notifier),
+          );
+        },
       ),
     );
   }
 
-  Widget _buildTransactionSummaryCard(BuildContext context, Transaction tx) {
-    final isIncome = tx.type == 'income';
+  /// ===============================
+  /// MAIN DETAIL VIEW
+  /// ===============================
+  Widget _buildDetailView(Transaction tx, dynamic notifier) {
+    final statusDesign = notifier.getStatusDesign(tx.type);
 
-    return Card(
-      color: isIncome ? AppColors.lightGreen : AppColors.lightRed,
-      margin: EdgeInsets.zero,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
-      child: Padding(
-        padding: EdgeInsets.all(20.w),
-        child: Column(
-          children: [
-            CircleAvatar(
-              radius: 30.r,
-              backgroundColor: AppColors.bgCard,
-              child: Icon(
-                isIncome ? Icons.arrow_downward : Icons.arrow_upward,
-                color: isIncome ? AppColors.darkGreen : AppColors.darkRed,
-                size: 30.sp,
-              ),
-            ),
-            SizedBox(height: 12.h),
-            Text(
-              '${isIncome ? "+" : "-"}${NumberFormat.currency(locale: "vi_VN", symbol: "₫").format(tx.amount)}',
-              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                color: isIncome ? AppColors.darkGreen : AppColors.darkRed,
-                fontSize: 24.sp,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            SizedBox(height: 4.h),
-            Text(
-              tx.merchant ?? "Không xác định",
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                color: isIncome ? AppColors.darkGreen : AppColors.darkRed,
-                fontSize: 14.sp,
-              ),
-            ),
-          ],
-        ),
+    return SingleChildScrollView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildHeaderSection(tx, statusDesign),
+          SizedBox(height: 20.h),
+
+          _buildSectionTitle("Thông tin giao dịch"),
+          SizedBox(height: 12.h),
+
+          _buildInfoRow(
+            "Số tiền",
+            "${tx.type == "income" ? "+" : "-"}${NumberFormat.currency(locale: 'vi_VN', symbol: '₫').format(tx.amount)}",
+          ),
+          _buildInfoRow("Thời gian", _formatDate(tx.occurredAt)),
+          _buildInfoRow("Danh mục", tx.categoryName ?? "Không xác định"),
+          _buildInfoRow("Nguồn", tx.source),
+          _buildInfoRow("Địa điểm", tx.merchant ?? "Không xác định"),
+
+          if (tx.userNote != null && tx.userNote!.isNotEmpty)
+            _buildInfoRow("Ghi chú", tx.userNote!),
+
+          SizedBox(height: 24.h),
+          _buildSectionTitle("Gợi ý từ AI"),
+          SizedBox(height: 12.h),
+          _buildAIBanner(tx),
+
+          SizedBox(height: 30.h),
+          _buildActionButtons(notifier, tx),
+        ],
       ),
     );
   }
 
-  Widget _buildAIClassificationBanner(BuildContext context, Transaction tx) {
-    if (tx.ai?.categorySuggestionId == null || tx.ai?.confidence == null) {
+  /// ===============================
+  /// HEADER CARD
+  /// ===============================
+  Widget _buildHeaderSection(Transaction tx, Map<String, dynamic> statusStyle) {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.all(20.w),
+      decoration: BoxDecoration(
+        color: statusStyle['color'].withOpacity(0.15),
+        borderRadius: BorderRadius.circular(14.r),
+      ),
+      child: Column(
+        children: [
+          CircleAvatar(
+            radius: 30.r,
+            backgroundColor: Colors.white,
+            child: Icon(
+              tx.type == "income" ? Icons.arrow_downward : Icons.arrow_upward,
+              size: 28.sp,
+              color: statusStyle['color'],
+            ),
+          ),
+          SizedBox(height: 12.h),
+          Text(
+            "${tx.type == "income" ? "+" : "-"}${NumberFormat.currency(locale: 'vi_VN', symbol: "₫").format(tx.amount)}",
+            style: TextStyle(
+              fontSize: 22.sp,
+              fontWeight: FontWeight.bold,
+              color: statusStyle['color'],
+            ),
+          ),
+          SizedBox(height: 6.h),
+          Text(
+            tx.merchant ?? "Không rõ địa điểm",
+            style: TextStyle(
+              fontSize: 15.sp,
+              fontWeight: FontWeight.w500,
+              color: AppColors.typoBody,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// ===============================
+  /// AI BANNER
+  /// ===============================
+  Widget _buildAIBanner(Transaction tx) {
+    if (tx.ai.categorySuggestionId == null || tx.ai.confidence == null) {
       return const SizedBox.shrink();
     }
+
+    final confidencePercent = (tx.ai.confidence! * 100).toInt();
 
     return Container(
       padding: EdgeInsets.all(12.w),
       decoration: BoxDecoration(
         color: AppColors.primaryGreen.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(8.r),
-        border: Border.all(color: AppColors.primaryGreen, width: 1),
+        borderRadius: BorderRadius.circular(10.r),
+        border: Border.all(color: AppColors.primaryGreen),
       ),
       child: Row(
         children: [
-          Icon(Icons.star, color: AppColors.primaryGreen, size: 20.sp),
-          SizedBox(width: 8.w),
+          Icon(Icons.auto_awesome, color: AppColors.primaryGreen, size: 18.sp),
+          SizedBox(width: 10.w),
           Expanded(
             child: Text(
-              'AI gợi ý danh mục "${tx.categoryName ?? "Không xác định"}" với độ chính xác ${(tx.ai!.confidence! * 100).toInt()}%',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: AppColors.primaryGreen,
+              'AI đề xuất danh mục: "${tx.categoryName ?? "Không xác định"}" '
+              '- Độ tin cậy $confidencePercent%',
+              style: TextStyle(
                 fontSize: 12.sp,
+                color: AppColors.primaryGreen,
+                fontWeight: FontWeight.w500,
               ),
             ),
           ),
@@ -155,30 +186,28 @@ class TransactionDetailPage extends ConsumerWidget {
     );
   }
 
-  Widget _buildDetailItem(
-    BuildContext context,
-    IconData icon,
-    String label,
-    String value,
-  ) {
+  /// ===============================
+  /// INFO ROW
+  /// ===============================
+  Widget _buildInfoRow(String label, String value) {
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: 8.h),
+      padding: EdgeInsets.symmetric(vertical: 6.h),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Icon(icon, size: 20.sp, color: Colors.grey[600]),
-          SizedBox(width: 12.w),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  label,
-                  style: TextStyle(fontSize: 12.sp, color: Colors.grey[600]),
-                ),
-                SizedBox(height: 4.h),
-                Text(value, style: TextStyle(fontSize: 14.sp)),
-              ],
+          Text(
+            label,
+            style: TextStyle(color: AppColors.typoBody, fontSize: 14.sp),
+          ),
+          Flexible(
+            child: Text(
+              value,
+              textAlign: TextAlign.end,
+              style: TextStyle(
+                fontWeight: FontWeight.w500,
+                fontSize: 14.sp,
+                color: AppColors.typoBlack,
+              ),
             ),
           ),
         ],
@@ -186,24 +215,32 @@ class TransactionDetailPage extends ConsumerWidget {
     );
   }
 
-  Widget _buildActionButtons(
-    BuildContext context,
-    WidgetRef ref,
-    Transaction tx,
-  ) {
+  Widget _buildSectionTitle(String text) => Text(
+    text,
+    style: TextStyle(
+      fontWeight: FontWeight.bold,
+      fontSize: 16.sp,
+      color: AppColors.typoBlack,
+    ),
+  );
+
+  /// ===============================
+  /// BUTTON
+  /// ===============================
+  Widget _buildActionButtons(dynamic notifier, Transaction tx) {
     return Row(
       children: [
         Expanded(
           child: OutlinedButton(
-            onPressed: () => ref
-                .read(transactionDetailNotifierProvider.notifier),
-                // .onEdit(context, tx),
+            onPressed: () {
+              /// sẽ implement sau
+            },
             style: OutlinedButton.styleFrom(
               side: const BorderSide(color: AppColors.primaryGreen),
+              padding: EdgeInsets.symmetric(vertical: 14.h),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12.r),
               ),
-              padding: EdgeInsets.symmetric(vertical: 14.h),
             ),
             child: Text(
               'Chỉnh sửa',
@@ -214,15 +251,15 @@ class TransactionDetailPage extends ConsumerWidget {
         SizedBox(width: 16.w),
         Expanded(
           child: ElevatedButton(
-            onPressed: () => ref
-                .read(transactionDetailNotifierProvider.notifier),
-                // .onDelete(context, tx),
+            onPressed: () {
+              /// sẽ implement
+            },
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.darkRed,
+              padding: EdgeInsets.symmetric(vertical: 14.h),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12.r),
               ),
-              padding: EdgeInsets.symmetric(vertical: 14.h),
             ),
             child: Text(
               'Xóa',
@@ -234,22 +271,25 @@ class TransactionDetailPage extends ConsumerWidget {
     );
   }
 
-  String _formatDate(int timestampSeconds) {
-    final date = DateTime.fromMillisecondsSinceEpoch(timestampSeconds * 1000);
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
+  /// ===============================
+  /// FORMAT DATE
+  /// ===============================
+  String _formatDate(int seconds) {
+    final date = DateTime.fromMillisecondsSinceEpoch(seconds * 1000);
 
-    if (date.year == today.year &&
+    final today = DateTime.now();
+    final yDay = today.subtract(const Duration(days: 1));
+
+    if (date.day == today.day &&
         date.month == today.month &&
-        date.day == today.day) {
-      return 'Hôm nay, ${DateFormat('HH:mm').format(date)}';
+        date.year == today.year) {
+      return "Hôm nay, ${DateFormat('HH:mm').format(date)}";
     }
 
-    final yesterday = today.subtract(const Duration(days: 1));
-    if (date.year == yesterday.year &&
-        date.month == yesterday.month &&
-        date.day == yesterday.day) {
-      return 'Hôm qua, ${DateFormat('HH:mm').format(date)}';
+    if (date.day == yDay.day &&
+        date.month == yDay.month &&
+        date.year == yDay.year) {
+      return "Hôm qua, ${DateFormat('HH:mm').format(date)}";
     }
 
     return DateFormat('dd/MM/yyyy, HH:mm').format(date);

@@ -1,41 +1,23 @@
-import '../../domain/repositories/transaction_repository.dart';
-import '../datasources/transaction_remote_datasources.dart';
-import '../models/transaction_model.dart';
-import '../models/transaction_update_request_model.dart';
-import '../../domain/entities/transaction.dart';
+import 'package:fridge_to_fork_ai/features/transactions/data/datasources/transaction_remote_datasources.dart';
+import 'package:fridge_to_fork_ai/features/transactions/domain/entities/transaction.dart';
+import 'package:fridge_to_fork_ai/features/transactions/domain/repositories/transaction_repository.dart'
+    show TransactionRepository;
 
 class TransactionRepositoryImpl implements TransactionRepository {
-  final TransactionRemoteDataSource remoteDataSource;
+  final TransactionRemoteDataSource remote;
 
-  TransactionRepositoryImpl({required this.remoteDataSource});
+  TransactionRepositoryImpl(this.remote);
 
   @override
-  Future<TransactionListResponseModel> getTransactions({
-    int? from,
-    int? to,
-    String? type,
-    String? direction,
-    String? categoryId,
-    String? accountId,
-    int page = 1,
-    int pageSize = 20,
-  }) async {
-    return await remoteDataSource.getTransactions(
-      from: from,
-      to: to,
-      type: type,
-      direction: direction,
-      categoryId: categoryId,
-      accountId: accountId,
-      page: page,
-      pageSize: pageSize,
-    );
+  Future<List<Transaction>> getTransactions() async {
+    final list = await remote.getTransactions();
+    return list.map((m) => m.toEntity()).toList();
   }
 
   @override
   Future<Transaction> getTransactionDetail(String id) async {
-    final model = await remoteDataSource.getTransactionDetail(id);
-    return model;
+    final model = await remote.getTransactionDetail(id);
+    return model.toEntity();
   }
 
   @override
@@ -44,10 +26,30 @@ class TransactionRepositoryImpl implements TransactionRepository {
     String? categoryId,
     String? userNote,
   }) async {
-    final request = TransactionUpdateRequestModel(
+    await remote.updateTransaction(
+      id,
       categoryId: categoryId,
       userNote: userNote,
     );
-    await remoteDataSource.updateTransaction(id, request);
+  }
+
+  @override
+  @override
+  Future<void> createTransaction({
+    required double amount,
+    required String type,
+    required String categoryId,
+    required String description,
+    required int occurredAt,
+    String? note,
+  }) async {
+    await remote.createTransaction(
+      amount: amount,
+      type: type,
+      categoryId: categoryId,
+      description: description,
+      occurredAt: occurredAt,
+      note: note,
+    );
   }
 }

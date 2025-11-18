@@ -1,3 +1,6 @@
+import 'package:fridge_to_fork_ai/features/transactions/domain/entities/transaction_ai.dart';
+import 'package:fridge_to_fork_ai/features/transactions/domain/entities/transaction_nomalized.dart';
+
 class Transaction {
   final String id;
   final String userId;
@@ -37,35 +40,5 @@ class Transaction {
     required this.source,
     required this.createdAt,
     required this.updatedAt,
-  });
-}
-
-class TransactionNormalized {
-  final String? title;
-  final String? description;
-  final String? peerName;
-  final double? balanceAfter;
-  final Map<String, dynamic>? meta;
-
-  const TransactionNormalized({
-    this.title,
-    this.description,
-    this.peerName,
-    this.balanceAfter,
-    this.meta,
-  });
-}
-
-class TransactionAI {
-  final String? categorySuggestionId;
-  final double? confidence;
-  final String? model;
-  final Map<String, dynamic>? rawResponse;
-
-  const TransactionAI({
-    this.categorySuggestionId,
-    this.confidence,
-    this.model,
-    this.rawResponse,
   });
 }

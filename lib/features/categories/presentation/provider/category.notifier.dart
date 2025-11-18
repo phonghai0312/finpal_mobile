@@ -1,5 +1,4 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fridge_to_fork_ai/features/categories/presentation/provider/category_provider.dart';
 import '../../domain/entities/category_entity.dart';
 import '../../domain/usecase/get_categories_usecase.dart';
 
@@ -39,11 +38,13 @@ class CategoryNotifier extends StateNotifier<CategoryState> {
   Future<void> fetchCategories({int page = 1, int pageSize = 20}) async {
     state = state.copyWith(isLoading: true, errorMessage: null);
     try {
-      final categories = await getCategoriesUseCase.call(page: page, pageSize: pageSize);
+      final categories = await getCategoriesUseCase.call(
+        page: page,
+        pageSize: pageSize,
+      );
       state = state.copyWith(categories: categories, isLoading: false);
     } catch (e) {
       state = state.copyWith(isLoading: false, errorMessage: e.toString());
     }
   }
 }
-
