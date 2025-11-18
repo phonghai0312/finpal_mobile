@@ -18,6 +18,7 @@ import 'package:go_router/go_router.dart';
 import '../../../features/auth/presentation/page/login/login_page.dart';
 import 'package:fridge_to_fork_ai/features/transactions/presentation/pages/transaction_detail_page.dart';
 import 'package:fridge_to_fork_ai/features/transactions/presentation/pages/create_transaction_page.dart';
+import 'package:fridge_to_fork_ai/features/profile/presentation/pages/edit_profile_page.dart';
 
 class AppRouter {
   static final customerRouter = GoRouter(
@@ -101,8 +102,13 @@ class AppRouter {
             path: AppRoutes.profile,
             builder: (context, state) => const ProfilePage(),
           ),
+          GoRoute(
+            path: AppRoutes.editProfile,
+            builder: (context, state) => const EditProfilePage(),
+          ),
         ],
       ),
+
     ],
   );
   static int _getUserGuestNavIndex(String path) {
