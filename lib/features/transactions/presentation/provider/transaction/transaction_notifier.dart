@@ -1,8 +1,12 @@
 // ignore_for_file: use_build_context_synchronously
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fridge_to_fork_ai/core/config/routing/app_routes.dart';
+import 'package:fridge_to_fork_ai/features/transactions/presentation/provider/createtransaction/create_transaction_provider.dart';
+import 'package:fridge_to_fork_ai/features/transactions/presentation/provider/transactiondetail/transaction_detail_provider.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../domain/entities/transaction.dart';
@@ -48,6 +52,7 @@ class TransactionState {
 class TransactionNotifier extends StateNotifier<TransactionState> {
   final GetTransactions _getTransactions;
   final Ref ref;
+  Timer? _debounce;
 
   /// transaction được chọn để xem detail
   String? _selectedId;
@@ -115,6 +120,7 @@ class TransactionNotifier extends StateNotifier<TransactionState> {
   /// ============================================
   void onTransactionSelected(BuildContext context, Transaction tx) {
     _selectedId = tx.id;
+    ref.invalidate(transactionDetailNotifierProvider);
     context.go(AppRoutes.transactionDetail);
   }
 
@@ -122,6 +128,7 @@ class TransactionNotifier extends StateNotifier<TransactionState> {
   /// ADD NEW
   /// ============================================
   void onPressAdd(BuildContext context) {
+    ref.invalidate(createTransactionNotifierProvider);
     context.go(AppRoutes.createTransaction);
   }
 
@@ -134,7 +141,31 @@ class TransactionNotifier extends StateNotifier<TransactionState> {
       context,
     ).showSnackBar(SnackBar(content: Text(msg), backgroundColor: Colors.red));
   }
-  void onPressEdit(BuildContext context) {
-    context.go(AppRoutes.editTransaction);
+
+  // void onPressEdit(BuildContext context) {
+  //   context.go(AppRoutes.editTransaction);
+  // }
+  void onSearchChanged(String query) {
+    _debounce?.cancel();
+
+    _debounce = Timer(const Duration(milliseconds: 500), () {
+      final cleanQuery = query.trim().toLowerCase();
+
+      // Khôi phục danh sách nếu ô tìm kiếm rỗng
+      if (cleanQuery.isEmpty) {
+        state = state.copyWith(filtered: state.all);
+        return;
+      }
+
+      final filtered = state.all.where((tx) {
+        final amountStr = tx.amount.toString();
+        return tx.merchant?.toLowerCase().contains(cleanQuery) == true ||
+            tx.categoryName?.toLowerCase().contains(cleanQuery) == true ||
+            tx.source.toLowerCase().contains(cleanQuery) ||
+            amountStr.contains(cleanQuery);
+      }).toList();
+
+      state = state.copyWith(filtered: filtered);
+    });
   }
 }

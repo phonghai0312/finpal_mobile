@@ -9,7 +9,8 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
     email: 'test@example.com',
     phone: '0123456789',
     name: 'John Doe',
-    avatarUrl: 'https://www.gravatar.com/avatar/205e460b479e2e5b48aec07710c08d50?s=200',
+    avatarUrl:
+        'https://www.gravatar.com/avatar/205e460b479e2e5b48aec07710c08d50?s=200',
     settings: UserSettings(
       currency: 'VND',
       language: 'vi',
@@ -40,7 +41,9 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
         currency: request.currency ?? _mockUser.settings?.currency,
         language: request.language ?? _mockUser.settings?.language,
         timezone: request.timezone ?? _mockUser.settings?.timezone,
-        notificationEnabled: request.notificationEnabled ?? _mockUser.settings?.notificationEnabled,
+        notificationEnabled:
+            request.notificationEnabled ??
+            _mockUser.settings?.notificationEnabled,
       ),
       updatedAt: DateTime.now().millisecondsSinceEpoch ~/ 1000,
     );
@@ -50,7 +53,5 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
   @override
   Future<void> logout() async {
     await Future.delayed(const Duration(milliseconds: 500));
-    // In a real app, this would clear authentication tokens
-    print('User logged out (mock action)');
   }
 }

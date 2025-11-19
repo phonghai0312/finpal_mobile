@@ -1,4 +1,4 @@
-// ignore_for_file: use_build_context_synchronously
+// ignore_for_file: use_build_context_synchronously, sized_box_for_whitespace, deprecated_member_use
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -128,9 +128,6 @@ class CreateTransactionPageState extends ConsumerState<CreateTransactionPage> {
 
             SizedBox(height: 28.h),
 
-            /// ========================
-            /// RULE TỰ ĐỘNG
-            /// ========================
             _autoRuleCard(),
 
             SizedBox(height: 32.h),
@@ -163,33 +160,37 @@ class CreateTransactionPageState extends ConsumerState<CreateTransactionPage> {
   // TYPE SELECTOR (expense / income)
   // ============================================================
   Widget _typeSelector(
-      CreateTransactionState state,
-      CreateTransactionNotifier notifier,
-      ) {
+    CreateTransactionState state,
+    CreateTransactionNotifier notifier,
+  ) {
     return Row(
       children: [
         Expanded(
           child: Container(
             height: 46.h,
-            child: ChoiceChip(
-              label: Text(
-                "Chi tiêu",
-                style: TextStyle(
-                  fontSize: 14.sp,
-                  fontWeight: FontWeight.w600,
-                  color: state.type == "expense"
-                      ? AppColors.darkRed
-                      : Colors.black87,
+            child: SizedBox(
+              width: 180.w,
+              height: 44.h,
+              child: ChoiceChip(
+                label: Text(
+                  "Chi tiêu",
+                  style: TextStyle(
+                    fontSize: 18.sp,
+                    fontWeight: FontWeight.w600,
+                    color: state.type == "expense"
+                        ? AppColors.darkRed
+                        : Colors.black87,
+                  ),
                 ),
+                selected: state.type == "expense",
+                selectedColor: AppColors.lightRed,
+                backgroundColor: Colors.grey.shade200,
+                onSelected: (_) => notifier.setType("expense"),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14.r),
+                ),
+                padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
               ),
-              selected: state.type == "expense",
-              selectedColor: AppColors.lightRed,
-              backgroundColor: Colors.grey.shade200,
-              onSelected: (_) => notifier.setType("expense"),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(14.r),
-              ),
-              padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
             ),
           ),
         ),
@@ -197,25 +198,29 @@ class CreateTransactionPageState extends ConsumerState<CreateTransactionPage> {
         Expanded(
           child: Container(
             height: 46.h,
-            child: ChoiceChip(
-              label: Text(
-                "Thu nhập",
-                style: TextStyle(
-                  fontSize: 14.sp,
-                  fontWeight: FontWeight.w600,
-                  color: state.type == "income"
-                      ? AppColors.darkGreen
-                      : Colors.black87,
+            child: SizedBox(
+              width: 180.w,
+              height: 44.h,
+              child: ChoiceChip(
+                label: Text(
+                  "Thu nhập",
+                  style: TextStyle(
+                    fontSize: 18.sp,
+                    fontWeight: FontWeight.w600,
+                    color: state.type == "income"
+                        ? AppColors.darkGreen
+                        : Colors.black87,
+                  ),
                 ),
+                selected: state.type == "income",
+                selectedColor: AppColors.lightGreen,
+                backgroundColor: Colors.grey.shade200,
+                onSelected: (_) => notifier.setType("income"),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14.r),
+                ),
+                padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
               ),
-              selected: state.type == "income",
-              selectedColor: AppColors.lightGreen,
-              backgroundColor: Colors.grey.shade200,
-              onSelected: (_) => notifier.setType("income"),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(14.r),
-              ),
-              padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
             ),
           ),
         ),
@@ -247,10 +252,10 @@ class CreateTransactionPageState extends ConsumerState<CreateTransactionPage> {
   // DATE + TIME PICKERS
   // ============================================================
   Widget _dateTimeRow(
-      BuildContext context,
-      CreateTransactionState state,
-      CreateTransactionNotifier notifier,
-      ) {
+    BuildContext context,
+    CreateTransactionState state,
+    CreateTransactionNotifier notifier,
+  ) {
     return Row(
       children: [
         Expanded(
@@ -312,39 +317,86 @@ class CreateTransactionPageState extends ConsumerState<CreateTransactionPage> {
   // CATEGORY SELECTOR
   // ============================================================
   Widget _categorySelector(
-      CreateTransactionState state,
-      CreateTransactionNotifier notifier,
-      ) {
+    CreateTransactionState state,
+    CreateTransactionNotifier notifier,
+  ) {
     final categories = [
-      ("c001", "Ăn uống", Icons.fastfood),
-      ("c008", "Cà phê", Icons.coffee),
-      ("c002", "Mua sắm", Icons.shopping_bag),
-      ("c004", "Di chuyển", Icons.directions_car),
-      ("c005", "Sức khỏe", Icons.health_and_safety),
-      ("c009", "Nhà cửa", Icons.home),
-      ("c003", "Lương", Icons.attach_money),
+      ("c001", "Ăn uống", Icons.fastfood, Colors.redAccent),
+      ("c008", "Cà phê", Icons.local_cafe, Colors.brown),
+      ("c002", "Mua sắm", Icons.shopping_bag, Colors.purple),
+      ("c004", "Di chuyển", Icons.directions_car, Colors.blue),
+      ("c005", "Sức khỏe", Icons.favorite, Colors.pink),
+      ("c009", "Nhà cửa", Icons.home, Colors.green),
+      ("c003", "Lương", Icons.attach_money, Colors.teal),
+      ("c010", "Nước", Icons.water_drop, Colors.blueAccent),
+      ("c011", "Điện", Icons.flash_on, Colors.amber),
     ];
 
-    return Wrap(
-      spacing: 10.w,
-      runSpacing: 10.h,
-      children: categories.map((c) {
-        final selected = c.$1 == state.categoryId;
-        return ChoiceChip(
-          selected: selected,
-          onSelected: (_) => notifier.setCategory(c.$1),
-          selectedColor: Colors.blue.shade600,
-          avatar: Icon(
-            c.$3,
-            size: 18.sp,
-            color: selected ? Colors.white : Colors.black,
-          ),
-          label: Text(c.$2),
-          labelStyle: TextStyle(
-            color: selected ? Colors.white : Colors.black87,
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: categories.length,
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 3,
+        mainAxisSpacing: 12.h,
+        crossAxisSpacing: 12.w,
+        childAspectRatio: 1,
+      ),
+      itemBuilder: (context, index) {
+        final item = categories[index];
+        final id = item.$1;
+        final label = item.$2;
+        final icon = item.$3;
+        final color = item.$4;
+
+        final isSelected = id == state.categoryId;
+
+        return GestureDetector(
+          onTap: () => notifier.setCategory(id),
+          child: Container(
+            padding: EdgeInsets.symmetric(vertical: 12.h),
+            decoration: BoxDecoration(
+              color: isSelected ? color.withOpacity(0.12) : Colors.white,
+              border: Border.all(
+                color: isSelected ? color : Colors.grey.shade300,
+                width: isSelected ? 2.w : 1.w,
+              ),
+              borderRadius: BorderRadius.circular(16.r),
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // Icon circle
+                Container(
+                  width: 40.w,
+                  height: 40.w,
+                  decoration: BoxDecoration(
+                    color: isSelected ? color : color.withOpacity(0.15),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    icon,
+                    size: 18.sp,
+                    color: isSelected ? Colors.white : color,
+                  ),
+                ),
+
+                SizedBox(height: 8.h),
+
+                // Label
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 13.sp,
+                    fontWeight: FontWeight.w600,
+                    color: isSelected ? color : Colors.black87,
+                  ),
+                ),
+              ],
+            ),
           ),
         );
-      }).toList(),
+      },
     );
   }
 
@@ -360,8 +412,8 @@ class CreateTransactionPageState extends ConsumerState<CreateTransactionPage> {
       ),
       child: const Text(
         "✨ Áp dụng quy tắc tự động\n"
-            "Tự động phân loại các giao dịch tương tự vào danh mục này trong tương lai.",
-        style: TextStyle(fontSize: 13),
+        "Tự động phân loại các giao dịch tương tự vào danh mục này trong tương lai.",
+        style: TextStyle(fontSize: 18),
       ),
     );
   }
@@ -370,10 +422,10 @@ class CreateTransactionPageState extends ConsumerState<CreateTransactionPage> {
   // BUTTONS
   // ============================================================
   Widget _buttons(
-      BuildContext context,
-      CreateTransactionNotifier notifier,
-      CreateTransactionState state,
-      ) {
+    BuildContext context,
+    CreateTransactionNotifier notifier,
+    CreateTransactionState state,
+  ) {
     return Row(
       children: [
         Expanded(

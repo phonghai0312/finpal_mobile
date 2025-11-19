@@ -49,7 +49,7 @@ class TransactionsPageState extends ConsumerState<TransactionsPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildSummaryCards(context, state),
-            _buildSearchBar(context),
+            _buildSearchBar(context, notifier),
             _buildFilterBar(context, state, notifier),
             _buildCategoryButton(),
             Expanded(child: _buildTransactionList(context, state, notifier)),
@@ -142,7 +142,7 @@ class TransactionsPageState extends ConsumerState<TransactionsPage> {
   // SEARCH BAR
   // ---------------------------------------------------------------------------
 
-  Widget _buildSearchBar(BuildContext context) {
+  Widget _buildSearchBar(BuildContext context, TransactionNotifier notifier) {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 16.w),
       child: TextField(
@@ -157,7 +157,7 @@ class TransactionsPageState extends ConsumerState<TransactionsPage> {
             borderSide: BorderSide.none,
           ),
         ),
-        onChanged: (value) {},
+        onChanged: (value) => notifier.onSearchChanged(value),
       ),
     );
   }

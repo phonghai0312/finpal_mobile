@@ -11,22 +11,26 @@ import '../../../domain/usecase/delete_transaction.dart';
 import '../../../domain/usecase/get_transaction_detail.dart';
 
 class TransactionDetailState {
+  final bool isEditing;
   final bool isLoading;
   final String? error;
   final Transaction? data;
 
   const TransactionDetailState({
+    this.isEditing = false,
     this.isLoading = false,
     this.error,
     this.data,
   });
 
   TransactionDetailState copyWith({
+    bool? isEditing,
     bool? isLoading,
     String? error,
     Transaction? data,
   }) {
     return TransactionDetailState(
+      isEditing: isEditing ?? this.isEditing,
       isLoading: isLoading ?? this.isLoading,
       error: error,
       data: data ?? this.data,
@@ -39,79 +43,73 @@ class TransactionDetailNotifier extends StateNotifier<TransactionDetailState> {
   final DeleteTransaction _deleteTransaction;
   final Ref ref;
 
-  /// cờ để đảm bảo init chỉ chạy 1 lần / 1 notifier instance
   bool _initialized = false;
 
   TransactionDetailNotifier(
-      this._getTransactionDetail,
-      this._deleteTransaction,
-      this.ref,
-      ) : super(const TransactionDetailState());
+    this._getTransactionDetail,
+    this._deleteTransaction,
+    this.ref,
+  ) : super(const TransactionDetailState());
 
-  /// gọi trong `addPostFrameCallback` ở page
+  // -----------------------------
+  // LOAD DETAIL
+  // -----------------------------
   Future<void> init() async {
     if (_initialized) return;
     _initialized = true;
 
-    // LẤY ID TỪ TransactionNotifier
-    final transactionNotifier =
-    ref.read(transactionNotifierProvider.notifier);
-    final selectedId = transactionNotifier.selectedTransactionId;
+    final selectedId = ref
+        .read(transactionNotifierProvider.notifier)
+        .selectedTransactionId;
 
-    if (selectedId == null || selectedId.isEmpty) {
-      state = state.copyWith(error: 'Không có giao dịch được chọn');
+    if (selectedId == null) {
+      state = state.copyWith(error: "Không tìm thấy ID giao dịch");
       return;
     }
 
     try {
-      state = state.copyWith(isLoading: true, error: null);
+      state = state.copyWith(isLoading: true);
       final tx = await _getTransactionDetail(selectedId);
       state = state.copyWith(isLoading: false, data: tx);
     } catch (e) {
-      state = state.copyWith(
-        isLoading: false,
-        error: e.toString(),
-      );
+      state = state.copyWith(isLoading: false, error: e.toString());
     }
   }
 
+  // -----------------------------
+  // BACK
+  // -----------------------------
   void onBack(BuildContext context) {
     context.go(AppRoutes.transactions);
   }
 
-  /// TransactionDetailPage:
-  /// `onPressed: () => notifier.onPressEdit(context, tx)`
-  void onPressEdit(BuildContext context, Transaction tx) {
-    context.go(
-      AppRoutes.editTransaction,
-      extra: tx,
-    );
-  }
-
+  // -----------------------------
+  // XÓA GIAO DỊCH
+  // -----------------------------
   Future<void> onDelete(BuildContext context, Transaction tx) async {
     try {
-      state = state.copyWith(isLoading: true, error: null);
       await _deleteTransaction(tx.id);
 
-      // quay về list + show snackbar
       context.go(AppRoutes.transactions);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Đã xoá giao dịch'),
-        ),
-      );
-    } catch (e) {
-      state = state.copyWith(
-        isLoading: false,
-        error: e.toString(),
-      );
 
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("Đã xoá giao dịch")));
+    } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Lỗi xoá: $e'),
-          backgroundColor: Colors.red,
-        ),
+        SnackBar(content: Text("Lỗi xoá: $e"), backgroundColor: Colors.red),
       );
     }
+  }
+
+  // -----------------------------
+  // EDIT MODE
+  // -----------------------------
+  void startEdit() {
+    state = state.copyWith(isEditing: true);
+  }
+
+  void cancelEdit() {
+    state = state.copyWith(isEditing: false);
   }
 }

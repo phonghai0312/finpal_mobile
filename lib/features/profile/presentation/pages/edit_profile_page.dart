@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -63,19 +65,23 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
             Text(
               'Thông tin cá nhân',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontSize: 16.sp,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.typoHeading,
-                  ),
+                fontSize: 16.sp,
+                fontWeight: FontWeight.bold,
+                color: AppColors.typoHeading,
+              ),
             ),
             SizedBox(height: 12.h),
             TextFormField(
               controller: _nameController,
               onChanged: notifier.updateName,
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: AppColors.typoHeading),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyLarge?.copyWith(color: AppColors.typoHeading),
               decoration: InputDecoration(
                 labelText: 'Tên',
-                labelStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(color: AppColors.typoBody),
+                labelStyle: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.copyWith(color: AppColors.typoBody),
                 floatingLabelBehavior: FloatingLabelBehavior.always,
                 filled: true,
                 fillColor: AppColors.bgWhite,
@@ -85,13 +91,21 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12.r),
-                  borderSide: BorderSide(color: AppColors.bgGray.withOpacity(0.5)),
+                  borderSide: BorderSide(
+                    color: AppColors.bgGray.withOpacity(0.5),
+                  ),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12.r),
-                  borderSide: BorderSide(color: AppColors.primaryGreen, width: 2.w),
+                  borderSide: BorderSide(
+                    color: AppColors.primaryGreen,
+                    width: 2.w,
+                  ),
                 ),
-                contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+                contentPadding: EdgeInsets.symmetric(
+                  horizontal: 16.w,
+                  vertical: 14.h,
+                ),
               ),
             ),
             SizedBox(height: 16.h),
@@ -99,10 +113,14 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
               controller: _emailController,
               onChanged: notifier.updateEmail,
               keyboardType: TextInputType.emailAddress,
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: AppColors.typoHeading),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyLarge?.copyWith(color: AppColors.typoHeading),
               decoration: InputDecoration(
                 labelText: 'Email',
-                labelStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(color: AppColors.typoBody),
+                labelStyle: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.copyWith(color: AppColors.typoBody),
                 floatingLabelBehavior: FloatingLabelBehavior.always,
                 filled: true,
                 fillColor: AppColors.bgWhite,
@@ -112,13 +130,21 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12.r),
-                  borderSide: BorderSide(color: AppColors.bgGray.withOpacity(0.5)),
+                  borderSide: BorderSide(
+                    color: AppColors.bgGray.withOpacity(0.5),
+                  ),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12.r),
-                  borderSide: BorderSide(color: AppColors.primaryGreen, width: 2.w),
+                  borderSide: BorderSide(
+                    color: AppColors.primaryGreen,
+                    width: 2.w,
+                  ),
                 ),
-                contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+                contentPadding: EdgeInsets.symmetric(
+                  horizontal: 16.w,
+                  vertical: 14.h,
+                ),
               ),
             ),
             SizedBox(height: 24.h),
@@ -128,9 +154,9 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
                 Text(
                   'Bật thông báo',
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: AppColors.typoHeading,
-                        fontWeight: FontWeight.w600,
-                      ),
+                    color: AppColors.typoHeading,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
                 Switch(
                   value: profileState.form.notificationEnabled ?? false,
@@ -142,12 +168,16 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
             SizedBox(height: 32.h),
             Text(
               'Lưu ý: Thay đổi Tên và Email hiện không được API hỗ trợ. Vui lòng liên hệ quản trị viên để cập nhật.',
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.typoError),
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall?.copyWith(color: AppColors.typoError),
               textAlign: TextAlign.center,
             ),
             SizedBox(height: 16.h),
             ElevatedButton(
-              onPressed: profileState.isLoading ? null : () => notifier.saveProfile(context),
+              onPressed: profileState.isLoading
+                  ? null
+                  : () => notifier.saveProfile(context),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primaryGreen,
                 shape: RoundedRectangleBorder(
@@ -161,10 +191,10 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
               child: Text(
                 'Lưu thay đổi',
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: AppColors.typoWhite,
-                      fontSize: 16.sp,
-                      fontWeight: FontWeight.bold,
-                    ),
+                  color: AppColors.typoWhite,
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
             SizedBox(height: 16.h),
@@ -183,10 +213,10 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
               child: Text(
                 'Hủy',
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: AppColors.typoBody,
-                      fontSize: 16.sp,
-                      fontWeight: FontWeight.bold,
-                    ),
+                  color: AppColors.typoBody,
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
           ],

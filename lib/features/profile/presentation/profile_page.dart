@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -41,18 +43,14 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     final notifier = ref.read(profileNotifierProvider.notifier);
 
     if (profileState.isLoading && profileState.user == null) {
-      return const Scaffold(
-        body: Center(
-          child: CircularProgressIndicator(),
-        ),
-      );
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
     return Scaffold(
       backgroundColor: AppColors.bgSecondary,
       appBar: HeaderWithBack(
         title: 'Hồ sơ cá nhân',
-        onBack: () => notifier.onBack(context)
+        onBack: () => notifier.onBack(context),
       ),
       body: SingleChildScrollView(
         padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 24.h),
@@ -65,7 +63,8 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   CircleAvatar(
                     radius: 60.r,
                     backgroundImage: NetworkImage(
-                      profileState.user?.avatarUrl ?? 'https://www.gravatar.com/avatar/?d=mp',
+                      profileState.user?.avatarUrl ??
+                          'https://www.gravatar.com/avatar/?d=mp',
                     ),
                     backgroundColor: AppColors.bgGray.withOpacity(0.2),
                   ),
@@ -73,16 +72,16 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   Text(
                     profileState.user?.name ?? 'Người dùng',
                     style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.typoHeading,
-                        ),
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.typoHeading,
+                    ),
                   ),
                   SizedBox(height: 4.h),
                   Text(
                     profileState.user?.email ?? profileState.user?.phone ?? '',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: AppColors.typoBody,
-                        ),
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodyMedium?.copyWith(color: AppColors.typoBody),
                   ),
                 ],
               ),
@@ -91,17 +90,20 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             Text(
               'Thông tin cá nhân',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontSize: 16.sp,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.typoHeading,
-                  ),
+                fontSize: 16.sp,
+                fontWeight: FontWeight.bold,
+                color: AppColors.typoHeading,
+              ),
             ),
             SizedBox(height: 12.h),
             _buildInfoRow(context, 'Tên', profileState.user?.name ?? 'N/A'),
             SizedBox(height: 8.h),
             _buildInfoRow(context, 'Email', profileState.user?.email ?? 'N/A'),
             SizedBox(height: 8.h),
-            _buildNotificationSwitch(context, profileState.user?.settings?.notificationEnabled ?? false),
+            _buildNotificationSwitch(
+              context,
+              profileState.user?.settings?.notificationEnabled ?? false,
+            ),
             SizedBox(height: 32.h),
             ElevatedButton(
               onPressed: () {
@@ -120,18 +122,21 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               child: Text(
                 'Chỉnh sửa thông tin cá nhân',
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: AppColors.typoWhite,
-                      fontSize: 16.sp,
-                      fontWeight: FontWeight.bold,
-                    ),
+                  color: AppColors.typoWhite,
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
             SizedBox(height: 16.h),
             OutlinedButton(
               onPressed: () {
-                // TODO: Implement Change Password functionality
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Chức năng đổi mật khẩu chưa được triển khai.')),
+                  const SnackBar(
+                    content: Text(
+                      'Chức năng đổi mật khẩu chưa được triển khai.',
+                    ),
+                  ),
                 );
               },
               style: OutlinedButton.styleFrom(
@@ -145,15 +150,17 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               child: Text(
                 'Đổi mật khẩu',
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: AppColors.typoBody,
-                      fontSize: 16.sp,
-                      fontWeight: FontWeight.bold,
-                    ),
+                  color: AppColors.typoBody,
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
             SizedBox(height: 16.h),
             OutlinedButton(
-              onPressed: profileState.isLoading ? null : () => notifier.logout(context),
+              onPressed: profileState.isLoading
+                  ? null
+                  : () => notifier.logout(context),
               style: OutlinedButton.styleFrom(
                 side: BorderSide(color: AppColors.bgError),
                 shape: RoundedRectangleBorder(
@@ -165,10 +172,10 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               child: Text(
                 'Đăng xuất',
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: AppColors.bgError,
-                      fontSize: 16.sp,
-                      fontWeight: FontWeight.bold,
-                    ),
+                  color: AppColors.bgError,
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
           ],
@@ -191,15 +198,15 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           Text(
             label,
             style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: AppColors.typoBody,
-                  fontWeight: FontWeight.w600,
-                ),
+              color: AppColors.typoBody,
+              fontWeight: FontWeight.w600,
+            ),
           ),
           Text(
             value,
-            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: AppColors.typoHeading,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.bodyLarge?.copyWith(color: AppColors.typoHeading),
           ),
         ],
       ),
@@ -220,9 +227,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           Text(
             'Bật thông báo',
             style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: AppColors.typoBody,
-                  fontWeight: FontWeight.w600,
-                ),
+              color: AppColors.typoBody,
+              fontWeight: FontWeight.w600,
+            ),
           ),
           Switch(
             value: isEnabled,

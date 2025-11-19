@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fridge_to_fork_ai/core/config/routing/app_routes.dart';
@@ -13,11 +15,7 @@ class ProfileFormState {
   final String? email;
   final bool? notificationEnabled;
 
-  ProfileFormState({
-    this.name,
-    this.email,
-    this.notificationEnabled,
-  });
+  ProfileFormState({this.name, this.email, this.notificationEnabled});
 
   ProfileFormState copyWith({
     String? name,
@@ -105,7 +103,9 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
   }
 
   void updateNotificationEnabled(bool? enabled) {
-    state = state.copyWith(form: state.form.copyWith(notificationEnabled: enabled));
+    state = state.copyWith(
+      form: state.form.copyWith(notificationEnabled: enabled),
+    );
   }
 
   Future<void> saveProfile(BuildContext context) async {
@@ -151,9 +151,9 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
       context.go(AppRoutes.login); // Assuming you have a login route
     } catch (e) {
       state = state.copyWith(isLoading: false, error: e.toString());
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Lỗi đăng xuất: ${e.toString()}')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Lỗi đăng xuất: ${e.toString()}')));
     }
   }
 
