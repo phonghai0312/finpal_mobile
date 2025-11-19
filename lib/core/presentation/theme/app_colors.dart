@@ -34,4 +34,10 @@ class AppColors {
   static const Color bgHover = Color(0xFFF9FAFB);
   static const Color bgDisable = Color(0x809FA19E);
   static const Color bgBlur = Color(0xFF9FA19E);
+
+  static const Color primaryGreen = Color(0xFF0D9488); // Using bgPrimary
+  static const Color lightGreen = Color(0xFFE0F2F1);
+  static const Color darkGreen = Color(0xFF0F3D1D); // Using bgDarkGreen
+  static const Color lightRed = Color(0xFFFFCDD2);
+  static const Color darkRed = Color(0xFFEF4444); // Using bgError
 }

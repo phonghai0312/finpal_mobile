@@ -10,4 +10,18 @@ class UserSettings {
     required this.timezone,
     required this.notificationEnabled,
   });
+
+  UserSettings copyWith({
+    String? currency,
+    String? language,
+    String? timezone,
+    bool? notificationEnabled,
+  }) {
+    return UserSettings(
+      currency: currency ?? this.currency,
+      language: language ?? this.language,
+      timezone: timezone ?? this.timezone,
+      notificationEnabled: notificationEnabled ?? this.notificationEnabled,
+    );
+  }
 }

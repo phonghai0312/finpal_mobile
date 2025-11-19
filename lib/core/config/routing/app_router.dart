@@ -7,8 +7,8 @@ import 'package:fridge_to_fork_ai/features/auth/presentation/page/register/regis
 import 'package:fridge_to_fork_ai/features/home/presentation/page/home_page.dart';
 import 'package:fridge_to_fork_ai/features/onboarding/presentation/page/onboarding_page.dart';
 import 'package:fridge_to_fork_ai/features/onboarding/presentation/page/splash_page.dart';
+import 'package:fridge_to_fork_ai/features/transactions/presentation/pages/transactions_page.dart';
 import 'package:fridge_to_fork_ai/features/stats/presentation/stats_page.dart';
-import 'package:fridge_to_fork_ai/features/transactions/presentation/transactions_page.dart';
 import 'package:fridge_to_fork_ai/features/profile/presentation/profile_page.dart';
 import 'package:fridge_to_fork_ai/features/suggestions/presentation/suggestions_page.dart';
 import 'package:fridge_to_fork_ai/features/welcome/presentation/page/connectsepay/connect_sepay_page.dart';
@@ -16,6 +16,9 @@ import 'package:fridge_to_fork_ai/features/welcome/presentation/page/welcome/wel
 import 'package:go_router/go_router.dart';
 
 import '../../../features/auth/presentation/page/login/login_page.dart';
+import 'package:fridge_to_fork_ai/features/transactions/presentation/pages/transaction_detail_page.dart';
+import 'package:fridge_to_fork_ai/features/transactions/presentation/pages/create_transaction_page.dart';
+import 'package:fridge_to_fork_ai/features/profile/presentation/pages/edit_profile_page.dart';
 
 class AppRouter {
   static final customerRouter = GoRouter(
@@ -52,6 +55,21 @@ class AppRouter {
         path: AppRoutes.sendrequest,
         builder: (context, state) => const SendRequestPage(),
       ),
+
+      // Transactions
+      GoRoute(
+        path: AppRoutes.transactionDetail,
+        builder: (context, state) => const TransactionDetailPage(),
+      ),
+      GoRoute(
+        path: AppRoutes.createTransaction,
+        builder: (context, state) => const CreateTransactionPage(),
+      ),
+      GoRoute(
+        path: AppRoutes.editTransaction,
+        builder: (context, state) => const CreateTransactionPage(),
+      ),
+
       // Shell router have nav bar
       ShellRoute(
         builder: (context, state, child) {
@@ -82,8 +100,13 @@ class AppRouter {
             path: AppRoutes.profile,
             builder: (context, state) => const ProfilePage(),
           ),
+          GoRoute(
+            path: AppRoutes.editProfile,
+            builder: (context, state) => const EditProfilePage(),
+          ),
         ],
       ),
+
     ],
   );
   static int _getUserGuestNavIndex(String path) {
