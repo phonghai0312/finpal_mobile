@@ -25,11 +25,13 @@ class TransactionRepositoryImpl implements TransactionRepository {
     required String id,
     String? categoryId,
     String? userNote,
+    String? merchant,
   }) async {
     await remote.updateTransaction(
       id,
       categoryId: categoryId,
       userNote: userNote,
+      merchant: merchant,
     );
   }
 

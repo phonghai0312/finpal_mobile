@@ -4,6 +4,7 @@ import 'package:fridge_to_fork_ai/features/transactions/data/repositories/transa
 import 'package:fridge_to_fork_ai/features/transactions/domain/usecase/delete_transaction.dart';
 import 'package:fridge_to_fork_ai/features/transactions/domain/usecase/get_transaction_detail.dart'
     show GetTransactionDetail;
+import 'package:fridge_to_fork_ai/features/transactions/domain/usecase/update_transaction.dart';
 import 'package:fridge_to_fork_ai/features/transactions/presentation/provider/transactiondetail/transaction_detail_notifier.dart';
 
 final transactionDetailRemoteDataSourceProvider =
@@ -24,12 +25,15 @@ final getTransactionDetailUsecaseProvider = Provider<GetTransactionDetail>(
 final deleteTransactionUsecaseProvider = Provider<DeleteTransaction>(
   (ref) => DeleteTransaction(ref.read(transactionDetailRepositoryProvider)),
 );
-
+final updateTransactionUsecaseProvider = Provider<UpdateTransaction>(
+  (ref) => UpdateTransaction(ref.read(transactionDetailRepositoryProvider)),
+);
 final transactionDetailNotifierProvider =
     StateNotifierProvider<TransactionDetailNotifier, TransactionDetailState>(
       (ref) => TransactionDetailNotifier(
         ref.read(getTransactionDetailUsecaseProvider),
         ref.read(deleteTransactionUsecaseProvider),
+        ref.read(updateTransactionUsecaseProvider),
         ref,
       ),
     );

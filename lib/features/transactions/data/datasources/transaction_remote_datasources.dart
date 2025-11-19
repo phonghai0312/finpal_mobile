@@ -291,6 +291,7 @@ class TransactionRemoteDataSource {
       String id, {
         String? categoryId,
         String? userNote,
+        String? merchant,
       }) async {
     await Future.delayed(const Duration(milliseconds: 300));
 
@@ -311,7 +312,7 @@ class TransactionRemoteDataSource {
       type: t.type,
       categoryId: categoryId ?? t.categoryId,
       categoryName: t.categoryName,
-      merchant: t.merchant,
+      merchant: merchant ?? t.merchant,
       occurredAt: t.occurredAt,
       rawMessage: t.rawMessage,
       normalized: t.normalized,

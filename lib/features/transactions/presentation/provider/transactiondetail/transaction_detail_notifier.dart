@@ -9,6 +9,7 @@ import 'package:go_router/go_router.dart';
 import '../../../domain/entities/transaction.dart';
 import '../../../domain/usecase/delete_transaction.dart';
 import '../../../domain/usecase/get_transaction_detail.dart';
+import '../../../domain/usecase/update_transaction.dart';
 
 class TransactionDetailState {
   final bool isEditing;
@@ -41,6 +42,7 @@ class TransactionDetailState {
 class TransactionDetailNotifier extends StateNotifier<TransactionDetailState> {
   final GetTransactionDetail _getTransactionDetail;
   final DeleteTransaction _deleteTransaction;
+  final UpdateTransaction _updateTransaction;
   final Ref ref;
 
   bool _initialized = false;
@@ -48,6 +50,7 @@ class TransactionDetailNotifier extends StateNotifier<TransactionDetailState> {
   TransactionDetailNotifier(
     this._getTransactionDetail,
     this._deleteTransaction,
+    this._updateTransaction,
     this.ref,
   ) : super(const TransactionDetailState());
 
@@ -111,5 +114,24 @@ class TransactionDetailNotifier extends StateNotifier<TransactionDetailState> {
 
   void cancelEdit() {
     state = state.copyWith(isEditing: false);
+  }
+
+  Future<void> onSave(BuildContext context, Transaction tx) async {
+    try {
+      state = state.copyWith(isLoading: true);
+      await _updateTransaction(
+        id: tx.id,
+        userNote: tx.userNote,
+        merchant: tx.merchant,
+      );
+      state = state.copyWith(isLoading: false, isEditing: false, data: tx);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Đã lưu thay đổi")), );
+    } catch (e) {
+      state = state.copyWith(isLoading: false, error: e.toString());
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Lỗi lưu: $e"), backgroundColor: Colors.red),
+      );
+    }
   }
 }

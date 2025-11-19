@@ -9,6 +9,7 @@ abstract class TransactionRepository {
     required String id,
     String? categoryId,
     String? userNote,
+    String? merchant,
   });
 
   Future<void> createTransaction({

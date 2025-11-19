@@ -19,9 +19,15 @@ class TransactionDetailPage extends ConsumerStatefulWidget {
 class _TransactionDetailPageState extends ConsumerState<TransactionDetailPage> {
   late TextEditingController noteCtrl;
   late TextEditingController merchantCtrl;
+  late FocusNode noteFocusNode;
+  late FocusNode merchantFocusNode;
   @override
   void initState() {
     super.initState();
+    noteCtrl = TextEditingController();
+    merchantCtrl = TextEditingController();
+    noteFocusNode = FocusNode();
+    merchantFocusNode = FocusNode();
 
     Future.microtask(() async {
       final notifier = ref.read(transactionDetailNotifierProvider.notifier);
@@ -29,16 +35,33 @@ class _TransactionDetailPageState extends ConsumerState<TransactionDetailPage> {
 
       final tx = ref.read(transactionDetailNotifierProvider).data;
       if (tx != null) {
-        noteCtrl = TextEditingController(text: tx.userNote);
-        merchantCtrl = TextEditingController(text: tx.merchant);
+        noteCtrl.text = tx.userNote ?? '';
+        merchantCtrl.text = tx.merchant ?? '';
       }
     });
   }
 
   @override
+  void dispose() {
+    noteCtrl.dispose();
+    merchantCtrl.dispose();
+    noteFocusNode.dispose();
+    merchantFocusNode.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(transactionDetailNotifierProvider);
+    ref.listen(transactionDetailNotifierProvider.select((value) => value.data), (previous, next) {
+      if (previous != next && next != null) {
+        noteCtrl.text = next.userNote ?? '';
+        merchantCtrl.text = next.merchant ?? '';
+      }
+    });
+    ref.listen(transactionDetailNotifierProvider.select((value) => value.isEditing), (previous, next) {
+      // This listener forces a rebuild when isEditing changes
+    });
     final notifier = ref.read(transactionDetailNotifierProvider.notifier);
     final isEditing = state.isEditing;
 
@@ -97,6 +120,7 @@ class _TransactionDetailPageState extends ConsumerState<TransactionDetailPage> {
               label: 'Địa điểm',
               value: tx.merchant ?? 'Không xác định',
               controller: merchantCtrl,
+              focusNode: merchantFocusNode,
             ),
 
             /// USER NOTE — CHO PHÉP SỬA
@@ -105,6 +129,7 @@ class _TransactionDetailPageState extends ConsumerState<TransactionDetailPage> {
               label: 'Ghi chú',
               value: tx.userNote ?? 'Không có ghi chú',
               controller: noteCtrl,
+              focusNode: noteFocusNode,
             ),
 
             SizedBox(height: 24.h),
@@ -213,6 +238,7 @@ class _TransactionDetailPageState extends ConsumerState<TransactionDetailPage> {
     required String label,
     required String value,
     TextEditingController? controller,
+    FocusNode? focusNode,
     required bool isEditing,
   }) {
     return Container(
@@ -236,6 +262,8 @@ class _TransactionDetailPageState extends ConsumerState<TransactionDetailPage> {
           isEditing && controller != null
               ? TextField(
                   controller: controller,
+                  focusNode: focusNode,
+                  autofocus: isEditing,
                   decoration: const InputDecoration(
                     border: InputBorder.none,
                     isDense: true,
@@ -360,7 +388,13 @@ class _TransactionDetailPageState extends ConsumerState<TransactionDetailPage> {
                   borderRadius: BorderRadius.circular(20.r),
                 ),
               ),
-              onPressed: () {},
+              onPressed: () => notifier.onSave(
+                context,
+                tx.copyWith(
+                  merchant: merchantCtrl.text,
+                  userNote: noteCtrl.text,
+                ),
+              ),
               child: Text(
                 "Lưu thay đổi",
                 style: TextStyle(

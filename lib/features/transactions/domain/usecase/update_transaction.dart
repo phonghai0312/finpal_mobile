@@ -1,11 +1,11 @@
 import '../repositories/transaction_repository.dart';
 
-class UpdateTransactionUseCase {
+class UpdateTransaction {
   final TransactionRepository repository;
 
-  UpdateTransactionUseCase(this.repository);
+  UpdateTransaction(this.repository);
 
-  Future<void> call({required String id, String? categoryId, String? userNote}) async {
-    await repository.updateTransaction(id: id, categoryId: categoryId, userNote: userNote);
+  Future<void> call({required String id, String? categoryId, String? userNote, String? merchant}) async {
+    await repository.updateTransaction(id: id, categoryId: categoryId, userNote: userNote, merchant: merchant);
   }
 }

@@ -41,4 +41,30 @@ class Transaction {
     required this.createdAt,
     required this.updatedAt,
   });
+
+  Transaction copyWith({
+    String? merchant,
+    String? userNote,
+  }) {
+    return Transaction(
+      id: id,
+      userId: userId,
+      accountId: accountId,
+      amount: amount,
+      currency: currency,
+      direction: direction,
+      type: type,
+      categoryId: categoryId,
+      categoryName: categoryName,
+      merchant: merchant ?? this.merchant,
+      occurredAt: occurredAt,
+      rawMessage: rawMessage,
+      normalized: normalized,
+      ai: ai,
+      userNote: userNote ?? this.userNote,
+      source: source,
+      createdAt: createdAt,
+      updatedAt: updatedAt,
+    );
+  }
 }

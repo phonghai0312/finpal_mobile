@@ -59,7 +59,7 @@ class AppRouter {
       // Transactions
       GoRoute(
         path: AppRoutes.transactionDetail,
-        builder: (context, state) => const TransactionDetailPage(),
+        builder: (context, state) => TransactionDetailPage(),
       ),
       GoRoute(
         path: AppRoutes.createTransaction,
