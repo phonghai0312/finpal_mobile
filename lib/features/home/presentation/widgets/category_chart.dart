@@ -44,7 +44,6 @@ class CategoryChart extends StatelessWidget {
                       sections: stats.items.map((item) {
                         return PieChartSectionData(
                           value: item.totalAmount,
-                          color: item.color,
                           radius: 10.w, // tô dày theo đúng hình
                           showTitle: false,
                           borderSide: BorderSide(color: Colors.black, width: 1),
@@ -71,7 +70,6 @@ class CategoryChart extends StatelessWidget {
                               width: 12.w,
                               height: 12.w,
                               decoration: BoxDecoration(
-                                color: item.color,
                                 shape: BoxShape.circle,
                                 border: Border.all(
                                   color: Colors.black,

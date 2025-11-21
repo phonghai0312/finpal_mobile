@@ -56,21 +56,18 @@ class HomeRemoteDataSource {
           categoryName: "Ăn uống",
           totalAmount: 150000.0,
           percentage: 60.0,
-          color: Colors.red,
         ),
         StatsByCategoryItemModel(
           categoryId: "shopping",
           categoryName: "Mua sắm",
           totalAmount: 70000.0,
           percentage: 28.0,
-          color: Colors.green,
         ),
         StatsByCategoryItemModel(
           categoryId: "move",
           categoryName: "Di chuyển",
           totalAmount: 30000.0,
           percentage: 12.0,
-          color: Colors.purple,
         ),
       ],
     );

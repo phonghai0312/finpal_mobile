@@ -1,4 +1,8 @@
-import 'package:fridge_to_fork_ai/features/stats/domain/entities/stats_by_category_item.dart';
+/// Stats By Category Item Model
+/// Dùng cho JSON parsing từ API
+library;
+
+import '../../domain/entities/stats_by_category_item.dart';
 
 class StatsByCategoryItemModel extends StatsByCategoryItem {
   const StatsByCategoryItemModel({
@@ -10,10 +14,10 @@ class StatsByCategoryItemModel extends StatsByCategoryItem {
 
   factory StatsByCategoryItemModel.fromJson(Map<String, dynamic> json) {
     return StatsByCategoryItemModel(
-      categoryId: json['categoryId'] ?? '',
-      categoryName: json['categoryName'] ?? '',
-      totalAmount: (json['totalAmount'] ?? 0).toDouble(),
-      percentage: (json['percentage'] ?? 0).toDouble(),
+      categoryId: json['categoryId'] as String,
+      categoryName: json['categoryName'] as String,
+      totalAmount: (json['totalAmount'] as num).toDouble(),
+      percentage: (json['percentage'] as num).toDouble(),
     );
   }
 
