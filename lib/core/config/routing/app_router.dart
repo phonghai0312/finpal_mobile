@@ -9,7 +9,7 @@ import 'package:fridge_to_fork_ai/features/onboarding/presentation/page/onboardi
 import 'package:fridge_to_fork_ai/features/onboarding/presentation/page/splash_page.dart';
 import 'package:fridge_to_fork_ai/features/transactions/presentation/pages/transactions_page.dart';
 import 'package:fridge_to_fork_ai/features/stats/presentation/stats_page.dart';
-import 'package:fridge_to_fork_ai/features/profile/presentation/profile_page.dart';
+import 'package:fridge_to_fork_ai/features/profile/presentation/pages/profile_page.dart';
 import 'package:fridge_to_fork_ai/features/suggestions/presentation/suggestions_page.dart';
 import 'package:fridge_to_fork_ai/features/welcome/presentation/page/connectsepay/connect_sepay_page.dart';
 import 'package:fridge_to_fork_ai/features/welcome/presentation/page/welcome/welcome_page.dart';
@@ -19,6 +19,8 @@ import '../../../features/auth/presentation/page/login/login_page.dart';
 import 'package:fridge_to_fork_ai/features/transactions/presentation/pages/transaction_detail_page.dart';
 import 'package:fridge_to_fork_ai/features/transactions/presentation/pages/create_transaction_page.dart';
 import 'package:fridge_to_fork_ai/features/profile/presentation/pages/edit_profile_page.dart';
+import 'package:fridge_to_fork_ai/features/profile/presentation/pages/user_settings_page.dart';
+import 'package:fridge_to_fork_ai/features/profile/presentation/pages/about_app_page.dart';
 
 class AppRouter {
   static final customerRouter = GoRouter(
@@ -69,6 +71,14 @@ class AppRouter {
         path: AppRoutes.editTransaction,
         builder: (context, state) => const CreateTransactionPage(),
       ),
+      GoRoute(
+        path: AppRoutes.userSettings,
+        builder: (context, state) => const UserSettingsPage(),
+      ),
+      GoRoute(
+        path: AppRoutes.aboutApp,
+        builder: (context, state) => const AboutAppPage(),
+      ),
 
       // Shell router have nav bar
       ShellRoute(
@@ -106,7 +116,6 @@ class AppRouter {
           ),
         ],
       ),
-
     ],
   );
   static int _getUserGuestNavIndex(String path) {
