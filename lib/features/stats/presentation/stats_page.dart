@@ -45,16 +45,19 @@ class _StatsPageState extends ConsumerState<StatsPage> {
                     ref.read(statsNotifierProvider.notifier).refresh(),
                 child: SingleChildScrollView(
                   physics: const AlwaysScrollableScrollPhysics(),
-                  padding:
-                      EdgeInsets.symmetric(horizontal: 16.w, vertical: 20.h),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 16.w,
+                    vertical: 20.h,
+                  ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       StatsHeader(
                         selectedMonth: monthFilter.month,
                         selectedYear: monthFilter.year,
-                        onMonthChanged: (month) =>
-                            ref.read(monthFilterProvider.notifier).setMonth(month),
+                        onMonthChanged: (month) => ref
+                            .read(monthFilterProvider.notifier)
+                            .setMonth(month),
                       ),
                       if (overview != null) ...[
                         SizedBox(height: 16.h),
@@ -119,19 +122,13 @@ class _StatsPageState extends ConsumerState<StatsPage> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(error),
-          backgroundColor: Colors.red,
-        ),
+        SnackBar(content: Text(error), backgroundColor: Colors.red),
       );
       ref.read(statsNotifierProvider.notifier).clearError();
     });
   }
 
-  void _onCategoryTap(
-    StatsByCategoryItem item,
-    MonthFilterState filter,
-  ) {
+  void _onCategoryTap(StatsByCategoryItem item, MonthFilterState filter) {
     final notifier = ref.read(statsNotifierProvider.notifier);
     showModalBottomSheet(
       context: context,
@@ -207,10 +204,7 @@ class _CategoryTransactionsSheet extends StatelessWidget {
                   SizedBox(height: 4.h),
                   Text(
                     periodLabel,
-                    style: TextStyle(
-                      fontSize: 13.sp,
-                      color: Colors.grey[600],
-                    ),
+                    style: TextStyle(fontSize: 13.sp, color: Colors.grey[600]),
                   ),
                 ],
               ),
@@ -261,7 +255,9 @@ class _CategoryTransactionsSheet extends StatelessWidget {
                             shape: BoxShape.circle,
                           ),
                           child: Icon(
-                            isIncome ? Icons.arrow_downward : Icons.arrow_upward,
+                            isIncome
+                                ? Icons.arrow_downward
+                                : Icons.arrow_upward,
                             color: isIncome ? Colors.green : Colors.redAccent,
                             size: 20.sp,
                           ),
@@ -272,7 +268,9 @@ class _CategoryTransactionsSheet extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                tx.normalized.title ?? tx.merchant ?? 'Giao dịch',
+                                tx.normalized.title ??
+                                    tx.merchant ??
+                                    'Giao dịch',
                                 style: TextStyle(
                                   fontSize: 15.sp,
                                   fontWeight: FontWeight.w600,

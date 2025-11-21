@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:flutter/material.dart';
 import 'package:fridge_to_fork_ai/features/home/data/models/stats_by_category_item_model.dart';
 import 'package:fridge_to_fork_ai/features/home/data/models/stats_by_category_model.dart';
 import 'package:fridge_to_fork_ai/features/home/data/models/stats_overview_model.dart';
