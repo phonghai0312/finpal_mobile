@@ -21,6 +21,7 @@ import 'package:fridge_to_fork_ai/features/transactions/presentation/pages/creat
 import 'package:fridge_to_fork_ai/features/profile/presentation/pages/edit_profile_page.dart';
 import 'package:fridge_to_fork_ai/features/profile/presentation/pages/user_settings_page.dart';
 import 'package:fridge_to_fork_ai/features/profile/presentation/pages/about_app_page.dart';
+import 'package:fridge_to_fork_ai/features/suggestions/presentation/pages/suggestion_detail_page.dart';
 
 class AppRouter {
   static final customerRouter = GoRouter(
@@ -78,6 +79,10 @@ class AppRouter {
       GoRoute(
         path: AppRoutes.aboutApp,
         builder: (context, state) => const AboutAppPage(),
+      ),
+      GoRoute(
+        path: '${AppRoutes.suggestionDetail}/:id',
+        builder: (context, state) => SuggestionDetailPage(insightId: state.pathParameters['id']!),
       ),
 
       // Shell router have nav bar

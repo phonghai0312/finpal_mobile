@@ -4,12 +4,49 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fridge_to_fork_ai/core/config/routing/app_routes.dart';
 import 'package:fridge_to_fork_ai/core/presentation/theme/app_colors.dart';
 import 'package:go_router/go_router.dart';
+import 'package:fridge_to_fork_ai/features/suggestions/presentation/provider/suggestion_provider.dart';
+import 'package:collection/collection.dart';
 
 class SuggestionsPage extends ConsumerWidget {
   const SuggestionsPage({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final suggestionsState = ref.watch(suggestionsNotifierProvider);
+    final notifier = ref.read(suggestionsNotifierProvider.notifier);
+
+    // Fetch insights when the widget is first built
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      notifier.fetchInsights();
+    });
+
+    if (suggestionsState.isLoading && suggestionsState.insights.isEmpty) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+
+    if (suggestionsState.error != null && suggestionsState.insights.isEmpty) {
+      return Scaffold(
+        body: Center(child: Text('Error: ${suggestionsState.error}')),
+      );
+    }
+
+    // Filter insights for the top two cards
+    final alertInsight = suggestionsState.insights.firstWhereOrNull(
+      (e) => e.type == 'alert',
+    );
+    final autoAnalysisInsight = suggestionsState.insights.firstWhereOrNull(
+      (e) => e.type == 'tip' && e.title == 'Phân tích tự động',
+    );
+
+    // Filter insights for other cards
+    final otherInsights = suggestionsState.insights
+        .where(
+          (e) =>
+              e.type != 'alert' &&
+              !(e.type == 'tip' && e.title == 'Phân tích tự động'),
+        )
+        .toList();
+
     return Scaffold(
       backgroundColor: AppColors.bgSecondary,
       appBar: AppBar(
@@ -31,31 +68,40 @@ class SuggestionsPage extends ConsumerWidget {
           children: [
             Row(
               children: [
-                Expanded(
-                  child: _buildSuggestionCard(
-                    context,
-                    icon: Icons.warning_amber_rounded,
-                    iconColor: AppColors.bgWarning,
-                    title: 'Cảnh báo quan trọng!',
-                    description: 'Chi tiêu cho cà phê tăng 35% so với tháng trước. Bạn đã chi 300.000đ trong tháng này',
-                    buttonText: 'Xem chi tiết & đặt hạn mức',
-                    onTap: () {},
-                    cardColor: AppColors.bgWarning.withOpacity(0.1),
+                if (alertInsight != null)
+                  Expanded(
+                    child: _buildSuggestionCard(
+                      context,
+                      icon: Icons.warning_amber_rounded,
+                      iconColor: AppColors.bgWarning,
+                      title: alertInsight.title,
+                      description: alertInsight.message,
+                      buttonText: 'Xem chi tiết & đặt hạn mức',
+                      onTap: () => context.push(
+                        '${AppRoutes.suggestionDetail}/${alertInsight.id}',
+                      ),
+                      cardColor: AppColors.bgWarning.withOpacity(0.1),
+                    ),
                   ),
-                ),
-                SizedBox(width: 16.w),
-                Expanded(
-                  child: _buildSuggestionCard(
-                    context,
-                    icon: Icons.lightbulb_outline,
-                    iconColor: AppColors.primaryGreen,
-                    title: 'Phân tích tự động',
-                    description: 'AI đã quét & phân loại 125 giao dịch từ SMS ngân hàng tháng này',
-                    buttonText: 'Xem chi tiết',
-                    onTap: () => context.go(AppRoutes.stats),
-                    cardColor: AppColors.primaryGreen.withOpacity(0.1),
+                if (alertInsight != null &&
+                    autoAnalysisInsight !=
+                        null) // Add spacing only if both exist
+                  SizedBox(width: 16.w),
+                if (autoAnalysisInsight != null)
+                  Expanded(
+                    child: _buildSuggestionCard(
+                      context,
+                      icon: Icons.lightbulb_outline,
+                      iconColor: AppColors.primaryGreen,
+                      title: autoAnalysisInsight.title,
+                      description: autoAnalysisInsight.message,
+                      buttonText: 'Xem chi tiết',
+                      onTap: () => context.push(
+                        '${AppRoutes.suggestionDetail}/${autoAnalysisInsight.id}',
+                      ),
+                      cardColor: AppColors.primaryGreen.withOpacity(0.1),
+                    ),
                   ),
-                ),
               ],
             ),
             SizedBox(height: 24.h),
@@ -68,35 +114,46 @@ class SuggestionsPage extends ConsumerWidget {
               ),
             ),
             SizedBox(height: 16.h),
-            _buildLargeSuggestionCard(
-              context,
-              icon: Icons.arrow_upward_rounded,
-              iconColor: AppColors.primaryGreen,
-              title: 'Tiết kiệm tốt hơn tháng trước',
-              description: 'Bạn đã tiết kiệm được 12.500.000đ trong tháng này, tăng 8.5% so với tháng trước',
-              onTap: () {},
-              cardColor: AppColors.primaryGreen.withOpacity(0.1),
-            ),
-            SizedBox(height: 16.h),
-            _buildLargeSuggestionCard(
-              context,
-              icon: Icons.money,
-              iconColor: AppColors.typoPrimary,
-              title: 'Đề xuất ngân sách',
-              description: 'Dựa trên thói quen chi tiêu, bạn nên đặt ngân sách 1.500.000đ cho ăn uống tháng sau',
-              onTap: () {},
-              cardColor: AppColors.lightRed.withOpacity(0.1),
-            ),
-            SizedBox(height: 16.h),
-            _buildLargeSuggestionCard(
-              context,
-              icon: Icons.emoji_objects_outlined,
-              iconColor: AppColors.lightRed,
-              title: 'Mẹo tiết kiệm',
-              description: 'Thay vì mua cà phê mỗi ngày, bạn có thể tiết kiệm 200.000đ/tháng nếu tự pha tại nhà 3...',
-              onTap: () {},
-              cardColor: AppColors.lightRed.withOpacity(0.1),
-            ),
+            ...otherInsights.map((insight) {
+              IconData icon;
+              Color iconColor;
+              Color cardColor;
+              switch (insight.type) {
+                case 'monthly_summary':
+                  icon = Icons.arrow_upward_rounded;
+                  iconColor = AppColors.primaryGreen;
+                  cardColor = AppColors.primaryGreen.withOpacity(0.1);
+                  break;
+                case 'budget_alert':
+                  icon = Icons.money;
+                  iconColor = AppColors.typoPrimary;
+                  cardColor = AppColors.lightRed.withOpacity(0.1);
+                  break;
+                case 'tip':
+                  icon = Icons.emoji_objects_outlined;
+                  iconColor = AppColors.lightRed;
+                  cardColor = AppColors.lightRed.withOpacity(0.1);
+                  break;
+                default:
+                  icon = Icons.info_outline;
+                  iconColor = AppColors.typoBody;
+                  cardColor = AppColors.bgGray.withOpacity(0.1);
+              }
+              return Padding(
+                padding: EdgeInsets.only(bottom: 16.h),
+                child: _buildLargeSuggestionCard(
+                  context,
+                  icon: icon,
+                  iconColor: iconColor,
+                  title: insight.title,
+                  description: insight.message,
+                  onTap: () => context.push(
+                    '${AppRoutes.suggestionDetail}/${insight.id}',
+                  ),
+                  cardColor: cardColor,
+                ),
+              );
+            }).toList(),
           ],
         ),
       ),
@@ -104,15 +161,15 @@ class SuggestionsPage extends ConsumerWidget {
   }
 
   Widget _buildSuggestionCard(
-      BuildContext context, {
-        required IconData icon,
-        required Color iconColor,
-        required String title,
-        required String description,
-        required String buttonText,
-        required VoidCallback onTap,
-        required Color cardColor,
-      }) {
+    BuildContext context, {
+    required IconData icon,
+    required Color iconColor,
+    required String title,
+    required String description,
+    required String buttonText,
+    required VoidCallback onTap,
+    required Color cardColor,
+  }) {
     return Container(
       padding: EdgeInsets.all(12.w),
       decoration: BoxDecoration(
@@ -135,9 +192,9 @@ class SuggestionsPage extends ConsumerWidget {
           SizedBox(height: 4.h),
           Text(
             description,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: AppColors.typoBody,
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.bodySmall?.copyWith(color: AppColors.typoBody),
             maxLines: 3,
             overflow: TextOverflow.ellipsis,
           ),
@@ -158,14 +215,14 @@ class SuggestionsPage extends ConsumerWidget {
   }
 
   Widget _buildLargeSuggestionCard(
-      BuildContext context, {
-        required IconData icon,
-        required Color iconColor,
-        required String title,
-        required String description,
-        required VoidCallback onTap,
-        required Color cardColor,
-      }) {
+    BuildContext context, {
+    required IconData icon,
+    required Color iconColor,
+    required String title,
+    required String description,
+    required VoidCallback onTap,
+    required Color cardColor,
+  }) {
     return Container(
       padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
@@ -191,9 +248,9 @@ class SuggestionsPage extends ConsumerWidget {
                 SizedBox(height: 4.h),
                 Text(
                   description,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: AppColors.typoBody,
-                  ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyMedium?.copyWith(color: AppColors.typoBody),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),

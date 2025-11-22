@@ -8,8 +8,21 @@ class InsightRepositoryImpl implements InsightRepository {
   InsightRepositoryImpl({required this.remoteDataSource});
 
   @override
-  Future<List<Insight>> getInsights({String? type, int? page, int? pageSize}) async {
-    return await remoteDataSource.getInsights(type: type, page: page, pageSize: pageSize);
+  Future<List<Insight>> getInsights({
+    String? type,
+    int? page,
+    int? pageSize,
+  }) async {
+    return await remoteDataSource.getInsights(
+      type: type,
+      page: page,
+      pageSize: pageSize,
+    );
+  }
+
+  @override
+  Future<Insight> getInsightById(String id) async {
+    return await remoteDataSource.getInsightById(id);
   }
 
   @override

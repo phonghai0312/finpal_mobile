@@ -1105,7 +1105,7 @@ components:
       properties:
         id:
           type: string
-        userId:
+        user:
           type: string
         accountId:
           type: string
@@ -1222,18 +1222,27 @@ components:
         items:
           type: array
           items:
-            $ref: '#/components/schemas/StatsByCategoryItem'
+            type: object
+            properties:
+              categoryId:
+                type: string
+              categoryName:
+                type: string
+              totalAmount:
+                type: number
+              percentage:
+                type: number
 
     Insight:
       type: object
       properties:
         id:
           type: string
-        userId:
+        user:
           type: string
         type:
           type: string
-          enum: [weekly_summary, monthly_summary, alert, tip]
+          enum: [weekly_summary, monthly_summary, alert, tip, budget_alert, daily_report, monthly_report]
         period:
           $ref: '#/components/schemas/Period'
         title:
@@ -1242,6 +1251,12 @@ components:
           type: string
         data:
           type: object
+          description: |-
+            Dữ liệu bổ sung tùy thuộc vào loại insight:
+            - **budget_alert**: `$ref: '#/components/schemas/InsightBudgetAlertMeta'`
+            - **daily_report**: `$ref: '#/components/schemas/InsightDailyReportMeta'`
+            - **monthly_report**: `$ref: '#/components/schemas/InsightMonthlyReportMeta'`
+            - Các loại khác: Có thể chứa bất kỳ dữ liệu bổ sung nào.
           additionalProperties: true
         read:
           type: boolean
@@ -1277,7 +1292,7 @@ components:
       properties:
         id:
           type: string
-        userId:
+        user:
           type: string
         name:
           type: string
@@ -1334,7 +1349,7 @@ components:
       properties:
         id:
           type: string
-        userId:
+        user:
           type: string
         type:
           type: string
@@ -1409,12 +1424,72 @@ components:
               percentage:
                 type: number
 
+    InsightBudgetAlertMeta:
+      type: object
+      properties:
+        categoryId:
+          type: string
+          description: ID của danh mục đã vượt ngân sách.
+        categoryName:
+          type: string
+          description: Tên hiển thị của danh mục.
+        spentAmount:
+          type: number
+          description: Số tiền đã chi tiêu trong danh mục.
+        budgetLimit:
+          type: number
+          description: Ngân sách đã đặt cho danh mục.
+        usagePercentage:
+          type: number
+          description: Phần trăm ngân sách đã sử dụng.
+
+    InsightDailyReportMeta:
+      type: object
+      properties:
+        totalExpense:
+          type: number
+          description: Tổng chi tiêu trong ngày.
+        totalIncome:
+          type: number
+          description: Tổng thu nhập trong ngày.
+        totalTransactions:
+          type: integer
+          description: Tổng số giao dịch trong ngày.
+
+    InsightMonthlyReportMeta:
+      type: object
+      properties:
+        expenseCur:
+          type: number
+          description: Tổng chi tiêu trong tháng hiện tại.
+        incomeCur:
+          type: number
+          description: Tổng thu nhập trong tháng hiện tại.
+        saving:
+          type: number
+          description: Khoản tiết kiệm trong tháng hiện tại (thu nhập - chi tiêu).
+        savingRate:
+          type: number
+          description: Tỷ lệ tiết kiệm trong tháng hiện tại.
+        expensePrev:
+          type: number
+          description: Tổng chi tiêu trong tháng trước.
+        incomePrev:
+          type: number
+          description: Tổng thu nhập trong tháng trước.
+        diffExpense:
+          type: number
+          description: Chênh lệch chi tiêu so với tháng trước.
+        diffIncome:
+          type: number
+          description: Chênh lệch thu nhập so với tháng trước.
+
     Budget:
       type: object
       properties:
         id:
           type: string
-        userId:
+        user:
           type: string
         categoryId:
           type: string

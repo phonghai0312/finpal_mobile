@@ -23,4 +23,5 @@ class AppRoutes {
   static const String editProfile = '/editProfile';
   static const String userSettings = '/userSettings';
   static const String aboutApp = '/aboutApp';
+  static const String suggestionDetail = '/suggestionDetail';
 }
