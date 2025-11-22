@@ -9,7 +9,13 @@ class SuggestionsState extends Equatable {
   final bool isLoading;
   final String? error;
 
-  const SuggestionsState({this.insights = const [], this.isLoading = false, this.error});
+  const SuggestionsState({
+    this.insights = const [],
+    this.isLoading = false,
+    this.error,
+  });
+
+  int get unreadCount => insights.where((insight) => !insight.read).length;
 
   SuggestionsState copyWith({
     List<Insight>? insights,
@@ -31,7 +37,8 @@ class SuggestionsNotifier extends StateNotifier<SuggestionsState> {
   final GetInsightsUseCase getInsightsUseCase;
   final UpdateInsightUseCase updateInsightUseCase;
 
-  SuggestionsNotifier(this.getInsightsUseCase, this.updateInsightUseCase) : super(const SuggestionsState());
+  SuggestionsNotifier(this.getInsightsUseCase, this.updateInsightUseCase)
+    : super(const SuggestionsState());
 
   Future<void> fetchInsights() async {
     state = state.copyWith(isLoading: true, error: null);
@@ -47,10 +54,16 @@ class SuggestionsNotifier extends StateNotifier<SuggestionsState> {
     try {
       final updatedInsight = await updateInsightUseCase.call(id, true);
       state = state.copyWith(
-        insights: state.insights.map((insight) => insight.id == id ? updatedInsight : insight).toList(),
+        insights: state.insights
+            .map((insight) => insight.id == id ? updatedInsight : insight)
+            .toList(),
       );
     } catch (e) {
       state = state.copyWith(error: e.toString());
     }
+  }
+
+  int getUnreadInsightsCount() {
+    return state.unreadCount;
   }
 }

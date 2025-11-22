@@ -6,7 +6,6 @@ import 'package:fridge_to_fork_ai/features/suggestions/domain/usecases/update_in
 import 'package:fridge_to_fork_ai/features/suggestions/domain/usecases/get_insight_by_id.dart';
 import 'package:fridge_to_fork_ai/features/suggestions/presentation/provider/suggestions_notifier.dart';
 import 'package:fridge_to_fork_ai/features/suggestions/presentation/provider/suggestion_detail_notifier.dart';
-import 'package:fridge_to_fork_ai/features/suggestions/domain/entities/insight.dart';
 
 /// Data Source
 final insightRemoteDataSourceProvider = Provider<InsightRemoteDataSourceImpl>(
@@ -54,3 +53,8 @@ final suggestionDetailNotifierProvider =
         insightId,
       ),
     );
+//tach rieng
+final unreadInsightsCountProvider = Provider<int>((ref) {
+  final suggestionsState = ref.watch(suggestionsNotifierProvider);
+  return suggestionsState.unreadCount;
+});

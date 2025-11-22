@@ -1,10 +1,14 @@
 // ignore_for_file: deprecated_member_use
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:fridge_to_fork_ai/core/config/routing/app_routes.dart';
 import 'package:fridge_to_fork_ai/core/presentation/theme/app_colors.dart';
+import 'package:fridge_to_fork_ai/features/suggestions/presentation/provider/suggestion_provider.dart';
+import 'package:go_router/go_router.dart';
 
-class HomeHeader extends StatelessWidget {
+class HomeHeader extends ConsumerWidget {
   final String userName;
   final String totalIncomeText;
   final String totalExpenseText;
@@ -19,7 +23,8 @@ class HomeHeader extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final unreadCount = ref.watch(unreadInsightsCountProvider);
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -71,19 +76,49 @@ class HomeHeader extends StatelessWidget {
 
                 /// NOTIFICATION BUTTON
                 GestureDetector(
-                  onTap: onNotificationTap,
-                  child: Container(
-                    width: 48.w,
-                    height: 48.w,
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.20),
-                      borderRadius: BorderRadius.circular(100.r),
-                    ),
-                    child: Icon(
-                      Icons.notifications_none,
-                      size: 26.w,
-                      color: Colors.white,
-                    ),
+                  onTap: () => context.push(AppRoutes.suggestions),
+                  child: Stack(
+                    children: [
+                      Container(
+                        width: 48.w,
+                        height: 48.w,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.20),
+                          borderRadius: BorderRadius.circular(100.r),
+                        ),
+                        child: Icon(
+                          Icons.notifications_none,
+                          size: 26.w,
+                          color: Colors.white,
+                        ),
+                      ),
+                      if (unreadCount > 0)
+                        Positioned(
+                          right: 4.w,
+                          top: 4.h,
+                          child: Container(
+                            padding: EdgeInsets.all(4.w),
+                            decoration: BoxDecoration(
+                              color: AppColors.bgError,
+                              shape: BoxShape.circle,
+                            ),
+                            constraints: BoxConstraints(
+                              minWidth: 20.w,
+                              minHeight: 20.w,
+                            ),
+                            child: Center(
+                              child: Text(
+                                '$unreadCount',
+                                style: TextStyle(
+                                  color: AppColors.typoWhite,
+                                  fontSize: 12.sp,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                    ],
                   ),
                 ),
               ],

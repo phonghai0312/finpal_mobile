@@ -82,7 +82,8 @@ class AppRouter {
       ),
       GoRoute(
         path: '${AppRoutes.suggestionDetail}/:id',
-        builder: (context, state) => SuggestionDetailPage(insightId: state.pathParameters['id']!),
+        builder: (context, state) =>
+            SuggestionDetailPage(insightId: state.pathParameters['id']!),
       ),
 
       // Shell router have nav bar
