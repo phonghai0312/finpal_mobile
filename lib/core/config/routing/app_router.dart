@@ -10,7 +10,7 @@ import 'package:fridge_to_fork_ai/features/onboarding/presentation/page/splash_p
 import 'package:fridge_to_fork_ai/features/transactions/presentation/pages/transactions_page.dart';
 import 'package:fridge_to_fork_ai/features/stats/presentation/stats_page.dart';
 import 'package:fridge_to_fork_ai/features/profile/presentation/pages/profile_page.dart';
-import 'package:fridge_to_fork_ai/features/suggestions/presentation/suggestions_page.dart';
+import 'package:fridge_to_fork_ai/features/suggestions/presentation/pages/suggestions_page.dart';
 import 'package:fridge_to_fork_ai/features/welcome/presentation/page/connectsepay/connect_sepay_page.dart';
 import 'package:fridge_to_fork_ai/features/welcome/presentation/page/welcome/welcome_page.dart';
 import 'package:go_router/go_router.dart';
