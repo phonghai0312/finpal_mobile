@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:heroicons/heroicons.dart';
 import 'package:fridge_to_fork_ai/core/presentation/theme/app_colors.dart';
+import 'package:fridge_to_fork_ai/core/config/routing/app_routes.dart';
+import 'package:go_router/go_router.dart';
 
 class ActionButtons extends StatelessWidget {
   final VoidCallback? onAddCategory;
@@ -45,7 +47,9 @@ class ActionButtons extends StatelessWidget {
 
         Expanded(
           child: _PressableButton(
-            onTap: onLimitPressed,
+            onTap: () {
+              context.push(AppRoutes.budgetForm);
+            },
             borderColor: AppColors.bgPrimary,
             background: Colors.white,
             child: Column(

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fridge_to_fork_ai/core/presentation/providers/month_filter_provider.dart';
+import 'package:fridge_to_fork_ai/core/presentation/theme/app_chart_colors.dart';
 import 'package:fridge_to_fork_ai/features/stats/domain/entities/stats_by_category_item.dart';
 import 'package:fridge_to_fork_ai/features/stats/presentation/providers/stats_notifier.dart';
 import 'package:fridge_to_fork_ai/features/stats/presentation/providers/stats_provider.dart';
@@ -130,6 +131,15 @@ class _StatsPageState extends ConsumerState<StatsPage> {
 
   void _onCategoryTap(StatsByCategoryItem item, MonthFilterState filter) {
     final notifier = ref.read(statsNotifierProvider.notifier);
+    // Determine the color based on the item's index in the overall list if possible,
+    // or use a default/placeholder color.
+    // For this example, let's assume we can get the index from the byCategory.items list
+    final byCategoryItems =
+        ref.read(statsNotifierProvider).byCategory?.items ?? [];
+    final itemIndex = byCategoryItems.indexOf(item);
+    final itemColor =
+        AppChartColors.colors[itemIndex % AppChartColors.colors.length];
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -139,6 +149,7 @@ class _StatsPageState extends ConsumerState<StatsPage> {
           title: item.categoryName,
           periodLabel: 'Tháng ${filter.month}/${filter.year}',
           future: notifier.getTransactionsByCategory(item.categoryId),
+          categoryColor: itemColor,
         );
       },
     );
@@ -149,11 +160,13 @@ class _CategoryTransactionsSheet extends StatelessWidget {
   final String title;
   final String periodLabel;
   final Future<List<Transaction>> future;
+  final Color categoryColor;
 
   const _CategoryTransactionsSheet({
     required this.title,
     required this.periodLabel,
     required this.future,
+    required this.categoryColor,
   });
 
   @override
@@ -250,15 +263,16 @@ class _CategoryTransactionsSheet extends StatelessWidget {
                           width: 40.w,
                           height: 40.w,
                           decoration: BoxDecoration(
-                            color: (isIncome ? Colors.green : Colors.redAccent)
-                                .withValues(alpha: 0.1),
+                            color: categoryColor.withOpacity(
+                              0.1,
+                            ), // Use categoryColor
                             shape: BoxShape.circle,
                           ),
                           child: Icon(
                             isIncome
                                 ? Icons.arrow_downward
                                 : Icons.arrow_upward,
-                            color: isIncome ? Colors.green : Colors.redAccent,
+                            color: categoryColor, // Use categoryColor
                             size: 20.sp,
                           ),
                         ),
@@ -293,7 +307,7 @@ class _CategoryTransactionsSheet extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 14.sp,
                             fontWeight: FontWeight.bold,
-                            color: isIncome ? Colors.green : Colors.redAccent,
+                            color: categoryColor, // Use categoryColor
                           ),
                         ),
                       ],
