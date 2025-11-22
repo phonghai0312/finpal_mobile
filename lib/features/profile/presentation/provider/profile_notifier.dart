@@ -16,7 +16,12 @@ class ProfileFormState {
   final String? phone;
   final bool? notificationEnabled;
 
-  ProfileFormState({this.name, this.email, this.phone, this.notificationEnabled});
+  ProfileFormState({
+    this.name,
+    this.email,
+    this.phone,
+    this.notificationEnabled,
+  });
 
   ProfileFormState copyWith({
     String? name,
