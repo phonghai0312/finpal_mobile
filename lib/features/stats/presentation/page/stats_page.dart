@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import 'package:fridge_to_fork_ai/core/presentation/widget/header/header_simple.dart';
 
 import 'package:fridge_to_fork_ai/features/stats/presentation/providers/stats_notifier.dart';
@@ -22,6 +23,7 @@ class _StatsPageState extends ConsumerState<StatsPage> {
   @override
   void initState() {
     super.initState();
+
     Future.microtask(() {
       ref.read(statsNotifierProvider.notifier).init();
     });
@@ -104,6 +106,7 @@ class _StatsPageState extends ConsumerState<StatsPage> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
+
       builder: (_) => StatsCategorySheet(
         title: name,
         monthLabel: "Tháng ${state.month}/${state.year}",

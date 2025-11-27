@@ -1,6 +1,7 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:fridge_to_fork_ai/core/presentation/theme/app_chart_colors.dart'; // Import the new color class
 import 'package:fridge_to_fork_ai/features/stats/domain/entities/stats_by_category_item.dart';
 
 class StatsChart extends StatelessWidget {
@@ -40,10 +41,14 @@ class StatsChart extends StatelessWidget {
               PieChartData(
                 sectionsSpace: 2,
                 centerSpaceRadius: 40,
-                sections: items.map((item) {
+                sections: items.asMap().entries.map((entry) {
+                  final index = entry.key;
+                  final item = entry.value;
+                  final color = AppChartColors.colors[index % AppChartColors.colors.length];
                   return PieChartSectionData(
                     value: item.percentage * 100,
                     title: '',
+                    color: color, // Assign color from the list
                     radius: 50,
                     titleStyle: TextStyle(
                       fontSize: 12.sp,
@@ -61,7 +66,10 @@ class StatsChart extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: items.take(3).map((item) {
+              children: items.take(3).map((item) => item).toList().asMap().entries.map((entry) {
+                final index = entry.key;
+                final item = entry.value;
+                final color = AppChartColors.colors[index % AppChartColors.colors.length];
                 return Padding(
                   padding: EdgeInsets.symmetric(vertical: 4.h),
                   child: Row(
@@ -69,7 +77,7 @@ class StatsChart extends StatelessWidget {
                       Container(
                         width: 12.w,
                         height: 12.w,
-                        decoration: BoxDecoration(shape: BoxShape.circle),
+                        decoration: BoxDecoration(shape: BoxShape.circle, color: color), // Assign color to legend
                       ),
                       SizedBox(width: 8.w),
                       Expanded(

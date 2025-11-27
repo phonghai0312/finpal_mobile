@@ -22,6 +22,8 @@ import 'package:fridge_to_fork_ai/features/profile/presentation/pages/edit_profi
 import 'package:fridge_to_fork_ai/features/profile/presentation/pages/user_settings_page.dart';
 import 'package:fridge_to_fork_ai/features/profile/presentation/pages/about_app_page.dart';
 import 'package:fridge_to_fork_ai/features/suggestions/presentation/pages/suggestion_detail_page.dart';
+import 'package:fridge_to_fork_ai/features/budgets/presentation/pages/budget_detail_page.dart';
+import 'package:fridge_to_fork_ai/features/budgets/presentation/pages/budget_form_page.dart';
 
 class AppRouter {
   static final customerRouter = GoRouter(
@@ -84,6 +86,16 @@ class AppRouter {
         path: '${AppRoutes.suggestionDetail}/:id',
         builder: (context, state) =>
             SuggestionDetailPage(insightId: state.pathParameters['id']!),
+      ),
+      GoRoute(
+        path: '${AppRoutes.budgetDetail}/:id',
+        builder: (context, state) =>
+            BudgetDetailPage(budgetId: state.pathParameters['id']!),
+      ),
+      GoRoute(
+        path: AppRoutes.budgetForm,
+        builder: (context, state) =>
+            BudgetFormPage(budgetId: state.extra as String?),
       ),
 
       // Shell router have nav bar
