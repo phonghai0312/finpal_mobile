@@ -1,6 +1,4 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fridge_to_fork_ai/core/presentation/providers/month_filter_provider.dart';
 import 'package:fridge_to_fork_ai/features/stats/domain/entities/stats_by_category.dart';
 import 'package:fridge_to_fork_ai/features/stats/domain/entities/stats_overview.dart';
 import 'package:fridge_to_fork_ai/features/stats/domain/usecases/get_category_transactions.dart';
@@ -9,155 +7,145 @@ import 'package:fridge_to_fork_ai/features/stats/domain/usecases/get_stats_overv
 import 'package:fridge_to_fork_ai/features/transactions/domain/entities/transaction.dart';
 
 class StatsState {
-  final StatsOverview? overview;
-  final StatsByCategory? byCategory;
   final bool isLoading;
   final bool isRefreshing;
-  final int selectedMonth;
-  final int selectedYear;
-  final DateTime periodStart;
+
+  final StatsOverview? overview;
+  final StatsByCategory? byCategory;
+
+  final int month;
+  final int year;
+
   final String? errorMessage;
 
   const StatsState({
-    this.overview,
-    this.byCategory,
     this.isLoading = false,
     this.isRefreshing = false,
-    required this.selectedMonth,
-    required this.selectedYear,
-    required this.periodStart,
+    this.overview,
+    this.byCategory,
+    this.month = 1,
+    this.year = 2025,
     this.errorMessage,
   });
 
-  factory StatsState.initial(MonthFilterState filter) {
-    return StatsState(
-      selectedMonth: filter.month,
-      selectedYear: filter.year,
-      periodStart: filter.start,
-    );
-  }
-
   StatsState copyWith({
-    StatsOverview? overview,
-    StatsByCategory? byCategory,
     bool? isLoading,
     bool? isRefreshing,
-    int? selectedMonth,
-    int? selectedYear,
-    DateTime? periodStart,
+    StatsOverview? overview,
+    StatsByCategory? byCategory,
+    int? month,
+    int? year,
     String? errorMessage,
-    bool clearOverview = false,
-    bool clearByCategory = false,
     bool clearError = false,
   }) {
     return StatsState(
-      overview: clearOverview ? null : (overview ?? this.overview),
-      byCategory: clearByCategory ? null : (byCategory ?? this.byCategory),
       isLoading: isLoading ?? this.isLoading,
       isRefreshing: isRefreshing ?? this.isRefreshing,
-      selectedMonth: selectedMonth ?? this.selectedMonth,
-      selectedYear: selectedYear ?? this.selectedYear,
-      periodStart: periodStart ?? this.periodStart,
+      overview: overview ?? this.overview,
+      byCategory: byCategory ?? this.byCategory,
+      month: month ?? this.month,
+      year: year ?? this.year,
       errorMessage: clearError ? null : errorMessage ?? this.errorMessage,
     );
   }
-
-  bool get hasData => overview != null && byCategory != null;
 }
 
 class StatsNotifier extends StateNotifier<StatsState> {
   final GetStatsOverview _getStatsOverview;
   final GetStatsByCategory _getStatsByCategory;
-  final GetCategoryTransactions _getCategoryTransactions;
+  final GetCategoryTransactions _getCategoryTx;
 
-  StatsNotifier({
-    required MonthFilterState initialFilter,
-    required GetStatsOverview getStatsOverview,
-    required GetStatsByCategory getStatsByCategory,
-    required GetCategoryTransactions getCategoryTransactions,
-  })  : _getStatsOverview = getStatsOverview,
-        _getStatsByCategory = getStatsByCategory,
-        _getCategoryTransactions = getCategoryTransactions,
-        super(StatsState.initial(initialFilter));
+  StatsNotifier(
+    this._getStatsOverview,
+    this._getStatsByCategory,
+    this._getCategoryTx,
+  ) : super(const StatsState());
 
+  // ------------------------------
+  // INIT
+  // ------------------------------
   Future<void> init() async {
-    if (state.isLoading || state.hasData) return;
-    await _loadData(showLoading: true);
+    await loadStats();
   }
 
-  Future<void> refresh() => _loadData(showLoading: false);
+  // ------------------------------
+  // LOAD DATA
+  // ------------------------------
+  Future<void> loadStats() async {
+    state = state.copyWith(isLoading: true, clearError: true);
 
-  void clearError() {
-    if (state.errorMessage != null) {
-      state = state.copyWith(clearError: true);
-    }
-  }
-
-  Future<void> onMonthFilterChanged(MonthFilterState filter) async {
-    if (filter.month == state.selectedMonth &&
-        filter.year == state.selectedYear) {
-      return;
-    }
-
-    state = state.copyWith(
-      selectedMonth: filter.month,
-      selectedYear: filter.year,
-      periodStart: filter.start,
-      clearOverview: true,
-      clearByCategory: true,
-    );
-
-    await _loadData(showLoading: true);
-  }
-
-  Future<List<Transaction>> getTransactionsByCategory(
-    String categoryKey,
-  ) async {
-    final range = _buildMonthlyRange(state.periodStart);
-    return _getCategoryTransactions(
-      from: range.$1,
-      to: range.$2,
-      categoryKey: categoryKey,
-    );
-  }
-
-  Future<void> _loadData({required bool showLoading}) async {
     try {
-      state = state.copyWith(
-        isLoading: showLoading,
-        isRefreshing: !showLoading,
-        errorMessage: null,
-      );
+      final (from, to) = _monthRange(state.month, state.year);
 
-      final range = _buildMonthlyRange(state.periodStart);
-
-      final overview = await _getStatsOverview(from: range.$1, to: range.$2);
-      final byCategory =
-          await _getStatsByCategory(from: range.$1, to: range.$2);
+      final overview = await _getStatsOverview(from: from, to: to);
+      final byCategory = await _getStatsByCategory(from: from, to: to);
 
       state = state.copyWith(
         overview: overview,
         byCategory: byCategory,
         isLoading: false,
-        isRefreshing: false,
       );
-    } catch (error, stackTrace) {
-      debugPrint('StatsNotifier error: $error\n$stackTrace');
-      state = state.copyWith(
-        isLoading: false,
-        isRefreshing: false,
-        errorMessage: error.toString(),
-      );
+    } catch (e) {
+      state = state.copyWith(isLoading: false, errorMessage: e.toString());
     }
   }
 
-  (int, int) _buildMonthlyRange(DateTime start) {
-    final nextMonth = DateTime(start.year, start.month + 1, 1);
-    final end = nextMonth.subtract(const Duration(minutes: 1));
-    return (_toSeconds(start), _toSeconds(end));
+  // ------------------------------
+  // Refresh
+  // ------------------------------
+  Future<void> refresh() async {
+    state = state.copyWith(isRefreshing: true, clearError: true);
+
+    try {
+      await loadStats();
+    } catch (_) {}
+
+    state = state.copyWith(isRefreshing: false);
   }
 
-  int _toSeconds(DateTime dateTime) =>
-      dateTime.toUtc().millisecondsSinceEpoch ~/ 1000;
-}
+  // ------------------------------
+  // Change month
+  // ------------------------------
+  Future<void> changeMonth(int month, int year) async {
+    state = state.copyWith(
+      month: month,
+      year: year,
+      overview: null,
+      byCategory: null,
+    );
 
+    await loadStats();
+  }
+
+  // ------------------------------
+  // Get transactions for a category
+  // ------------------------------
+  Future<List<Transaction>> getTransactionsByCategory(String id) async {
+    final (from, to) = _monthRange(state.month, state.year);
+    return _getCategoryTx(from: from, to: to, categoryKey: id);
+  }
+
+  // ------------------------------
+  // Clear error
+  // ------------------------------
+  void clearError() {
+    state = state.copyWith(clearError: true);
+  }
+
+  // ------------------------------
+  // Helper: Build month range
+  // ------------------------------
+  (int, int) _monthRange(int month, int year) {
+    final start = DateTime(year, month, 1);
+    final end = DateTime(
+      year,
+      month + 1,
+      1,
+    ).subtract(const Duration(seconds: 1));
+
+    return (
+      start.toUtc().millisecondsSinceEpoch ~/ 1000,
+      end.toUtc().millisecondsSinceEpoch ~/ 1000,
+    );
+  }
+}

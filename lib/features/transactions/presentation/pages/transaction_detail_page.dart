@@ -1,12 +1,15 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:fridge_to_fork_ai/core/presentation/theme/app_colors.dart';
-import 'package:fridge_to_fork_ai/core/presentation/widget/header/header_with_back.dart';
-import 'package:fridge_to_fork_ai/features/transactions/domain/entities/transaction.dart';
-import 'package:fridge_to_fork_ai/features/transactions/presentation/provider/transactiondetail/transaction_detail_notifier.dart';
-import 'package:fridge_to_fork_ai/features/transactions/presentation/provider/transactiondetail/transaction_detail_provider.dart';
 import 'package:intl/intl.dart';
+
+import '../../../../../core/presentation/theme/app_colors.dart';
+import '../../../../../core/presentation/widget/header/header_with_back.dart';
+import '../../domain/entities/transaction.dart';
+import '../provider/transactiondetail/transaction_detail_notifier.dart';
+import '../provider/transactiondetail/transaction_detail_provider.dart';
 
 class TransactionDetailPage extends ConsumerStatefulWidget {
   const TransactionDetailPage({super.key});
@@ -19,24 +22,24 @@ class TransactionDetailPage extends ConsumerStatefulWidget {
 class _TransactionDetailPageState extends ConsumerState<TransactionDetailPage> {
   late TextEditingController noteCtrl;
   late TextEditingController merchantCtrl;
-  late FocusNode noteFocusNode;
-  late FocusNode merchantFocusNode;
+
   @override
   void initState() {
     super.initState();
+
     noteCtrl = TextEditingController();
     merchantCtrl = TextEditingController();
-    noteFocusNode = FocusNode();
-    merchantFocusNode = FocusNode();
 
     Future.microtask(() async {
+      // chạy init notifier
       final notifier = ref.read(transactionDetailNotifierProvider.notifier);
       await notifier.init();
 
-      final tx = ref.read(transactionDetailNotifierProvider).data;
-      if (tx != null) {
-        noteCtrl.text = tx.userNote ?? '';
-        merchantCtrl.text = tx.merchant ?? '';
+      // CHỈ đọc state khi data đã có
+      final st = ref.read(transactionDetailNotifierProvider);
+      if (st.data != null) {
+        noteCtrl.text = st.data!.userNote ?? "";
+        merchantCtrl.text = st.data!.merchant ?? "";
       }
     });
   }
@@ -45,119 +48,94 @@ class _TransactionDetailPageState extends ConsumerState<TransactionDetailPage> {
   void dispose() {
     noteCtrl.dispose();
     merchantCtrl.dispose();
-    noteFocusNode.dispose();
-    merchantFocusNode.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(transactionDetailNotifierProvider);
-    ref.listen(transactionDetailNotifierProvider.select((value) => value.data), (previous, next) {
-      if (previous != next && next != null) {
-        noteCtrl.text = next.userNote ?? '';
-        merchantCtrl.text = next.merchant ?? '';
-      }
-    });
-    ref.listen(transactionDetailNotifierProvider.select((value) => value.isEditing), (previous, next) {
-      // This listener forces a rebuild when isEditing changes
-    });
     final notifier = ref.read(transactionDetailNotifierProvider.notifier);
-    final isEditing = state.isEditing;
 
     if (state.isLoading) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
     if (state.error != null) {
-      return Scaffold(body: Center(child: Text(state.error!)));
+      return Scaffold(
+        appBar: const HeaderWithBack(title: "Chi tiết giao dịch"),
+        body: Center(child: Text(state.error!)),
+      );
+    }
+
+    if (state.data == null) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
     final tx = state.data!;
 
     return Scaffold(
-      backgroundColor: AppColors.bgWhite,
+      backgroundColor: Colors.white,
       appBar: HeaderWithBack(
-        title: isEditing ? 'Chỉnh sửa giao dịch' : 'Chi tiết giao dịch',
+        title: "Chi tiết giao dịch",
         onBack: () => notifier.onBack(context),
       ),
       body: SingleChildScrollView(
         padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildTransactionSummaryCard(context, tx),
-            SizedBox(height: 12.h),
+            _buildTopCard(tx),
+            SizedBox(height: 16.h),
 
-            /// AI Suggestion
-            _buildAIClassificationBanner(context, tx),
-            SizedBox(height: 12.h),
+            _buildAIBanner(tx),
+            SizedBox(height: 16.h),
 
-            /// TIME (Không cho sửa)
-            _buildEditableCard(
-              isEditing: isEditing,
-              label: 'Thời gian',
-              value: _formatDate(tx.occurredAt),
+            _infoTile(
+              "Thời gian",
+              _formatDate(tx.occurredAt),
+              Icons.access_time,
+            ),
+            _infoTile("Danh mục", tx.categoryName ?? "", Icons.category),
+            _infoTile("Phương thức", tx.source, Icons.account_balance_wallet),
+
+            _editableTile(
+              "Địa điểm",
+              Icons.location_on_outlined,
+              merchantCtrl,
+              state.isEditing,
             ),
 
-            /// CATEGORY (Không cho sửa)
-            _buildEditableCard(
-              isEditing: isEditing,
-              label: 'Danh mục',
-              value: tx.categoryName ?? 'Không xác định',
+            _editableTile(
+              "Ghi chú",
+              Icons.edit_note,
+              noteCtrl,
+              state.isEditing,
             ),
 
-            /// SOURCE (Không cho sửa)
-            _buildEditableCard(
-              isEditing: isEditing,
-              label: 'Phương thức',
-              value: tx.source,
-            ),
-
-            /// MERCHANT — CHO PHÉP SỬA
-            _buildEditableCard(
-              isEditing: isEditing,
-              label: 'Địa điểm',
-              value: tx.merchant ?? 'Không xác định',
-              controller: merchantCtrl,
-              focusNode: merchantFocusNode,
-            ),
-
-            /// USER NOTE — CHO PHÉP SỬA
-            _buildEditableCard(
-              isEditing: isEditing,
-              label: 'Ghi chú',
-              value: tx.userNote ?? 'Không có ghi chú',
-              controller: noteCtrl,
-              focusNode: noteFocusNode,
-            ),
-
-            SizedBox(height: 24.h),
-
-            /// BUTTONS
-            _buildActionButtons(context, ref, tx, notifier, isEditing),
+            SizedBox(height: 20.h),
+            _buildBottomButtons(context, notifier, state, tx),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildTransactionSummaryCard(BuildContext context, Transaction tx) {
-    final isIncome = tx.type == 'income';
+  // =====================================================================
+  // TOP CARD
+  Widget _buildTopCard(Transaction tx) {
+    final isIncome = tx.type == "income";
 
     return Container(
       width: double.infinity,
+      padding: EdgeInsets.all(20.w),
       decoration: BoxDecoration(
         color: isIncome ? AppColors.lightGreen : AppColors.lightRed,
         borderRadius: BorderRadius.circular(20.r),
       ),
-      padding: EdgeInsets.symmetric(vertical: 24.h, horizontal: 20.w),
       child: Column(
-        mainAxisSize: MainAxisSize.min,
         children: [
           CircleAvatar(
             radius: 26.r,
-            backgroundColor: AppColors.bgCard,
+            backgroundColor: Colors.white,
             child: Icon(
               isIncome ? Icons.arrow_downward : Icons.arrow_upward,
               color: isIncome ? AppColors.darkGreen : AppColors.darkRed,
@@ -166,36 +144,29 @@ class _TransactionDetailPageState extends ConsumerState<TransactionDetailPage> {
           ),
           SizedBox(height: 12.h),
           Text(
-            '${isIncome ? "+" : "-"}${NumberFormat.currency(locale: "vi_VN", symbol: "₫").format(tx.amount)}',
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+            "${isIncome ? "+" : "-"}${NumberFormat("#,###", "vi_VN").format(tx.amount)}đ",
+            style: TextStyle(
+              fontSize: 22.sp,
+              fontWeight: FontWeight.w800,
               color: isIncome ? AppColors.darkGreen : AppColors.darkRed,
-              fontSize: 24.sp,
-              fontWeight: FontWeight.w700,
             ),
           ),
           SizedBox(height: 6.h),
           Text(
             tx.merchant ?? "Không xác định",
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Colors.black87,
-              fontSize: 14.sp,
-            ),
+            style: TextStyle(fontSize: 14.sp, color: Colors.black87),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildAIClassificationBanner(BuildContext context, Transaction tx) {
-    if (tx.ai.categorySuggestionId == null || tx.ai.confidence == null) {
-      return const SizedBox.shrink();
-    }
-
-    final confidencePercent = (tx.ai.confidence! * 100).toInt();
-    final categoryName = tx.categoryName ?? 'Không xác định';
+  // =====================================================================
+  // AI BANNER
+  Widget _buildAIBanner(Transaction tx) {
+    if (tx.ai.categorySuggestionId == null) return const SizedBox.shrink();
 
     return Container(
-      width: double.infinity,
       padding: EdgeInsets.all(14.w),
       decoration: BoxDecoration(
         color: const Color(0xFFFFF4D1),
@@ -204,29 +175,14 @@ class _TransactionDetailPageState extends ConsumerState<TransactionDetailPage> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(Icons.auto_awesome, color: Colors.orange[600], size: 22.sp),
+          Icon(Icons.auto_awesome, color: Colors.orange[700]),
           SizedBox(width: 10.w),
           Expanded(
-            child: RichText(
-              text: TextSpan(
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  fontSize: 13.sp,
-                  color: Colors.orange[900],
-                ),
-                children: [
-                  TextSpan(
-                    text: 'Phân loại tự động bởi AI\n',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w700,
-                      fontSize: 13.sp,
-                    ),
-                  ),
-                  TextSpan(
-                    text:
-                        'Giao dịch này được AI phân loại vào danh mục "$categoryName" với độ chính xác $confidencePercent%.',
-                  ),
-                ],
-              ),
+            child: Text(
+              "Phân loại tự động bởi AI\n"
+              "Giao dịch được AI phân loại: “${tx.categoryName}” "
+              "với độ chính xác ${(tx.ai.confidence! * 100).toInt()}%",
+              style: TextStyle(fontSize: 13.sp, color: Colors.orange[900]),
             ),
           ),
         ],
@@ -234,84 +190,131 @@ class _TransactionDetailPageState extends ConsumerState<TransactionDetailPage> {
     );
   }
 
-  Widget _buildEditableCard({
-    required String label,
-    required String value,
-    TextEditingController? controller,
-    FocusNode? focusNode,
-    required bool isEditing,
-  }) {
+  // =====================================================================
+  // NORMAL INFO TILE
+  Widget _infoTile(String title, String value, IconData icon) {
     return Container(
-      width: double.infinity,
+      padding: EdgeInsets.all(14.w),
       margin: EdgeInsets.only(bottom: 10.h),
-      padding: EdgeInsets.symmetric(vertical: 12.h, horizontal: 16.w),
       decoration: BoxDecoration(
-        color: AppColors.bgCard,
-        borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(color: Colors.grey.shade300, width: 1),
+        borderRadius: BorderRadius.circular(14.r),
+        border: Border.all(color: Colors.grey.shade300),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
         children: [
-          Text(
-            label,
-            style: TextStyle(fontSize: 12.sp, color: Colors.grey[600]),
-          ),
-          SizedBox(height: 6.h),
-
-          isEditing && controller != null
-              ? TextField(
-                  controller: controller,
-                  focusNode: focusNode,
-                  autofocus: isEditing,
-                  decoration: const InputDecoration(
-                    border: InputBorder.none,
-                    isDense: true,
-                  ),
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                  ),
-                )
-              : Text(
+          Icon(icon, color: Colors.black54, size: 20.sp),
+          SizedBox(width: 12.w),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: TextStyle(fontSize: 12.sp, color: Colors.grey),
+                ),
+                SizedBox(height: 4.h),
+                Text(
                   value,
                   style: TextStyle(
                     fontSize: 14.sp,
-                    fontWeight: FontWeight.w500,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
+              ],
+            ),
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildActionButtons(
-    BuildContext context,
-    WidgetRef ref,
-    Transaction tx,
-    TransactionDetailNotifier notifier,
+  // =====================================================================
+  // EDITABLE TILE
+  Widget _editableTile(
+    String title,
+    IconData icon,
+    TextEditingController ctrl,
     bool isEditing,
   ) {
-    if (!isEditing) {
+    return Container(
+      padding: EdgeInsets.all(14.w),
+      margin: EdgeInsets.only(bottom: 10.h),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(14.r),
+        border: Border.all(color: Colors.grey.shade300),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, color: Colors.black54, size: 20.sp),
+          SizedBox(width: 12.w),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: TextStyle(fontSize: 12.sp, color: Colors.grey),
+                ),
+                SizedBox(height: 4.h),
+                isEditing
+                    ? TextField(
+                        controller: ctrl,
+                        decoration: const InputDecoration(
+                          border: InputBorder.none,
+                          isDense: true,
+                        ),
+                      )
+                    : Text(
+                        ctrl.text.isEmpty ? " " : ctrl.text,
+                        style: TextStyle(
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBottomButtons(
+    BuildContext context,
+    TransactionDetailNotifier notifier,
+    TransactionDetailState state,
+    Transaction tx,
+  ) {
+    final buttonHeight = 50.h; // chuẩn Figma
+    final buttonRadius = 20.r;
+    final buttonWidth = 185.w; // bạn đang dùng Expanded nên sẽ auto fill
+
+    if (!state.isEditing) {
       return Row(
         children: [
-          // Nút Chỉnh sửa
+          // ---------------- CHỈNH SỬA ----------------
           Expanded(
             child: SizedBox(
-              height: 50.h,
+              height: buttonHeight,
               child: OutlinedButton(
+                onPressed: notifier.startEdit,
                 style: OutlinedButton.styleFrom(
-                  side: BorderSide(color: AppColors.primaryGreen, width: 1.w),
+                  minimumSize: Size(buttonWidth, buttonHeight),
+                  padding: EdgeInsets.zero, // FIX tràn
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  side: const BorderSide(
+                    color: AppColors.primaryGreen,
+                    width: 1,
+                  ),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20.r),
+                    borderRadius: BorderRadius.circular(buttonRadius),
                   ),
                 ),
-                onPressed: notifier.startEdit,
                 child: Text(
                   "Chỉnh sửa",
                   style: TextStyle(
                     color: AppColors.primaryGreen,
-                    fontSize: 15.sp,
+                    fontSize: 16.sp,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -321,23 +324,26 @@ class _TransactionDetailPageState extends ConsumerState<TransactionDetailPage> {
 
           SizedBox(width: 12.w),
 
-          // Nút Xóa
+          // ---------------- XÓA ----------------
           Expanded(
             child: SizedBox(
-              height: 50.h,
+              height: buttonHeight,
               child: ElevatedButton(
+                onPressed: () => notifier.onDelete(context, tx),
                 style: ElevatedButton.styleFrom(
+                  minimumSize: Size(buttonWidth, buttonHeight),
+                  padding: EdgeInsets.zero, // FIX tràn
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   backgroundColor: AppColors.darkRed,
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20.r),
+                    borderRadius: BorderRadius.circular(buttonRadius),
                   ),
                 ),
-                onPressed: () => notifier.onDelete(context, tx),
                 child: Text(
                   "Xóa",
                   style: TextStyle(
-                    color: AppColors.bgCard,
-                    fontSize: 15.sp,
+                    color: Colors.white,
+                    fontSize: 16.sp,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -348,27 +354,29 @@ class _TransactionDetailPageState extends ConsumerState<TransactionDetailPage> {
       );
     }
 
-    // ================== EDIT MODE ==================
+    // =================== EDIT MODE ===================
     return Row(
       children: [
-        // Nút Hủy
         Expanded(
           child: SizedBox(
-            height: 50.h,
+            height: buttonHeight,
             child: OutlinedButton(
+              onPressed: notifier.cancelEdit,
               style: OutlinedButton.styleFrom(
-                side: BorderSide(color: Colors.grey.shade400, width: 1.w),
+                minimumSize: Size(buttonWidth, buttonHeight),
+                padding: EdgeInsets.zero,
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                side: BorderSide(color: Colors.grey.shade400, width: 1),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20.r),
+                  borderRadius: BorderRadius.circular(buttonRadius),
                 ),
               ),
-              onPressed: notifier.cancelEdit,
               child: Text(
                 "Hủy",
                 style: TextStyle(
-                  color: Colors.grey.shade700,
-                  fontSize: 15.sp,
+                  fontSize: 16.sp,
                   fontWeight: FontWeight.w600,
+                  color: Colors.grey.shade700,
                 ),
               ),
             ),
@@ -377,17 +385,10 @@ class _TransactionDetailPageState extends ConsumerState<TransactionDetailPage> {
 
         SizedBox(width: 12.w),
 
-        // Nút Lưu thay đổi
         Expanded(
           child: SizedBox(
-            height: 50.h,
+            height: buttonHeight,
             child: ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.darkGreen,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20.r),
-                ),
-              ),
               onPressed: () => notifier.onSave(
                 context,
                 tx.copyWith(
@@ -395,12 +396,21 @@ class _TransactionDetailPageState extends ConsumerState<TransactionDetailPage> {
                   userNote: noteCtrl.text,
                 ),
               ),
+              style: ElevatedButton.styleFrom(
+                minimumSize: Size(buttonWidth, buttonHeight),
+                padding: EdgeInsets.zero,
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                backgroundColor: AppColors.darkGreen,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(buttonRadius),
+                ),
+              ),
               child: Text(
                 "Lưu thay đổi",
                 style: TextStyle(
                   color: Colors.white,
-                  fontSize: 15.sp,
                   fontWeight: FontWeight.w600,
+                  fontSize: 16.sp,
                 ),
               ),
             ),
@@ -410,24 +420,9 @@ class _TransactionDetailPageState extends ConsumerState<TransactionDetailPage> {
     );
   }
 
-  String _formatDate(int timestampSeconds) {
-    final date = DateTime.fromMillisecondsSinceEpoch(timestampSeconds * 1000);
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-
-    if (date.year == today.year &&
-        date.month == today.month &&
-        date.day == today.day) {
-      return 'Hôm nay, ${DateFormat('HH:mm').format(date)}';
-    }
-
-    final yesterday = today.subtract(const Duration(days: 1));
-    if (date.year == yesterday.year &&
-        date.month == yesterday.month &&
-        date.day == yesterday.day) {
-      return 'Hôm qua, ${DateFormat('HH:mm').format(date)}';
-    }
-
-    return DateFormat('dd/MM/yyyy, HH:mm').format(date);
+  // =====================================================================
+  String _formatDate(int ts) {
+    final dt = DateTime.fromMillisecondsSinceEpoch(ts * 1000);
+    return DateFormat("dd/MM/yyyy, HH:mm").format(dt);
   }
 }

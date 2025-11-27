@@ -1,5 +1,4 @@
-import 'package:fridge_to_fork_ai/features/stats/domain/entities/stats_by_category_item.dart'
-    show StatsByCategoryItem;
+import 'package:fridge_to_fork_ai/features/stats/domain/entities/stats_by_category_item.dart';
 import 'package:fridge_to_fork_ai/features/stats/domain/entities/stats_period.dart';
 
 class StatsByCategory {

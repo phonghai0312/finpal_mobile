@@ -19,7 +19,7 @@ class TransactionRemoteDataSource {
       categoryId: 'c001',
       categoryName: 'Ăn uống',
       merchant: 'The Coffee House',
-      occurredAt: 1708157400, // hôm nay 14:30
+      occurredAt: 1739693400, // 17/02/2025 14:30
       rawMessage: 'TCH 45000VND',
       normalized: TransactionNormalizedModel(
         title: 'The Coffee House',
@@ -29,8 +29,8 @@ class TransactionRemoteDataSource {
       ai: TransactionAIModel(categorySuggestionId: 'c001', confidence: 0.91),
       source: 'sepay',
       userNote: null,
-      createdAt: 1708157400,
-      updatedAt: 1708157400,
+      createdAt: 1739693400,
+      updatedAt: 1739693400,
     ),
 
     // Shopee
@@ -45,7 +45,7 @@ class TransactionRemoteDataSource {
       categoryId: 'c002',
       categoryName: 'Mua sắm',
       merchant: 'Shopee',
-      occurredAt: 1708154100, // hôm nay 10:15
+      occurredAt: 1739690100, // 17/02/2025 10:15
       rawMessage: 'Shopee Order #123',
       normalized: const TransactionNormalizedModel(
         title: 'Shopee - Đơn hàng #123',
@@ -58,8 +58,8 @@ class TransactionRemoteDataSource {
       ),
       source: 'sepay',
       userNote: null,
-      createdAt: 1708154100,
-      updatedAt: 1708154100,
+      createdAt: 1739690100,
+      updatedAt: 1739690100,
     ),
 
     // Thu nhập
@@ -74,7 +74,7 @@ class TransactionRemoteDataSource {
       categoryId: 'c003',
       categoryName: 'Thu nhập',
       merchant: 'Công ty ABC',
-      occurredAt: 1708154100, // hôm nay
+      occurredAt: 1739690100, // same as above
       rawMessage: 'Lương tháng 11',
       normalized: const TransactionNormalizedModel(
         title: 'Lương tháng 11',
@@ -87,8 +87,8 @@ class TransactionRemoteDataSource {
       ),
       source: 'manual',
       userNote: null,
-      createdAt: 1708154100,
-      updatedAt: 1708154100,
+      createdAt: 1739690100,
+      updatedAt: 1739690100,
     ),
 
     // Highlands Coffee
@@ -103,7 +103,7 @@ class TransactionRemoteDataSource {
       categoryId: 'c001',
       categoryName: 'Ăn uống',
       merchant: 'Highlands Coffee',
-      occurredAt: 1707991200, // 2 ngày trước
+      occurredAt: 1739527200, // 15/02/2025
       rawMessage: 'Highlands Coffee 65000₫',
       normalized: const TransactionNormalizedModel(
         title: 'Highlands Coffee',
@@ -116,8 +116,8 @@ class TransactionRemoteDataSource {
       ),
       source: 'sepay',
       userNote: null,
-      createdAt: 1707991200,
-      updatedAt: 1707991200,
+      createdAt: 1739527200,
+      updatedAt: 1739527200,
     ),
 
     // Grab
@@ -132,7 +132,7 @@ class TransactionRemoteDataSource {
       categoryId: 'c004',
       categoryName: 'Di chuyển',
       merchant: 'Grab',
-      occurredAt: 1708077600, // hôm qua 18:45
+      occurredAt: 1739613900, // 16/02/2025 18:45
       rawMessage: 'Grab from home to work',
       normalized: const TransactionNormalizedModel(
         title: 'Grab - Từ nhà đến công ty',
@@ -145,8 +145,8 @@ class TransactionRemoteDataSource {
       ),
       source: 'sepay',
       userNote: null,
-      createdAt: 1708077600,
-      updatedAt: 1708077600,
+      createdAt: 1739613900,
+      updatedAt: 1739613900,
     ),
 
     // Phòng khám ABC
@@ -161,7 +161,7 @@ class TransactionRemoteDataSource {
       categoryId: 'c005',
       categoryName: 'Sức khỏe',
       merchant: 'Phòng khám ABC',
-      occurredAt: 1707904800, // 3 ngày trước
+      occurredAt: 1739440800, // 14/02/2025
       rawMessage: 'Phòng khám ABC 5.000.000đ',
       normalized: const TransactionNormalizedModel(
         title: 'Phòng khám ABC',
@@ -174,11 +174,11 @@ class TransactionRemoteDataSource {
       ),
       source: 'manual',
       userNote: null,
-      createdAt: 1707904800,
-      updatedAt: 1707904800,
+      createdAt: 1739440800,
+      updatedAt: 1739440800,
     ),
 
-    // thêm các transaction khác nếu muốn UI dài hơn ↓↓↓
+    // CGV
     TransactionModel(
       id: 't007',
       userId: 'u001',
@@ -190,7 +190,7 @@ class TransactionRemoteDataSource {
       categoryId: 'c006',
       categoryName: 'Giải trí',
       merchant: 'CGV Vincom',
-      occurredAt: 1707818400,
+      occurredAt: 1739354400, // 13/02/2025
       rawMessage: 'CGV Movie',
       normalized: const TransactionNormalizedModel(
         title: 'CGV - Vé xem phim',
@@ -203,10 +203,11 @@ class TransactionRemoteDataSource {
       ),
       source: 'sepay',
       userNote: null,
-      createdAt: 1707818400,
-      updatedAt: 1707818400,
+      createdAt: 1739354400,
+      updatedAt: 1739354400,
     ),
 
+    // Udemy
     TransactionModel(
       id: 't008',
       userId: 'u001',
@@ -218,7 +219,7 @@ class TransactionRemoteDataSource {
       categoryId: 'c007',
       categoryName: 'Giáo dục',
       merchant: 'Udemy',
-      occurredAt: 1707732000,
+      occurredAt: 1739268000, // 12/02/2025
       rawMessage: 'Udemy Payment',
       normalized: const TransactionNormalizedModel(
         title: 'Udemy - Khoá học Flutter',
@@ -231,10 +232,11 @@ class TransactionRemoteDataSource {
       ),
       source: 'manual',
       userNote: null,
-      createdAt: 1707732000,
-      updatedAt: 1707732000,
+      createdAt: 1739268000,
+      updatedAt: 1739268000,
     ),
 
+    // Pizza Home
     TransactionModel(
       id: 't009',
       userId: 'u001',
@@ -246,7 +248,7 @@ class TransactionRemoteDataSource {
       categoryId: 'c001',
       categoryName: 'Ăn uống',
       merchant: 'Pizza Home',
-      occurredAt: 1707645600,
+      occurredAt: 1739181600, // 11/02/2025
       rawMessage: 'Pizza Home order',
       normalized: const TransactionNormalizedModel(
         title: 'Pizza Home',
@@ -259,46 +261,37 @@ class TransactionRemoteDataSource {
       ),
       source: 'sepay',
       userNote: null,
-      createdAt: 1707645600,
-      updatedAt: 1707645600,
+      createdAt: 1739181600,
+      updatedAt: 1739181600,
     ),
   ];
 
-  /// ============================
-  /// GET ALL TRANSACTIONS
-  /// ============================
+  /// GET ALL
   Future<List<TransactionModel>> getTransactions() async {
     await Future.delayed(const Duration(milliseconds: 300));
     return _mock;
   }
 
-  /// ============================
-  /// GET DETAIL
-  /// ============================
+  /// DETAIL
   Future<TransactionModel> getTransactionDetail(String id) async {
     await Future.delayed(const Duration(milliseconds: 300));
-
     return _mock.firstWhere(
-          (t) => t.id == id,
+      (t) => t.id == id,
       orElse: () => throw Exception('Transaction not found'),
     );
   }
 
-  /// ============================
-  /// UPDATE TRANSACTION  ← KHỚP REPO
-  /// ============================
+  /// UPDATE
   Future<void> updateTransaction(
-      String id, {
-        String? categoryId,
-        String? userNote,
-        String? merchant,
-      }) async {
+    String id, {
+    String? categoryId,
+    String? userNote,
+    String? merchant,
+  }) async {
     await Future.delayed(const Duration(milliseconds: 300));
 
     final index = _mock.indexWhere((t) => t.id == id);
-    if (index == -1) {
-      throw Exception('Transaction not found');
-    }
+    if (index == -1) throw Exception('Transaction not found');
 
     final t = _mock[index];
 
@@ -326,9 +319,7 @@ class TransactionRemoteDataSource {
     _mock[index] = updated;
   }
 
-  /// ============================
-  /// CREATE TRANSACTION (NEW)
-  /// ============================
+  /// CREATE
   Future<void> createTransaction({
     required double amount,
     required String type,
@@ -364,6 +355,6 @@ class TransactionRemoteDataSource {
       updatedAt: occurredAt,
     );
 
-    _mock.insert(0, newModel); // thêm vào đầu danh sách
+    _mock.insert(0, newModel);
   }
 }

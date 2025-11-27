@@ -1,21 +1,20 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fridge_to_fork_ai/features/transactions/data/datasources/transaction_remote_datasources.dart';
 import 'package:fridge_to_fork_ai/features/transactions/data/repositories/transaction_repository_impl.dart';
 import 'package:fridge_to_fork_ai/features/transactions/domain/usecase/delete_transaction.dart';
 import 'package:fridge_to_fork_ai/features/transactions/domain/usecase/get_transaction_detail.dart'
     show GetTransactionDetail;
 import 'package:fridge_to_fork_ai/features/transactions/domain/usecase/update_transaction.dart';
+import 'package:fridge_to_fork_ai/features/transactions/presentation/provider/transaction/transaction_provider.dart';
 import 'package:fridge_to_fork_ai/features/transactions/presentation/provider/transactiondetail/transaction_detail_notifier.dart';
 
-final transactionDetailRemoteDataSourceProvider =
-    Provider<TransactionRemoteDataSource>(
-      (ref) => TransactionRemoteDataSource(),
-    );
+// final transactionDetailRemoteDataSourceProvider =
+//     Provider<TransactionRemoteDataSource>(
+//       (ref) => TransactionRemoteDataSource(),
+//     );
 
 final transactionDetailRepositoryProvider = Provider<TransactionRepositoryImpl>(
-  (ref) => TransactionRepositoryImpl(
-    ref.read(transactionDetailRemoteDataSourceProvider),
-  ),
+  (ref) =>
+      TransactionRepositoryImpl(ref.read(transactionRemoteDataSourceProvider)),
 );
 
 final getTransactionDetailUsecaseProvider = Provider<GetTransactionDetail>(

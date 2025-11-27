@@ -3,7 +3,7 @@
 library;
 
 import '../entities/stats_overview.dart';
-import '../repositories/stats_repository.dart';
+import '../repositories/stats_repositories.dart';
 
 class GetStatsOverview {
   final StatsRepository repository;

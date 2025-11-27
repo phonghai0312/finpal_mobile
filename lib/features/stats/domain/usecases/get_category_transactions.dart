@@ -1,6 +1,6 @@
 library;
 
-import 'package:fridge_to_fork_ai/features/stats/domain/repositories/stats_repository.dart';
+import 'package:fridge_to_fork_ai/features/stats/domain/repositories/stats_repositories.dart';
 import 'package:fridge_to_fork_ai/features/transactions/domain/entities/transaction.dart';
 
 class GetCategoryTransactions {

@@ -6,11 +6,7 @@ class StatsCategoryList extends StatelessWidget {
   final List<StatsByCategoryItem> items;
   final ValueChanged<StatsByCategoryItem>? onCategoryTap;
 
-  const StatsCategoryList({
-    super.key,
-    required this.items,
-    this.onCategoryTap,
-  });
+  const StatsCategoryList({super.key, required this.items, this.onCategoryTap});
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +17,7 @@ class StatsCategoryList extends StatelessWidget {
           'Top 3 danh mục',
           style: TextStyle(
             fontSize: 18.sp,
-            fontWeight: FontWeight.bold,
+            fontWeight: FontWeight.w400,
             color: Colors.black87,
           ),
         ),

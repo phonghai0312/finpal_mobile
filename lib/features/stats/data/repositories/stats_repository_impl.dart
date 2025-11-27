@@ -6,7 +6,7 @@ import 'package:fridge_to_fork_ai/features/transactions/domain/entities/transact
 
 import '../../domain/entities/stats_by_category.dart';
 import '../../domain/entities/stats_overview.dart';
-import '../../domain/repositories/stats_repository.dart';
+import '../../domain/repositories/stats_repositories.dart';
 import '../datasources/stats_remote_datasource.dart';
 
 class StatsRepositoryImpl implements StatsRepository {

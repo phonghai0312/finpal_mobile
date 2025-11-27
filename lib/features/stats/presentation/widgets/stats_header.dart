@@ -48,10 +48,7 @@ class StatsHeader extends StatelessWidget {
               SizedBox(height: 4.h),
               Text(
                 'Năm $selectedYear',
-                style: TextStyle(
-                  fontSize: 13.sp,
-                  color: Colors.grey[600],
-                ),
+                style: TextStyle(fontSize: 13.sp, color: Colors.grey[600]),
               ),
             ],
           ),
@@ -64,7 +61,13 @@ class StatsHeader extends StatelessWidget {
                   .map(
                     (m) => DropdownMenuItem<int>(
                       value: m,
-                      child: Text('Tháng $m'),
+                      child: Text(
+                        'Tháng $m',
+                        style: TextStyle(
+                          fontSize: 15.sp,
+                          color: Colors.grey[600],
+                        ),
+                      ),
                     ),
                   )
                   .toList(),
