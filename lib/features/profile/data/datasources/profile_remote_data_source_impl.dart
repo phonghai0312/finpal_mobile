@@ -32,11 +32,13 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
     UserSettingsUpdateRequestModel request,
     String? name,
     String? email,
+    String? phone,
   ) async {
     await Future.delayed(const Duration(milliseconds: 500));
     _mockUser = _mockUser.copyWith(
       name: name ?? _mockUser.name,
       email: email ?? _mockUser.email,
+      phone: phone ?? _mockUser.phone,
       settings: _mockUser.settings?.copyWith(
         currency: request.currency ?? _mockUser.settings?.currency,
         language: request.language ?? _mockUser.settings?.language,

@@ -18,8 +18,9 @@ class ProfileRepositoryImpl implements ProfileRepository {
     UserSettingsUpdateRequestModel request,
     String? name,
     String? email,
+    String? phone,
   ) async {
-    return await remoteDataSource.updateUserSettings(request, name, email);
+    return await remoteDataSource.updateUserSettings(request, name, email, phone);
   }
 
   @override

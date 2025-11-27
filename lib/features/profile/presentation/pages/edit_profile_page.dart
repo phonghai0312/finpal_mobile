@@ -18,6 +18,7 @@ class EditProfilePage extends ConsumerStatefulWidget {
 class _EditProfilePageState extends ConsumerState<EditProfilePage> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _phoneController = TextEditingController();
 
   @override
   void initState() {
@@ -37,6 +38,7 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
   void dispose() {
     _nameController.dispose();
     _emailController.dispose();
+    _phoneController.dispose();
     super.dispose();
   }
 
@@ -44,6 +46,7 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
     final profileState = ref.read(profileNotifierProvider);
     _nameController.text = profileState.form.name ?? '';
     _emailController.text = profileState.form.email ?? '';
+    _phoneController.text = profileState.form.phone ?? '';
   }
 
   @override
@@ -53,127 +56,114 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
 
     return Scaffold(
       backgroundColor: AppColors.bgSecondary,
-      appBar: HeaderWithBack(
-        title: 'Chỉnh sửa thông tin cá nhân',
-        onBack: () => context.pop(),
+      appBar: AppBar(
+        backgroundColor: AppColors.bgWhite,
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(
+            Icons.arrow_back,
+            color: AppColors.typoHeading,
+            size: 24.sp,
+          ),
+          onPressed: () => context.pop(),
+        ),
+        title: Text(
+          'Chỉnh sửa thông tin',
+          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+            color: AppColors.typoHeading,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        centerTitle: true,
       ),
       body: SingleChildScrollView(
         padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 24.h),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Center(
+              child: Column(
+                children: [
+                  Stack(
+                    children: [
+                      CircleAvatar(
+                        radius: 60.r,
+                        backgroundColor: AppColors.bgGray.withOpacity(0.2),
+                        backgroundImage: NetworkImage(
+                          profileState.user?.avatarUrl ??
+                              'https://www.gravatar.com/avatar/?d=mp',
+                        ),
+                      ),
+                      Positioned(
+                        bottom: 0,
+                        right: 0,
+                        child: Container(
+                          padding: EdgeInsets.all(4.w),
+                          decoration: BoxDecoration(
+                            color: AppColors.primaryGreen,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            Icons.camera_alt, // Camera icon
+                            color: AppColors.typoWhite,
+                            size: 20.sp,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 16.h),
+                  Text(
+                    profileState.user?.name ?? 'Người dùng',
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.typoHeading,
+                    ),
+                  ),
+                  SizedBox(height: 4.h),
+                  Text(
+                    'ID: ${profileState.user?.id ?? 'N/A'}',
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodyMedium?.copyWith(color: AppColors.typoBody),
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(height: 32.h),
             Text(
-              'Thông tin cá nhân',
+              'Account Settings',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontSize: 16.sp,
+                fontSize: 18.sp,
                 fontWeight: FontWeight.bold,
                 color: AppColors.typoHeading,
               ),
             ),
-            SizedBox(height: 12.h),
-            TextFormField(
+            SizedBox(height: 16.h),
+            _buildProfileInputField(
+              context,
               controller: _nameController,
+              label: 'Username',
               onChanged: notifier.updateName,
-              style: Theme.of(
-                context,
-              ).textTheme.bodyLarge?.copyWith(color: AppColors.typoHeading),
-              decoration: InputDecoration(
-                labelText: 'Tên',
-                labelStyle: Theme.of(
-                  context,
-                ).textTheme.bodyMedium?.copyWith(color: AppColors.typoBody),
-                floatingLabelBehavior: FloatingLabelBehavior.always,
-                filled: true,
-                fillColor: AppColors.bgWhite,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12.r),
-                  borderSide: BorderSide.none,
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12.r),
-                  borderSide: BorderSide(
-                    color: AppColors.bgGray.withOpacity(0.5),
-                  ),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12.r),
-                  borderSide: BorderSide(
-                    color: AppColors.primaryGreen,
-                    width: 2.w,
-                  ),
-                ),
-                contentPadding: EdgeInsets.symmetric(
-                  horizontal: 16.w,
-                  vertical: 14.h,
-                ),
-              ),
+              keyboardType: TextInputType.text,
             ),
             SizedBox(height: 16.h),
-            TextFormField(
+            _buildProfileInputField(
+              context,
+              controller: _phoneController,
+              label: 'Phone',
+              onChanged: notifier.updatePhone,
+              keyboardType: TextInputType.phone,
+            ),
+            SizedBox(height: 16.h),
+            _buildProfileInputField(
+              context,
               controller: _emailController,
+              label: 'Email Address',
               onChanged: notifier.updateEmail,
               keyboardType: TextInputType.emailAddress,
-              style: Theme.of(
-                context,
-              ).textTheme.bodyLarge?.copyWith(color: AppColors.typoHeading),
-              decoration: InputDecoration(
-                labelText: 'Email',
-                labelStyle: Theme.of(
-                  context,
-                ).textTheme.bodyMedium?.copyWith(color: AppColors.typoBody),
-                floatingLabelBehavior: FloatingLabelBehavior.always,
-                filled: true,
-                fillColor: AppColors.bgWhite,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12.r),
-                  borderSide: BorderSide.none,
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12.r),
-                  borderSide: BorderSide(
-                    color: AppColors.bgGray.withOpacity(0.5),
-                  ),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12.r),
-                  borderSide: BorderSide(
-                    color: AppColors.primaryGreen,
-                    width: 2.w,
-                  ),
-                ),
-                contentPadding: EdgeInsets.symmetric(
-                  horizontal: 16.w,
-                  vertical: 14.h,
-                ),
-              ),
-            ),
-            SizedBox(height: 24.h),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Bật thông báo',
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: AppColors.typoHeading,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                Switch(
-                  value: profileState.form.notificationEnabled ?? false,
-                  onChanged: notifier.updateNotificationEnabled,
-                  activeColor: AppColors.primaryGreen,
-                ),
-              ],
             ),
             SizedBox(height: 32.h),
-            Text(
-              'Lưu ý: Thay đổi Tên và Email hiện không được API hỗ trợ. Vui lòng liên hệ quản trị viên để cập nhật.',
-              style: Theme.of(
-                context,
-              ).textTheme.bodySmall?.copyWith(color: AppColors.typoError),
-              textAlign: TextAlign.center,
-            ),
-            SizedBox(height: 16.h),
             ElevatedButton(
               onPressed: profileState.isLoading
                   ? null
@@ -189,7 +179,7 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
                 minimumSize: Size(double.infinity, 50.h),
               ),
               child: Text(
-                'Lưu thay đổi',
+                'Update Profile',
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
                   color: AppColors.typoWhite,
                   fontSize: 16.sp,
@@ -197,30 +187,47 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
                 ),
               ),
             ),
-            SizedBox(height: 16.h),
-            OutlinedButton(
-              onPressed: () {
-                context.pop();
-              },
-              style: OutlinedButton.styleFrom(
-                side: BorderSide(color: AppColors.bgGray.withOpacity(0.5)),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12.r),
-                ),
-                padding: EdgeInsets.symmetric(vertical: 16.h),
-                minimumSize: Size(double.infinity, 50.h),
-              ),
-              child: Text(
-                'Hủy',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: AppColors.typoBody,
-                  fontSize: 16.sp,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildProfileInputField(
+    BuildContext context, {
+    required TextEditingController controller,
+    required String label,
+    required Function(String) onChanged,
+    TextInputType keyboardType = TextInputType.text,
+  }) {
+    return TextFormField(
+      controller: controller,
+      onChanged: onChanged,
+      keyboardType: keyboardType,
+      style: Theme.of(
+        context,
+      ).textTheme.bodyLarge?.copyWith(color: AppColors.typoHeading),
+      decoration: InputDecoration(
+        labelText: label,
+        labelStyle: Theme.of(
+          context,
+        ).textTheme.bodyMedium?.copyWith(color: AppColors.typoBody),
+        floatingLabelBehavior: FloatingLabelBehavior.never,
+        filled: true,
+        fillColor: AppColors.bgWhite,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12.r),
+          borderSide: BorderSide.none,
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12.r),
+          borderSide: BorderSide(color: AppColors.bgGray.withOpacity(0.5)),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12.r),
+          borderSide: BorderSide(color: AppColors.primaryGreen, width: 2.w),
+        ),
+        contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
       ),
     );
   }

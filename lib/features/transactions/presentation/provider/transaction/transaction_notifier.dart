@@ -1,4 +1,4 @@
-// ignore_for_file: use_build_context_synchronously
+// ignore_for_file: use_build_context_synchronously, unused_result
 
 import 'dart:async';
 
@@ -15,7 +15,7 @@ import '../../../domain/usecase/get_transactions.dart';
 class TransactionState {
   final bool isLoading;
   final bool isRefreshing;
-  final String currentFilter; // all | income | expense
+  final String currentFilter;
   final String? errorMessage;
 
   final List<Transaction> all;
@@ -120,7 +120,10 @@ class TransactionNotifier extends StateNotifier<TransactionState> {
   /// ============================================
   void onTransactionSelected(BuildContext context, Transaction tx) {
     _selectedId = tx.id;
-    ref.invalidate(transactionDetailNotifierProvider);
+
+    // Reset lại detail notifier
+    ref.refresh(transactionDetailNotifierProvider);
+
     context.go(AppRoutes.transactionDetail);
   }
 

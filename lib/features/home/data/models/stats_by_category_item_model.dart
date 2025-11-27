@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:fridge_to_fork_ai/features/stats/domain/entities/stats_by_category_item.dart';
 
 class StatsByCategoryItemModel extends StatsByCategoryItem {
@@ -7,7 +6,6 @@ class StatsByCategoryItemModel extends StatsByCategoryItem {
     required super.categoryName,
     required super.totalAmount,
     required super.percentage,
-    required super.color,
   });
 
   factory StatsByCategoryItemModel.fromJson(Map<String, dynamic> json) {
@@ -16,7 +14,6 @@ class StatsByCategoryItemModel extends StatsByCategoryItem {
       categoryName: json['categoryName'] ?? '',
       totalAmount: (json['totalAmount'] ?? 0).toDouble(),
       percentage: (json['percentage'] ?? 0).toDouble(),
-      color: Colors.grey,
     );
   }
 
@@ -25,6 +22,5 @@ class StatsByCategoryItemModel extends StatsByCategoryItem {
     'categoryName': categoryName,
     'totalAmount': totalAmount,
     'percentage': percentage,
-    'color': color,
   };
 }

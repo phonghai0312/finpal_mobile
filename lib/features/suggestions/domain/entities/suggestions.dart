@@ -3,7 +3,7 @@ import '../../../stats/domain/entities/stats_period.dart';
 class Suggestions {
   final String id;
   final String userId;
-  final String type; // weekly_summary, monthly_summary, alert, tip
+  final String type;
   final StatsPeriod period;
   final String title;
   final String message;

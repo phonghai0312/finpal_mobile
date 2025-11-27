@@ -11,7 +11,8 @@ class UpdateUserProfileUseCase {
     required UserSettingsUpdateRequestModel request,
     String? name,
     String? email,
+    String? phone,
   }) async {
-    return await repository.updateUserSettings(request, name, email);
+    return await repository.updateUserSettings(request, name, email, phone);
   }
 }

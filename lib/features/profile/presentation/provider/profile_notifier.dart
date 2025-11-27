@@ -13,18 +13,26 @@ import 'package:go_router/go_router.dart';
 class ProfileFormState {
   final String? name;
   final String? email;
+  final String? phone;
   final bool? notificationEnabled;
 
-  ProfileFormState({this.name, this.email, this.notificationEnabled});
+  ProfileFormState({
+    this.name,
+    this.email,
+    this.phone,
+    this.notificationEnabled,
+  });
 
   ProfileFormState copyWith({
     String? name,
     String? email,
+    String? phone,
     bool? notificationEnabled,
   }) {
     return ProfileFormState(
       name: name ?? this.name,
       email: email ?? this.email,
+      phone: phone ?? this.phone,
       notificationEnabled: notificationEnabled ?? this.notificationEnabled,
     );
   }
@@ -86,6 +94,7 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
         form: ProfileFormState(
           name: user.name,
           email: user.email,
+          phone: user.phone,
           notificationEnabled: user.settings?.notificationEnabled,
         ),
       );
@@ -100,6 +109,10 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
 
   void updateEmail(String? email) {
     state = state.copyWith(form: state.form.copyWith(email: email));
+  }
+
+  void updatePhone(String? phone) {
+    state = state.copyWith(form: state.form.copyWith(phone: phone));
   }
 
   void updateNotificationEnabled(bool? enabled) {
@@ -122,6 +135,7 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
         request: request,
         name: state.form.name,
         email: state.form.email,
+        phone: state.form.phone,
       );
       state = state.copyWith(
         user: updatedUser,
@@ -129,6 +143,7 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
         form: ProfileFormState(
           name: updatedUser.name,
           email: updatedUser.email,
+          phone: updatedUser.phone,
           notificationEnabled: updatedUser.settings?.notificationEnabled,
         ),
       );

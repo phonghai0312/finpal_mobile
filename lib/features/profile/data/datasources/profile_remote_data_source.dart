@@ -7,6 +7,7 @@ abstract class ProfileRemoteDataSource {
     UserSettingsUpdateRequestModel request,
     String? name,
     String? email,
+    String? phone,
   );
   Future<void> logout();
 }
