@@ -5,7 +5,7 @@ class RefreshTokenAccount {
   final AuthRepository repository;
   RefreshTokenAccount(this.repository);
 
-  Future<RefreshToken> call(String refreshToken) {
-    return repository.refreshToken(refreshToken);
+  Future<RefreshToken> call() {
+    return repository.refreshToken();
   }
 }

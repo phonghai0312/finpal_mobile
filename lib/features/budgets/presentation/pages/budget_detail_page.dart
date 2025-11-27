@@ -2,7 +2,6 @@ import 'package:fridge_to_fork_ai/core/config/routing/app_routes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:fridge_to_fork_ai/core/presentation/theme/app_chart_colors.dart';
 import 'package:fridge_to_fork_ai/core/presentation/theme/app_colors.dart';
 import 'package:fridge_to_fork_ai/features/budgets/presentation/providers/budget_provider.dart';
 import 'package:fridge_to_fork_ai/features/budgets/presentation/providers/budget_detail_notifier.dart';

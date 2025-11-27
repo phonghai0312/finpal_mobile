@@ -1,0 +1,28 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "finpal_mobile",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "finpal_mobile (web debug)",
+            "type": "dart",
+            "request": "launch",
+            "deviceId": "chrome"
+        },
+        {
+            "name": "finpal_mobile (profile mode)",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "finpal_mobile (release mode)",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        }
+    ]
+}

@@ -1,11 +1,7 @@
 class RefreshToken {
-  final String accessToken;
-  final String tokenType;
-  final String expiresIn;
+  final String token;
 
   const RefreshToken({
-    required this.accessToken,
-    required this.tokenType,
-    required this.expiresIn,
+    required this.token,
   });
 }

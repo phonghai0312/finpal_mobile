@@ -60,10 +60,10 @@ class LoginPage extends ConsumerWidget {
 
               /// Email field
               InputTextField(
-                controller: state.usernameController,
+                controller: state.emailController,
                 label: 'Email',
                 hintText: 'example@email.com',
-                hasError: state.hasUserNameError,
+                hasError: state.hasEmailError,
               ),
 
               SizedBox(height: 14.h),

@@ -6,19 +6,27 @@ class LoginModel extends Login {
     required super.phone,
     required super.email,
     required super.password,
-    required super.accessToken,
-    required super.refreshToken,
+    required super.token,
   });
 
   factory LoginModel.fromJson(Map<String, dynamic> json) {
-    final user = json['user'] ?? {};
+    // API response:
+    // {
+    //   "settings": {...},
+    //   "_id": "...",
+    //   "email": "...",
+    //   "name": "...",
+    //   "password": "...",
+    //   "phone": "...",
+    //   "token": "...",
+    //   "menus": []
+    // }
     return LoginModel(
-      id: user['id'],
-      phone: user['phone'],
-      email: user['email'],
-      password: user['password'],
-      accessToken: json['accessToken'],
-      refreshToken: json['refreshToken'],
+      id: json['_id']?.toString() ?? '',
+      phone: json['phone']?.toString() ?? '',
+      email: json['email']?.toString() ?? '',
+      password: json['password']?.toString() ?? '',
+      token: json['token']?.toString() ?? '',
     );
   }
 
@@ -28,8 +36,7 @@ class LoginModel extends Login {
       'phone': phone,
       'email': email,
       'password': password,
-      'accessToken': accessToken,
-      'refreshToken': refreshToken,
+      'token': token,
     };
   }
 }

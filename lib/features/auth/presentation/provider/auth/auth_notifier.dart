@@ -1,37 +1,41 @@
 import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
 import '../../../domain/usecase/refresh_token_icon.dart';
 
-/// ===== STATE =====
+/// STATE
 class AuthState {
   final bool isLoggedIn;
-  final String? accessToken;
-  final String? refreshToken;
+  final bool isActive;
+  final String? token;
 
   const AuthState({
     this.isLoggedIn = false,
-    this.accessToken,
-    this.refreshToken,
+    this.isActive = false,
+    this.token,
   });
 
   AuthState copyWith({
     bool? isLoggedIn,
-    String? accessToken,
-    String? refreshToken,
+    bool? isActive,
+    String? token,
   }) {
     return AuthState(
       isLoggedIn: isLoggedIn ?? this.isLoggedIn,
-      accessToken: accessToken ?? this.accessToken,
-      refreshToken: refreshToken ?? this.refreshToken,
+      isActive: isActive ?? this.isActive,
+      token: token ?? this.token,
     );
   }
 }
 
-/// ===== NOTIFIER =====
+/// NOTIFIER
 class AuthNotifier extends StateNotifier<AuthState> {
   final RefreshTokenAccount refreshTokenUseCase;
   final Ref ref;
+
   Timer? _refreshTimer;
 
   AuthNotifier(this.refreshTokenUseCase, this.ref) : super(const AuthState()) {
@@ -44,52 +48,94 @@ class AuthNotifier extends StateNotifier<AuthState> {
     super.dispose();
   }
 
-  /// 🔍 Kiểm tra token có phải JWT hợp lệ hay không
-  bool isValidJwt(String token) {
-    final parts = token.split('.');
-    return parts.length == 3;
-  }
-
-  /// LOAD AUTH
+  /// Load auth
   Future<void> _loadAuth() async {
     final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+ 
 
-    final accessToken = prefs.getString('access_token');
-    final refreshToken = prefs.getString('refresh_token');
-
-    if (accessToken != null && refreshToken != null) {
+    if (token != null ) {
+    
       state = state.copyWith(
         isLoggedIn: true,
-        accessToken: accessToken,
-        refreshToken: refreshToken,
+        token: token,
       );
 
-      // Chỉ monitor expiry nếu token thật
-      // if (_isValidJwt(accessToken)) {
-      //   _monitorTokenExpiry();
-      // }
+      _monitorTokenExpiry();
     }
   }
 
-  /// LOGIN
+  /// Login
   Future<void> login({
-    required String accessToken,
-    required String refreshToken,
+    required String token,
   }) async {
     final prefs = await SharedPreferences.getInstance();
 
-    // Lưu token vào SharedPreferences
-    await prefs.setString('access_token', accessToken);
-    await prefs.setString('refresh_token', refreshToken);
+    await prefs.setString('token', token);
 
     state = state.copyWith(
       isLoggedIn: true,
-      accessToken: accessToken,
-      refreshToken: refreshToken,
+      token: token,
     );
 
-    // 👉 Nếu dùng token mock → Bỏ qua refresh logic
-    // if (_isValidJwt(accessToken)) {
-    //   _monitorTokenExpiry();
+    _monitorTokenExpiry();
+  }
+
+  /// Logout
+  Future<void> logout() async {
+    _refreshTimer?.cancel();
+
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('token');
+
+    state = const AuthState(isLoggedIn: false);
+  }
+
+  /// Refresh access token
+  Future<void> refreshAccessToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    final refreshToken = prefs.getString('refresh_token');
+
+    if (refreshToken == null) return;
+
+    try {
+      final result = await refreshTokenUseCase();
+
+      if (result.token.isEmpty) {
+        await logout();
+        return;
+      }
+
+      await prefs.setString('token', result.token);
+      state = state.copyWith(token: result.token);
+
+      _monitorTokenExpiry();
+    } catch (e) {
+      await logout();
+    }
+  }
+
+  /// Monitor token expiry
+  void _monitorTokenExpiry() {
+    _refreshTimer?.cancel();
+
+    final token = state.token;
+    if (token == null) return;
+
+    try {
+      final expiry = JwtDecoder.getExpirationDate(token);
+      final refreshAt = expiry.subtract(const Duration(minutes: 1));
+      final now = DateTime.now();
+
+      final delay = refreshAt.isBefore(now)
+          ? Duration.zero
+          : refreshAt.difference(now);
+
+      _refreshTimer = Timer(delay, () async {
+        await refreshAccessToken();
+      });
+    } catch (e) {
+      logout();
+    }
   }
 }

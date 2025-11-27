@@ -1,7 +1,7 @@
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class ApiBaseDev {
-  static const String baseUrlDevelopment = 'https://api.example.com';
+  static const String baseUrlDevelopment = 'http://localhost:3001';
 }
 
 class ApiBaseProd {
