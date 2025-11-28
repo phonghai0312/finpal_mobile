@@ -25,7 +25,8 @@ class ApiClient {
         onRequest: (options, handler) async {
           // Skip auth header for login/register if needed
           final path = options.path;
-          if (path.startsWith('/auth/login') || path.startsWith('/auth/register')) {
+          if (path.startsWith('/auth/login') ||
+              path.startsWith('/auth/register')) {
             return handler.next(options);
           }
 
@@ -49,4 +50,3 @@ class ApiClient {
     return createFn(_dio, baseUrl: baseUrl);
   }
 }
-
