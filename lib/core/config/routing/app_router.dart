@@ -74,14 +74,7 @@ class AppRouter {
         path: AppRoutes.editTransaction,
         builder: (context, state) => const CreateTransactionPage(),
       ),
-      GoRoute(
-        path: AppRoutes.userSettings,
-        builder: (context, state) => const UserSettingsPage(),
-      ),
-      GoRoute(
-        path: AppRoutes.aboutApp,
-        builder: (context, state) => const AboutAppPage(),
-      ),
+
       GoRoute(
         path: '${AppRoutes.suggestionDetail}/:id',
         builder: (context, state) =>
@@ -97,7 +90,19 @@ class AppRouter {
         builder: (context, state) =>
             BudgetFormPage(budgetId: state.extra as String?),
       ),
-
+      // Profile
+      GoRoute(
+        path: AppRoutes.userSettings,
+        builder: (context, state) => const UserSettingsPage(),
+      ),
+      GoRoute(
+        path: AppRoutes.aboutApp,
+        builder: (context, state) => const AboutAppPage(),
+      ),
+      GoRoute(
+        path: AppRoutes.editProfile,
+        builder: (context, state) => const EditProfilePage(),
+      ),
       // Shell router have nav bar
       ShellRoute(
         builder: (context, state, child) {
@@ -127,10 +132,6 @@ class AppRouter {
           GoRoute(
             path: AppRoutes.profile,
             builder: (context, state) => const ProfilePage(),
-          ),
-          GoRoute(
-            path: AppRoutes.editProfile,
-            builder: (context, state) => const EditProfilePage(),
           ),
         ],
       ),

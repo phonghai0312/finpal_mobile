@@ -1,4 +1,4 @@
-// ignore_for_file: use_build_context_synchronously
+// ignore_for_file: use_build_context_synchronously, unnecessary_null_comparison
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -119,44 +119,42 @@ class LoginNotifier extends StateNotifier<LoginState> {
   }
 
   /// Login
-Future<void> onSignIn(BuildContext context) async {
-  if (!state.isValid) return;
+  Future<void> onSignIn(BuildContext context) async {
+    if (!state.isValid) return;
 
-  _setLoading(true);
+    _setLoading(true);
 
-  final email = state.emailController.text.trim();
-  final pass = state.passwordController.text.trim();
+    final email = state.emailController.text.trim();
+    final pass = state.passwordController.text.trim();
 
-  try {
-    final auth = await _loginUseCase(email, pass);
+    try {
+      final auth = await _loginUseCase(email, pass);
 
-    if (auth.token == null || auth.token.isEmpty) {
-      _setLoading(false);
-      if (context.mounted) {
-        _showError(context, 'Đăng nhập thất bại');
+      if (auth.token == null || auth.token.isEmpty) {
+        _setLoading(false);
+        if (context.mounted) {
+          _showError(context, 'Đăng nhập thất bại');
+        }
+        return;
       }
-      return;
+
+      // Lưu token vào provider
+      await ref.read(authProvider.notifier).login(token: auth.token);
+
+      // Lưu remember me nếu cần
+      await _saveRemember(email, pass);
+
+      _setLoading(false);
+
+      // Chuyển sang màn hình welcome
+      if (context.mounted) context.go(AppRoutes.welcome);
+    } catch (e) {
+      _setLoading(false);
+
+      // Đây chỉ còn bắt các lỗi network, timeout, server 500...
+      if (context.mounted) _showError(context, _translateError(e.toString()));
     }
-
-    // Lưu token vào provider
-    await ref.read(authProvider.notifier).login(token: auth.token);
-
-    // Lưu remember me nếu cần
-    await _saveRemember(email, pass);
-
-    _setLoading(false);
-
-    // Chuyển sang màn hình welcome
-    if (context.mounted) context.go(AppRoutes.welcome);
-
-  } catch (e) {
-    _setLoading(false);
-
-    // Đây chỉ còn bắt các lỗi network, timeout, server 500...
-    if (context.mounted) _showError(context, _translateError(e.toString()));
   }
-}
-
 
   /// Save remember me info
   Future<void> _saveRemember(String u, String p) async {

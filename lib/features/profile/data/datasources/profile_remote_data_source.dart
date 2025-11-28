@@ -1,13 +1,37 @@
-import 'package:fridge_to_fork_ai/core/domain/entities/user.dart';
-import 'package:fridge_to_fork_ai/features/profile/data/models/user_settings_update_request_model.dart';
+import '../api/profile_api.dart';
+import '../models/user_model.dart';
 
-abstract class ProfileRemoteDataSource {
-  Future<User> getUserProfile();
-  Future<User> updateUserSettings(
-    UserSettingsUpdateRequestModel request,
-    String? name,
-    String? email,
-    String? phone,
-  );
-  Future<void> logout();
+class ProfileRemoteDataSource {
+  final ProfileApi api;
+
+  ProfileRemoteDataSource(this.api);
+
+  /// GET USER
+  Future<UserModel> getUser() {
+    return api.getCurrentUser();
+  }
+
+  /// UPDATE PROFILE
+  Future<UserModel> updateUser({String? name, String? phone}) {
+    final body = <String, dynamic>{};
+
+    if (name != null) body['name'] = name;
+    if (phone != null) body['phone'] = phone;
+    return api.updateUserProfile(body);
+  }
+
+  Future<void> logout() {
+    return api.logout();
+  }
+
+  // /// CHANGE PASSWORD
+  // Future<void> changePassword({
+  //   required String currentPassword,
+  //   required String newPassword,
+  // }) {
+  //   return api.changePassword({
+  //     'currentPassword': currentPassword,
+  //     'password': newPassword,
+  //   });
+  // }
 }

@@ -1,35 +1,60 @@
 import 'package:fridge_to_fork_ai/core/domain/entities/user.dart';
-import 'package:fridge_to_fork_ai/features/profile/data/datasources/profile_remote_data_source.dart';
-import 'package:fridge_to_fork_ai/features/profile/data/models/user_settings_update_request_model.dart';
-import 'package:fridge_to_fork_ai/features/profile/domain/repositories/profile_repository.dart';
+import '../../domain/repositories/profile_repository.dart';
+import '../datasources/profile_remote_data_source.dart';
 
 class ProfileRepositoryImpl implements ProfileRepository {
   final ProfileRemoteDataSource remoteDataSource;
 
   ProfileRepositoryImpl({required this.remoteDataSource});
 
+  /// GET USER
   @override
-  Future<User> getUserProfile() async {
-    return await remoteDataSource.getUserProfile();
+  Future<User> getUser() async {
+    final model = await remoteDataSource.getUser();
+
+    return User(
+      id: model.id,
+      email: model.email,
+      phone: model.phone,
+      name: model.name,
+      avatarUrl: model.avatarUrl,
+      settings: model.settings, // settings là object model? để mình hỏi tiếp
+      createdAt: model.createdAt,
+      updatedAt: model.updatedAt,
+    );
   }
 
+  /// UPDATE PROFILE
   @override
-  Future<User> updateUserSettings(
-    UserSettingsUpdateRequestModel request,
-    String? name,
-    String? email,
-    String? phone,
-  ) async {
-    return await remoteDataSource.updateUserSettings(
-      request,
-      name,
-      email,
-      phone,
+  Future<User> updateUser(String? name, String? phone) async {
+    final model = await remoteDataSource.updateUser(name: name, phone: phone);
+
+    return User(
+      id: model.id,
+      email: model.email,
+      phone: model.phone,
+      name: model.name,
+      avatarUrl: model.avatarUrl,
+      settings: model.settings,
+      createdAt: model.createdAt,
+      updatedAt: model.updatedAt,
     );
   }
 
   @override
   Future<void> logout() async {
-    await remoteDataSource.logout();
+    return await remoteDataSource.logout();
   }
+
+  /// CHANGE PASSWORD
+  // @override
+  // Future<void> changePassword(
+  //   String currentPassword,
+  //   String newPassword,
+  // ) {
+  //   return remoteDataSource.changePassword(
+  //     currentPassword: currentPassword,
+  //     newPassword: newPassword,
+  //   );
+  // }
 }

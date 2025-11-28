@@ -2,177 +2,86 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fridge_to_fork_ai/core/config/routing/app_routes.dart';
-import 'package:fridge_to_fork_ai/core/domain/entities/user.dart';
-import 'package:fridge_to_fork_ai/features/profile/data/models/user_settings_update_request_model.dart';
-import 'package:fridge_to_fork_ai/features/profile/domain/usecases/get_user_profile.dart';
-import 'package:fridge_to_fork_ai/features/profile/domain/usecases/logout.dart';
-import 'package:fridge_to_fork_ai/features/profile/domain/usecases/update_user_profile.dart';
 import 'package:go_router/go_router.dart';
 
-class ProfileFormState {
-  final String? name;
-  final String? email;
-  final String? phone;
-  final bool? notificationEnabled;
-
-  ProfileFormState({
-    this.name,
-    this.email,
-    this.phone,
-    this.notificationEnabled,
-  });
-
-  ProfileFormState copyWith({
-    String? name,
-    String? email,
-    String? phone,
-    bool? notificationEnabled,
-  }) {
-    return ProfileFormState(
-      name: name ?? this.name,
-      email: email ?? this.email,
-      phone: phone ?? this.phone,
-      notificationEnabled: notificationEnabled ?? this.notificationEnabled,
-    );
-  }
-}
+import '../../../../../core/config/routing/app_routes.dart';
+import '../../../../../core/domain/entities/user.dart';
+import '../../../domain/usecases/get_user_profile.dart';
+import '../../../domain/usecases/logout.dart';
 
 class ProfileState {
   final User? user;
   final bool isLoading;
   final String? error;
-  final ProfileFormState form;
 
-  const ProfileState({
-    this.user,
-    this.isLoading = false,
-    this.error,
-    required this.form,
-  });
+  const ProfileState({this.user, this.isLoading = false, this.error});
 
-  ProfileState copyWith({
-    User? user,
-    bool? isLoading,
-    String? error,
-    ProfileFormState? form,
-  }) {
+  ProfileState copyWith({User? user, bool? isLoading, String? error}) {
     return ProfileState(
       user: user ?? this.user,
       isLoading: isLoading ?? this.isLoading,
       error: error,
-      form: form ?? this.form,
     );
   }
 }
 
 class ProfileNotifier extends StateNotifier<ProfileState> {
-  final GetUserProfileUseCase getUserProfileUseCase;
-  final UpdateUserProfileUseCase updateUserSettingsUseCase;
+  final GetUserProfileUseCase getUserProfile;
   final LogoutUseCase logoutUseCase;
   final Ref ref;
 
-  ProfileNotifier(
-    this.getUserProfileUseCase,
-    this.updateUserSettingsUseCase,
-    this.logoutUseCase,
-    this.ref,
-  ) : super(ProfileState(form: ProfileFormState()));
+  ProfileNotifier(this.getUserProfile, this.logoutUseCase, this.ref)
+    : super(const ProfileState());
 
+  /// -------------------------------------
+  /// LOAD THÔNG TIN TRANG PROFILE
+  /// -------------------------------------
   Future<void> init() async {
-    if (state.user != null) return; // Prevent re-fetching if data exists
-    await fetchUserProfile();
+    if (state.user != null) return;
+    await fetchProfile();
   }
 
-  Future<void> fetchUserProfile() async {
+  Future<void> fetchProfile() async {
     state = state.copyWith(isLoading: true, error: null);
     try {
-      final user = await getUserProfileUseCase.call();
-      state = state.copyWith(
-        user: user,
-        isLoading: false,
-        form: ProfileFormState(
-          name: user.name,
-          email: user.email,
-          phone: user.phone,
-          notificationEnabled: user.settings?.notificationEnabled,
-        ),
-      );
+      final user = await getUserProfile.call();
+      state = state.copyWith(user: user, isLoading: false);
     } catch (e) {
       state = state.copyWith(isLoading: false, error: e.toString());
     }
   }
 
-  void updateName(String? name) {
-    state = state.copyWith(form: state.form.copyWith(name: name));
-  }
-
-  void updateEmail(String? email) {
-    state = state.copyWith(form: state.form.copyWith(email: email));
-  }
-
-  void updatePhone(String? phone) {
-    state = state.copyWith(form: state.form.copyWith(phone: phone));
-  }
-
-  void updateNotificationEnabled(bool? enabled) {
-    state = state.copyWith(
-      form: state.form.copyWith(notificationEnabled: enabled),
-    );
-  }
-
-  Future<void> saveProfile(BuildContext context) async {
-    state = state.copyWith(isLoading: true, error: null);
-    try {
-      final request = UserSettingsUpdateRequestModel(
-        notificationEnabled: state.form.notificationEnabled,
-      );
-      // Note: 'name' and 'email' are updated via the mock data source for demonstration purposes.
-      // In a real application, a separate API endpoint or a more comprehensive user update endpoint
-      // would be required to update these fields if they are part of the core user profile
-      // and not just user settings.
-      final updatedUser = await updateUserSettingsUseCase.call(
-        request: request,
-        name: state.form.name,
-        email: state.form.email,
-        phone: state.form.phone,
-      );
-      state = state.copyWith(
-        user: updatedUser,
-        isLoading: false,
-        form: ProfileFormState(
-          name: updatedUser.name,
-          email: updatedUser.email,
-          phone: updatedUser.phone,
-          notificationEnabled: updatedUser.settings?.notificationEnabled,
-        ),
-      );
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Cập nhật hồ sơ thành công!')),
-      );
-    } catch (e) {
-      state = state.copyWith(isLoading: false, error: e.toString());
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Lỗi cập nhật hồ sơ: ${e.toString()}')),
-      );
-    }
-  }
-
+  /// -------------------------------------
+  /// LOGOUT
+  /// -------------------------------------
   Future<void> logout(BuildContext context) async {
     state = state.copyWith(isLoading: true, error: null);
     try {
       await logoutUseCase.call();
-      state = state.copyWith(isLoading: false);
-      context.go(AppRoutes.login); // Assuming you have a login route
+      state = const ProfileState(user: null);
+      context.go(AppRoutes.login);
     } catch (e) {
       state = state.copyWith(isLoading: false, error: e.toString());
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text('Lỗi đăng xuất: ${e.toString()}')));
+      ).showSnackBar(SnackBar(content: Text("Lỗi đăng xuất: $e")));
     }
   }
 
-  void onBack(BuildContext context) {
-    context.go(AppRoutes.profile);
+  /// -------------------------------------
+  /// CHUYỂN TRANG
+  /// -------------------------------------
+  void goToEditProfile(BuildContext context) =>
+      context.go(AppRoutes.editProfile);
+
+  void goToSettings(BuildContext context) => context.go(AppRoutes.userSettings);
+
+  void goToAboutApp(BuildContext context) => context.go(AppRoutes.aboutApp);
+
+  void goToHelpSupport(BuildContext context) {
+    // Chuyển đến trang Help & Support (nếu có)
+  }
+  void setUser(User updatedUser) {
+    state = state.copyWith(user: updatedUser);
   }
 }

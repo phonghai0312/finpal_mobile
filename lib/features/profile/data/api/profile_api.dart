@@ -15,4 +15,10 @@ abstract class ProfileApi {
 
   @PATCH('/users/me/settings')
   Future<UserModel> updateUserSettings(@Body() Map<String, dynamic> body);
+
+  @PUT('/users/update-profile')
+  Future<UserModel> updateUserProfile(@Body() Map<String, dynamic> body);
+
+  @POST('/auth/logout')
+  Future<void> logout();
 }
