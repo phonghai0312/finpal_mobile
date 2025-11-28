@@ -100,7 +100,7 @@ class EditProfilePage extends ConsumerWidget {
             /// Name
             _inputField(
               context,
-              controller: state.nameController,
+              controller: notifier.nameController,
               label: "Tên người dùng",
               keyboard: TextInputType.text,
             ),
@@ -110,7 +110,7 @@ class EditProfilePage extends ConsumerWidget {
             /// Phone
             _inputField(
               context,
-              controller: state.phoneController,
+              controller: notifier.phoneController,
               label: "Số điện thoại",
               keyboard: TextInputType.phone,
             ),
@@ -120,7 +120,7 @@ class EditProfilePage extends ConsumerWidget {
             /// Email (read-only)
             _inputField(
               context,
-              controller: state.emailController,
+              controller: notifier.emailController,
               label: "Email",
               keyboard: TextInputType.emailAddress,
               readOnly: true,

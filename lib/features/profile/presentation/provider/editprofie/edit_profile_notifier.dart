@@ -17,18 +17,11 @@ class EditProfileState {
   final bool hasChanges;
   final String? errorMessage;
 
-  final TextEditingController nameController;
-  final TextEditingController emailController;
-  final TextEditingController phoneController;
-
   const EditProfileState({
     this.user,
     this.isLoading = false,
     this.hasChanges = false,
     this.errorMessage,
-    required this.nameController,
-    required this.emailController,
-    required this.phoneController,
   });
 
   EditProfileState copyWith({
@@ -36,18 +29,12 @@ class EditProfileState {
     bool? isLoading,
     bool? hasChanges,
     String? errorMessage,
-    TextEditingController? nameController,
-    TextEditingController? emailController,
-    TextEditingController? phoneController,
   }) {
     return EditProfileState(
       user: user ?? this.user,
       isLoading: isLoading ?? this.isLoading,
       hasChanges: hasChanges ?? this.hasChanges,
-      errorMessage: errorMessage,
-      nameController: nameController ?? this.nameController,
-      emailController: emailController ?? this.emailController,
-      phoneController: phoneController ?? this.phoneController,
+      errorMessage: errorMessage ?? this.errorMessage,
     );
   }
 }
@@ -56,36 +43,33 @@ class EditProfileNotifier extends StateNotifier<EditProfileState> {
   final UpdateUserProfileUseCase updateUserUseCase;
   final Ref ref;
 
+  // Controllers should NOT be in state.
+  final nameController = TextEditingController();
+  final emailController = TextEditingController();
+  final phoneController = TextEditingController();
+
   EditProfileNotifier(this.updateUserUseCase, this.ref)
-    : super(
-        EditProfileState(
-          nameController: TextEditingController(),
-          emailController: TextEditingController(),
-          phoneController: TextEditingController(),
-        ),
-      ) {
+      : super(const EditProfileState()) {
     _loadUser();
     _initListeners();
   }
 
-  /// Load từ ProfileNotifier
   void _loadUser() {
     final profile = ref.read(profileNotifierProvider);
     final user = profile.user;
 
     if (user != null) {
-      state.nameController.text = user.name ?? "";
-      state.emailController.text = user.email ?? "";
-      state.phoneController.text = user.phone ?? "";
+      nameController.text = user.name ?? "";
+      emailController.text = user.email ?? "";
+      phoneController.text = user.phone ?? "";
 
       state = state.copyWith(user: user);
     }
   }
 
-  /// Detect changes
   void _initListeners() {
-    state.nameController.addListener(_checkChanges);
-    state.phoneController.addListener(_checkChanges);
+    nameController.addListener(_checkChanges);
+    phoneController.addListener(_checkChanges);
   }
 
   void _checkChanges() {
@@ -93,30 +77,23 @@ class EditProfileNotifier extends StateNotifier<EditProfileState> {
     if (user == null) return;
 
     final changed =
-        state.nameController.text.trim() != (user.name ?? "") ||
-        state.phoneController.text.trim() != (user.phone ?? "");
+        nameController.text.trim() != (user.name ?? "") ||
+        phoneController.text.trim() != (user.phone ?? "");
 
     if (changed != state.hasChanges) {
       state = state.copyWith(hasChanges: changed);
     }
   }
 
-  void goBack(BuildContext context) => context.go(AppRoutes.profile);
-
-  /// Save update
   Future<void> save(BuildContext context) async {
     try {
       state = state.copyWith(isLoading: true);
 
-      final user = state.user;
-      if (user == null) throw Exception("User not found");
-
-      final updatedUser = await updateUserUseCase.call(
-        name: state.nameController.text.trim(),
-        phone: state.phoneController.text.trim(),
+      final updatedUser = await updateUserUseCase(
+        name: nameController.text.trim(),
+        phone: phoneController.text.trim(),
       );
 
-      /// update lên ProfileNotifier
       ref.read(profileNotifierProvider.notifier).setUser(updatedUser);
 
       state = state.copyWith(
@@ -125,7 +102,9 @@ class EditProfileNotifier extends StateNotifier<EditProfileState> {
         hasChanges: false,
       );
 
-      context.go(AppRoutes.profile);
+      if (context.mounted) {
+        context.go(AppRoutes.profile);
+      }
     } catch (e) {
       _handleError(e, context);
     }
@@ -154,9 +133,16 @@ class EditProfileNotifier extends StateNotifier<EditProfileState> {
 
   @override
   void dispose() {
-    state.nameController.dispose();
-    state.emailController.dispose();
-    state.phoneController.dispose();
+    nameController.dispose();
+    emailController.dispose();
+    phoneController.dispose();
     super.dispose();
   }
+
+  void goBack(BuildContext context) {
+    context.go(AppRoutes.profile);
+  }
 }
+
+
+

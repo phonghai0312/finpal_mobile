@@ -6,7 +6,7 @@ class ApiClient {
   final Dio _dio = Dio();
 
   ApiClient() {
-    // Logging
+    // 1. Logging
     _dio.interceptors.add(
       PrettyDioLogger(
         requestHeader: true,
@@ -19,12 +19,31 @@ class ApiClient {
       ),
     );
 
-    // Attach JWT from SharedPreferences for authenticated calls
+    // 2. Unwrap { "data": {...} } -> { ... }
+    _dio.interceptors.add(
+      InterceptorsWrapper(
+        onResponse: (response, handler) {
+          final data = response.data;
+
+          // Nếu response là Map và có key "data"
+          if (data is Map<String, dynamic> && data['data'] != null) {
+            // print để debug nếu muốn
+            // debugPrint('[ApiClient] unwrap data: ${data['data']}');
+            response.data = data['data'];
+          }
+
+          handler.next(response);
+        },
+      ),
+    );
+
+    // 3. Attach JWT từ SharedPreferences
     _dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) async {
-          // Skip auth header for login/register if needed
           final path = options.path;
+
+          // Bỏ qua auth cho login/register
           if (path.startsWith('/auth/login') ||
               path.startsWith('/auth/register')) {
             return handler.next(options);
