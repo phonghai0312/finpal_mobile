@@ -23,23 +23,25 @@ class CategoryModel {
 
   // Tạo từ JSON
   factory CategoryModel.fromJson(Map<String, dynamic> json) {
+    final rawId = json['_id'] ?? json['id'];
+    final rawUser = json['user'] ?? json['userId'];
     return CategoryModel(
-      id: json['id'],
-      userId: json['userId'],
-      name: json['name'],
-      displayName: json['displayName'],
-      parent: json['parent'],
-      icon: json['icon'],
-      createdAt: json['createdAt'],
-      updatedAt: json['updatedAt'],
+      id: rawId?.toString() ?? '',
+      userId: rawUser?.toString() ?? '',
+      name: json['name']?.toString() ?? '',
+      displayName: json['displayName']?.toString() ?? '',
+      parent: json['parent']?.toString(),
+      icon: json['icon']?.toString(),
+      createdAt: (json['createdAt'] as num?)?.toInt() ?? 0,
+      updatedAt: (json['updatedAt'] as num?)?.toInt() ?? 0,
     );
   }
 
   // Chuyển sang JSON
   Map<String, dynamic> toJson() {
     return {
-      'id': id,
-      'userId': userId,
+      '_id': id,
+      'user': userId,
       'name': name,
       'displayName': displayName,
       'parent': parent,
@@ -79,13 +81,14 @@ class CategoryListResponseModel {
   });
 
   factory CategoryListResponseModel.fromJson(Map<String, dynamic> json) {
+    final rawItems = (json['items'] as List<dynamic>?) ?? const <dynamic>[];
     return CategoryListResponseModel(
-      items: (json['items'] as List)
-          .map((item) => CategoryModel.fromJson(item))
+      items: rawItems
+          .map((item) => CategoryModel.fromJson(item as Map<String, dynamic>))
           .toList(),
-      page: json['page'],
-      pageSize: json['pageSize'],
-      total: json['total'],
+      page: (json['page'] as num?)?.toInt() ?? 1,
+      pageSize: (json['pageSize'] as num?)?.toInt() ?? rawItems.length,
+      total: (json['total'] as num?)?.toInt() ?? rawItems.length,
     );
   }
 

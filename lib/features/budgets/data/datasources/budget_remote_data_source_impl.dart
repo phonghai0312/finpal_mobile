@@ -11,6 +11,7 @@ class BudgetRemoteDataSourceImpl implements BudgetRemoteDataSource {
       categoryId: 'c001',
       categoryName: 'Ăn uống',
       amount: 2500000,
+      spentAmount: 1500000,
       period: 'monthly',
       startDate: 1672531200, // Jan 1, 2023
       endDate: 1675209599, // Jan 31, 2023
@@ -24,6 +25,7 @@ class BudgetRemoteDataSourceImpl implements BudgetRemoteDataSource {
       categoryId: 'c002',
       categoryName: 'Mua sắm',
       amount: 4200000,
+      spentAmount: 2100000,
       period: 'monthly',
       startDate: 1672531200, // Jan 1, 2023
       endDate: 1675209599, // Jan 31, 2023
@@ -37,6 +39,7 @@ class BudgetRemoteDataSourceImpl implements BudgetRemoteDataSource {
       categoryId: 'c003',
       categoryName: 'Đi lại',
       amount: 1000000,
+      spentAmount: 400000,
       period: 'monthly',
       startDate: 1672531200, // Jan 1, 2023
       endDate: 1675209599, // Jan 31, 2023
@@ -94,6 +97,7 @@ class BudgetRemoteDataSourceImpl implements BudgetRemoteDataSource {
       categoryName:
           'Mock Category Name', // TODO: Replace with actual category name lookup
       amount: request.amount,
+      spentAmount: 0,
       period: request.period,
       startDate: request.startDate,
       endDate: request.endDate,
@@ -123,6 +127,7 @@ class BudgetRemoteDataSourceImpl implements BudgetRemoteDataSource {
         categoryId: request.categoryId ?? existingBudget.categoryId,
         categoryName: existingBudget.categoryName,
         amount: request.amount ?? existingBudget.amount,
+        spentAmount: existingBudget.spentAmount,
         period: request.period ?? existingBudget.period,
         startDate: request.startDate ?? existingBudget.startDate,
         endDate: request.endDate ?? existingBudget.endDate      ,

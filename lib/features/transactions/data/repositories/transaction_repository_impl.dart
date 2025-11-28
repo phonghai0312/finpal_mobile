@@ -1,4 +1,5 @@
 import 'package:fridge_to_fork_ai/features/transactions/data/datasources/transaction_remote_datasources.dart';
+import 'package:fridge_to_fork_ai/features/transactions/domain/entities/spend_amount.dart';
 import 'package:fridge_to_fork_ai/features/transactions/domain/entities/transaction.dart';
 import 'package:fridge_to_fork_ai/features/transactions/domain/repositories/transaction_repository.dart'
     show TransactionRepository;
@@ -53,5 +54,19 @@ class TransactionRepositoryImpl implements TransactionRepository {
       occurredAt: occurredAt,
       note: note,
     );
+  }
+
+  @override
+  Future<List<SpendAmount>> getSpendAmounts({String? categoryId}) async {
+    final response = await remote.getSpendAmounts(categoryId: categoryId);
+    return response
+        .map(
+          (model) => SpendAmount(
+            categoryId: model.categoryId,
+            categoryName: model.categoryName,
+            spentAmount: model.spentAmount,
+          ),
+        )
+        .toList();
   }
 }

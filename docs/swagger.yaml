@@ -487,7 +487,31 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-
+  /transactions/spend-amount:
+    get:
+      tags:
+        - Transactions
+      summary: Lấy tổng số tiền đã chi theo từng danh mục
+      description: Tổng hợp các giao dịch chi tiêu (expense/out) của người dùng và trả về số tiền đã sử dụng theo danh mục.
+      parameters:
+        - in: query
+          name: categoryId
+          schema:
+            type: string
+          description: Lọc theo ID danh mục cụ thể
+      responses:
+        '200':
+          description: Tổng số tiền đã chi cho từng danh mục
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionSpendAmountResponse'
+        '401':
+          description: Chưa đăng nhập
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
   /transactions/{id}:
     get:
       tags:

@@ -6,6 +6,7 @@ class Budget extends Equatable {
   final String categoryId;
   final String categoryName;
   final double amount;
+  final double spentAmount;
   final String period; // monthly, weekly
   final int startDate;
   final int endDate;
@@ -19,6 +20,7 @@ class Budget extends Equatable {
     required this.categoryId,
     required this.categoryName,
     required this.amount,
+    this.spentAmount = 0,
     required this.period,
     required this.startDate,
     required this.endDate,
@@ -34,6 +36,7 @@ class Budget extends Equatable {
     categoryId,
     categoryName,
     amount,
+    spentAmount,
     period,
     startDate,
     endDate,
@@ -49,6 +52,7 @@ class Budget extends Equatable {
       categoryId: json['categoryId'] as String,
       categoryName: json['categoryName'] as String,
       amount: (json['amount'] as num).toDouble(),
+      spentAmount: (json['spentAmount'] as num?)?.toDouble() ?? 0,
       period: json['period'] as String,
       startDate: json['startDate'] as int,
       endDate: json['endDate'] as int,
@@ -65,6 +69,7 @@ class Budget extends Equatable {
       'categoryId': categoryId,
       'categoryName': categoryName,
       'amount': amount,
+      'spentAmount': spentAmount,
       'period': period,
       'startDate': startDate,
       'endDate': endDate,
@@ -72,5 +77,24 @@ class Budget extends Equatable {
       'createdAt': createdAt,
       'updatedAt': updatedAt,
     };
+  }
+
+  Budget copyWith({
+    double? spentAmount,
+  }) {
+    return Budget(
+      id: id,
+      userId: userId,
+      categoryId: categoryId,
+      categoryName: categoryName,
+      amount: amount,
+      spentAmount: spentAmount ?? this.spentAmount,
+      period: period,
+      startDate: startDate,
+      endDate: endDate,
+      alertThreshold: alertThreshold,
+      createdAt: createdAt,
+      updatedAt: updatedAt,
+    );
   }
 }

@@ -1,19 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:fridge_to_fork_ai/core/config/routing/app_routes.dart';
 import 'package:fridge_to_fork_ai/core/presentation/theme/app_chart_colors.dart';
 import 'package:fridge_to_fork_ai/core/presentation/theme/app_colors.dart';
 import 'package:fridge_to_fork_ai/features/budgets/domain/entities/budget.dart';
+import 'package:fridge_to_fork_ai/features/categories/presentation/provider/category_provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import 'package:fridge_to_fork_ai/core/config/routing/app_routes.dart';
 
-class BudgetList extends StatelessWidget {
-  final List<Budget> budgets;
-
+class BudgetList extends ConsumerWidget {
   const BudgetList({super.key, required this.budgets});
 
+  final List<Budget> budgets;
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     if (budgets.isEmpty) {
       return Container(
         width: double.infinity,
@@ -23,7 +25,7 @@ class BudgetList extends StatelessWidget {
           borderRadius: BorderRadius.circular(16.r),
         ),
         child: Column(
-          mainAxisSize: MainAxisSize.min, // 👈 tránh cao dư
+          mainAxisSize: MainAxisSize.min,
           children: [
             Icon(Icons.money_off, size: 48.sp, color: Colors.grey[400]),
             SizedBox(height: 12.h),
@@ -41,19 +43,20 @@ class BudgetList extends StatelessWidget {
       );
     }
 
+    final categoryState = ref.watch(categoryNotifierProvider);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           'Ngân sách',
           style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-            fontWeight: FontWeight.bold,
-            color: AppColors.typoHeading,
-          ),
+                fontWeight: FontWeight.bold,
+                color: AppColors.typoHeading,
+              ),
         ),
         SizedBox(height: 16.h),
         SizedBox(
-          // 👇 tăng nhẹ chiều cao list, tránh card bị chật
           height: 190.h,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
@@ -62,16 +65,24 @@ class BudgetList extends StatelessWidget {
               final budget = budgets[index];
               final color =
                   AppChartColors.colors[index % AppChartColors.colors.length];
-              final spentAmount = 3000000.0; // Mock
-              final progress = (spentAmount / budget.amount).clamp(0.0, 1.0);
+              final spentAmount = budget.spentAmount;
+              final amount = budget.amount <= 0 ? 1 : budget.amount;
+              final progress = (spentAmount / amount).clamp(0.0, 1.0);
               final formatter = NumberFormat.currency(
                 locale: 'vi_VN',
                 symbol: '₫',
               );
 
+              String? iconName;
+              for (final category in categoryState.categories) {
+                if (category.id == budget.categoryId) {
+                  iconName = category.icon;
+                  break;
+                }
+              }
+
               return GestureDetector(
                 onTap: () {
-                  // Navigate to BudgetDetailPage
                   context.push('${AppRoutes.budgetDetail}/${budget.id}');
                 },
                 child: Container(
@@ -91,8 +102,7 @@ class BudgetList extends StatelessWidget {
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment:
-                        MainAxisAlignment.spaceBetween, // 👈 dàn đều trên–dưới
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Row(
                         children: [
@@ -104,7 +114,7 @@ class BudgetList extends StatelessWidget {
                               shape: BoxShape.circle,
                             ),
                             child: Icon(
-                              Icons.fastfood, // Placeholder icon
+                              _iconFromName(iconName),
                               color: color,
                               size: 24.sp,
                             ),
@@ -113,7 +123,7 @@ class BudgetList extends StatelessWidget {
                           Expanded(
                             child: Text(
                               budget.categoryName,
-                              maxLines: 1, // 👈 hạn chế xuống nhiều dòng
+                              maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: Theme.of(context).textTheme.titleMedium
                                   ?.copyWith(
@@ -124,26 +134,25 @@ class BudgetList extends StatelessWidget {
                           ),
                         ],
                       ),
-                      // bỏ bớt SizedBox cao quá, để column tự co lại
                       Text(
                         formatter.format(budget.amount),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.typoBody,
-                        ),
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.typoBody,
+                            ),
                       ),
                       Text(
                         'Đã chi ${formatter.format(spentAmount)}',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: AppColors.typoBody,
-                        ),
+                              color: AppColors.typoBody,
+                            ),
                       ),
                       LinearProgressIndicator(
-                        value: progress,
+                        value: progress.isNaN ? 0 : progress,
                         backgroundColor: Colors.grey[200],
                         valueColor: AlwaysStoppedAnimation<Color>(color),
                         minHeight: 6.h,
@@ -158,5 +167,33 @@ class BudgetList extends StatelessWidget {
         ),
       ],
     );
+  }
+}
+
+IconData _iconFromName(String? iconName) {
+  const fallback = Icons.category;
+  switch (iconName) {
+    case 'fastfood':
+      return Icons.fastfood;
+    case 'shopping_bag':
+      return Icons.shopping_bag;
+    case 'attach_money':
+      return Icons.attach_money;
+    case 'directions_car':
+      return Icons.directions_car;
+    case 'medical_services':
+      return Icons.medical_services;
+    case 'home':
+      return Icons.home;
+    case 'favorite':
+      return Icons.favorite;
+    case 'local_cafe':
+      return Icons.local_cafe;
+    case 'water_drop':
+      return Icons.water_drop;
+    case 'flash_on':
+      return Icons.flash_on;
+    default:
+      return fallback;
   }
 }

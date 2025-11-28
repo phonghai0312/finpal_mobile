@@ -11,6 +11,7 @@ import 'package:fridge_to_fork_ai/features/budgets/domain/usecases/delete_budget
 import 'package:fridge_to_fork_ai/features/budgets/presentation/providers/budget_notifier.dart';
 import 'package:fridge_to_fork_ai/features/budgets/presentation/providers/budget_detail_notifier.dart';
 import 'package:fridge_to_fork_ai/features/budgets/presentation/providers/budget_form_notifier.dart';
+import 'package:fridge_to_fork_ai/features/transactions/presentation/provider/transaction/transaction_provider.dart';
 
 /// DATASOURCE
 final budgetRemoteDataSourceProvider = Provider<BudgetRemoteDataSource>((ref) {
@@ -52,7 +53,10 @@ final deleteBudgetUseCaseProvider = Provider<DeleteBudgetUseCase>((ref) {
 /// NOTIFIER
 final budgetNotifierProvider =
     StateNotifierProvider<BudgetNotifier, BudgetState>((ref) {
-      return BudgetNotifier(ref.read(getBudgetsUseCaseProvider));
+      return BudgetNotifier(
+        ref.read(getBudgetsUseCaseProvider),
+        ref.read(getSpendAmountsUseCaseProvider),
+      );
     });
 
 /// NOTIFIER: Budget Detail
