@@ -5,7 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fridge_to_fork_ai/core/presentation/theme/app_colors.dart';
 import 'package:fridge_to_fork_ai/core/presentation/widget/header/header_with_back.dart';
-import 'package:fridge_to_fork_ai/features/profile/presentation/provider/profile_provider.dart';
+import 'package:fridge_to_fork_ai/features/profile/presentation/provider/profile/profile_provider.dart';
 import 'package:go_router/go_router.dart';
 
 class EditProfilePage extends ConsumerStatefulWidget {

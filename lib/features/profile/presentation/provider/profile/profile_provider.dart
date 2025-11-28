@@ -8,7 +8,7 @@ import 'package:fridge_to_fork_ai/features/profile/data/repositories/profile_rep
 import 'package:fridge_to_fork_ai/features/profile/domain/usecases/get_user_profile.dart';
 import 'package:fridge_to_fork_ai/features/profile/domain/usecases/logout.dart';
 import 'package:fridge_to_fork_ai/features/profile/domain/usecases/update_user_profile.dart';
-import 'package:fridge_to_fork_ai/features/profile/presentation/provider/profile_notifier.dart';
+import 'package:fridge_to_fork_ai/features/profile/presentation/provider/profile/profile_notifier.dart';
 
 /// Retrofit Api With Dio
 final profileApiProvider = Provider<ProfileApi>((ref) {

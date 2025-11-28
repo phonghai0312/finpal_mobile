@@ -5,7 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fridge_to_fork_ai/core/config/routing/app_routes.dart';
 import 'package:fridge_to_fork_ai/core/presentation/theme/app_colors.dart';
-import 'package:fridge_to_fork_ai/features/profile/presentation/provider/profile_provider.dart';
+import 'package:fridge_to_fork_ai/features/profile/presentation/provider/profile/profile_provider.dart';
 import 'package:go_router/go_router.dart';
 
 class ProfilePage extends ConsumerStatefulWidget {
@@ -173,7 +173,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   icon: Icons.person_outline,
                   label: 'Chỉnh sửa thông tin cá nhân',
                   onTap: () {
-                    context.push(AppRoutes.editProfile);
+                    context.go(AppRoutes.editProfile);
                   },
                 ),
                 SizedBox(height: 8.h),
