@@ -17,7 +17,7 @@ class BudgetModel extends Budget {
   });
 
   factory BudgetModel.fromJson(Map<String, dynamic> json) {
-    final rawId = json['_id'] ?? json['id'];
+    final rawId = json['_id'] ?? json['id'] ?? json['budgetId'];
     final rawUser = json['user'] ?? json['userId'];
     return BudgetModel(
       id: rawId?.toString() ?? '',

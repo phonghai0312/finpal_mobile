@@ -153,6 +153,7 @@ class _BudgetListState extends ConsumerState<BudgetList> {
 
               return GestureDetector(
                 onTap: () {
+                  if (budget.id.isEmpty) return;
                   context.push('${AppRoutes.budgetDetail}/${budget.id}');
                 },
                 child: Container(

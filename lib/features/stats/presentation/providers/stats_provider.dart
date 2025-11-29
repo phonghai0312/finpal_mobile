@@ -1,4 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fridge_to_fork_ai/core/network/api_client.dart';
+import 'package:fridge_to_fork_ai/features/stats/data/api/stats_api.dart';
 import 'package:fridge_to_fork_ai/features/stats/data/datasources/stats_remote_datasource.dart';
 import 'package:fridge_to_fork_ai/features/stats/data/repositories/stats_repository_impl.dart';
 import 'package:fridge_to_fork_ai/features/stats/domain/usecases/get_category_transactions.dart';
@@ -9,10 +11,20 @@ import 'package:fridge_to_fork_ai/features/transactions/presentation/provider/tr
 import 'stats_notifier.dart';
 
 /// ===============================
+/// API PROVIDER
+/// ===============================
+final statsApiProvider = Provider<StatsApi>(
+  (ref) => ApiClient().create(StatsApi.new),
+);
+
+/// ===============================
 /// DATASOURCE PROVIDER
 /// ===============================
 final statsRemoteDataSourceProvider = Provider<StatsRemoteDataSource>((ref) {
-  return StatsRemoteDataSource(ref.read(transactionRemoteDataSourceProvider));
+  return StatsRemoteDataSource(
+    ref.read(statsApiProvider),
+    ref.read(transactionRemoteDataSourceProvider),
+  );
 });
 
 /// ===============================

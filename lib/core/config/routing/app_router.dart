@@ -82,6 +82,11 @@ class AppRouter {
             BudgetDetailPage(budgetId: state.pathParameters['id']!),
       ),
       GoRoute(
+        path: AppRoutes.budgetDetail,
+        builder: (context, state) =>
+            const Scaffold(body: Center(child: Text('Budget ID không hợp lệ'))),
+      ),
+      GoRoute(
         path: AppRoutes.budgetForm,
         builder: (context, state) =>
             BudgetFormPage(budgetId: state.extra as String?),
