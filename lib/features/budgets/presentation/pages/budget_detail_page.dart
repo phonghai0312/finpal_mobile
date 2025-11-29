@@ -8,15 +8,36 @@ import 'package:fridge_to_fork_ai/features/budgets/presentation/providers/budget
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
-class BudgetDetailPage extends ConsumerWidget {
+class BudgetDetailPage extends ConsumerStatefulWidget {
   final String budgetId;
 
   const BudgetDetailPage({super.key, required this.budgetId});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final budgetDetailState = ref.watch(budgetDetailNotifierProvider(budgetId));
-    final notifier = ref.read(budgetDetailNotifierProvider(budgetId).notifier);
+  ConsumerState<BudgetDetailPage> createState() => _BudgetDetailPageState();
+}
+
+class _BudgetDetailPageState extends ConsumerState<BudgetDetailPage> {
+  @override
+  void initState() {
+    super.initState();
+    // Set selected budget ID vào provider khi page được khởi tạo
+    Future.microtask(() {
+      ref.read(selectedBudgetIdProvider.notifier).state = widget.budgetId;
+    });
+  }
+
+  @override
+  void dispose() {
+    // Clear selected budget ID khi page bị dispose
+    ref.read(selectedBudgetIdProvider.notifier).state = null;
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final budgetDetailState = ref.watch(budgetDetailNotifierProvider);
+    final notifier = ref.read(budgetDetailNotifierProvider.notifier);
 
     return Scaffold(
       backgroundColor: AppColors.bgSecondary,
@@ -47,8 +68,10 @@ class BudgetDetailPage extends ConsumerWidget {
                   budgetDetailState.budget == null
               ? _ErrorView(
                   message: budgetDetailState.errorMessage!,
-                  onRetry: () =>
-                      ref.refresh(budgetDetailNotifierProvider(budgetId)),
+                  onRetry: () {
+                    // Refresh bằng cách set lại selected budget ID
+                    ref.read(selectedBudgetIdProvider.notifier).state = widget.budgetId;
+                  },
                 )
               : budgetDetailState.budget == null
                   ? const _EmptyView()

@@ -33,7 +33,6 @@ class _HomePageState extends ConsumerState<HomePage> {
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(homeNotifierProvider);
-    final budgetState = ref.watch(budgetNotifierProvider);
 
     ref.listen<BudgetFormState>(budgetFormNotifierProvider, (previous, next) {
       if (next.isSuccess && !previous!.isSuccess) {
@@ -42,9 +41,7 @@ class _HomePageState extends ConsumerState<HomePage> {
     });
 
     ref.listen<BudgetDetailState>(
-      budgetDetailNotifierProvider(
-        budgetState.budgets.isNotEmpty ? budgetState.budgets[0].id : '',
-      ),
+      budgetDetailNotifierProvider,
       (previous, next) {
         if (next.budget == null &&
             previous?.budget != null &&
@@ -91,9 +88,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                       16.verticalSpace,
 
                       /// Biểu đồ chi tiêu
-                      BudgetList(
-                        budgets: budgetState.budgets,
-                      ), // Replaced CategoryChart with BudgetList
+                      const BudgetList(), // Fetches real data from API
                       16.verticalSpace,
 
                       /// Gợi ý thông minh

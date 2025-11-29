@@ -4,19 +4,92 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fridge_to_fork_ai/core/config/routing/app_routes.dart';
 import 'package:fridge_to_fork_ai/core/presentation/theme/app_chart_colors.dart';
 import 'package:fridge_to_fork_ai/core/presentation/theme/app_colors.dart';
-import 'package:fridge_to_fork_ai/features/budgets/domain/entities/budget.dart';
+import 'package:fridge_to_fork_ai/features/budgets/presentation/providers/budget_provider.dart';
 import 'package:fridge_to_fork_ai/features/categories/presentation/provider/category_provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
-class BudgetList extends ConsumerWidget {
-  const BudgetList({super.key, required this.budgets});
-
-  final List<Budget> budgets;
+class BudgetList extends ConsumerStatefulWidget {
+  const BudgetList({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    if (budgets.isEmpty) {
+  ConsumerState<BudgetList> createState() => _BudgetListState();
+}
+
+class _BudgetListState extends ConsumerState<BudgetList> {
+  @override
+  void initState() {
+    super.initState();
+    // Fetch budgets when widget is first built
+    Future.microtask(() {
+      ref.read(budgetNotifierProvider.notifier).fetchBudgets();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final budgetState = ref.watch(budgetNotifierProvider);
+    final categoryState = ref.watch(categoryNotifierProvider);
+
+    // Show loading state
+    if (budgetState.isLoading && budgetState.budgets.isEmpty) {
+      return Container(
+        width: double.infinity,
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 24.h),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16.r),
+        ),
+        child: const Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    // Show error state
+    if (budgetState.errorMessage != null && budgetState.budgets.isEmpty) {
+      return Container(
+        width: double.infinity,
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 24.h),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16.r),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.error_outline, size: 48.sp, color: Colors.red[300]),
+            SizedBox(height: 12.h),
+            Text(
+              'Lỗi tải ngân sách',
+              style: TextStyle(
+                fontSize: 16.sp,
+                fontWeight: FontWeight.w600,
+                color: Colors.red[700],
+              ),
+              textAlign: TextAlign.center,
+            ),
+            SizedBox(height: 8.h),
+            Text(
+              budgetState.errorMessage ?? 'Đã xảy ra lỗi',
+              style: TextStyle(
+                fontSize: 12.sp,
+                color: Colors.grey[600],
+              ),
+              textAlign: TextAlign.center,
+            ),
+            SizedBox(height: 12.h),
+            ElevatedButton(
+              onPressed: () {
+                ref.read(budgetNotifierProvider.notifier).fetchBudgets();
+              },
+              child: const Text('Thử lại'),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // Show empty state
+    if (budgetState.budgets.isEmpty) {
       return Container(
         width: double.infinity,
         padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 24.h),
@@ -43,8 +116,6 @@ class BudgetList extends ConsumerWidget {
       );
     }
 
-    final categoryState = ref.watch(categoryNotifierProvider);
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -60,9 +131,9 @@ class BudgetList extends ConsumerWidget {
           height: 190.h,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
-            itemCount: budgets.length,
+            itemCount: budgetState.budgets.length,
             itemBuilder: (context, index) {
-              final budget = budgets[index];
+              final budget = budgetState.budgets[index];
               final color =
                   AppChartColors.colors[index % AppChartColors.colors.length];
               final spentAmount = budget.spentAmount;
@@ -83,7 +154,7 @@ class BudgetList extends ConsumerWidget {
 
               return GestureDetector(
                 onTap: () {
-                  context.push('${AppRoutes.budgetDetail}/${budget.id}');
+                  context.push(AppRoutes.budgetDetail, extra: budget.id);
                 },
                 child: Container(
                   width: 180.w,

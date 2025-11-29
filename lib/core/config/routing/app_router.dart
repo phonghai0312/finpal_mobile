@@ -75,20 +75,29 @@ class AppRouter {
         builder: (context, state) => const CreateTransactionPage(),
       ),
 
+      // Budgets
       GoRoute(
-        path: '${AppRoutes.suggestionDetail}/:id',
-        builder: (context, state) =>
-            SuggestionDetailPage(insightId: state.pathParameters['id']!),
-      ),
-      GoRoute(
-        path: '${AppRoutes.budgetDetail}/:id',
-        builder: (context, state) =>
-            BudgetDetailPage(budgetId: state.pathParameters['id']!),
+        path: AppRoutes.budgetDetail,
+        builder: (context, state) {
+          final budgetId = state.extra as String?;
+          if (budgetId == null || budgetId.isEmpty) {
+            return const Scaffold(
+              body: Center(child: Text('Budget ID không hợp lệ')),
+            );
+          }
+          return BudgetDetailPage(budgetId: budgetId);
+        },
       ),
       GoRoute(
         path: AppRoutes.budgetForm,
         builder: (context, state) =>
             BudgetFormPage(budgetId: state.extra as String?),
+      ),
+      // Suggestions
+      GoRoute(
+        path: '${AppRoutes.suggestionDetail}/:id',
+        builder: (context, state) =>
+            SuggestionDetailPage(insightId: state.pathParameters['id']!),
       ),
       // Profile
       GoRoute(
