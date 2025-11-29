@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -70,10 +72,7 @@ class _BudgetListState extends ConsumerState<BudgetList> {
             SizedBox(height: 8.h),
             Text(
               budgetState.errorMessage ?? 'Đã xảy ra lỗi',
-              style: TextStyle(
-                fontSize: 12.sp,
-                color: Colors.grey[600],
-              ),
+              style: TextStyle(fontSize: 12.sp, color: Colors.grey[600]),
               textAlign: TextAlign.center,
             ),
             SizedBox(height: 12.h),
@@ -122,9 +121,9 @@ class _BudgetListState extends ConsumerState<BudgetList> {
         Text(
           'Ngân sách',
           style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: AppColors.typoHeading,
-              ),
+            fontWeight: FontWeight.bold,
+            color: AppColors.typoHeading,
+          ),
         ),
         SizedBox(height: 16.h),
         SizedBox(
@@ -154,7 +153,7 @@ class _BudgetListState extends ConsumerState<BudgetList> {
 
               return GestureDetector(
                 onTap: () {
-                  context.push(AppRoutes.budgetDetail, extra: budget.id);
+                  context.push('${AppRoutes.budgetDetail}/${budget.id}');
                 },
                 child: Container(
                   width: 180.w,
@@ -210,17 +209,17 @@ class _BudgetListState extends ConsumerState<BudgetList> {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.typoBody,
-                            ),
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.typoBody,
+                        ),
                       ),
                       Text(
                         'Đã chi ${formatter.format(spentAmount)}',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: AppColors.typoBody,
-                            ),
+                          color: AppColors.typoBody,
+                        ),
                       ),
                       LinearProgressIndicator(
                         value: progress.isNaN ? 0 : progress,

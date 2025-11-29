@@ -1,3 +1,5 @@
+// ignore_for_file: prefer_final_fields
+
 import 'package:fridge_to_fork_ai/features/suggestions/data/datasources/insight_remote_data_source.dart';
 import 'package:fridge_to_fork_ai/features/suggestions/domain/entities/insight.dart';
 import 'package:fridge_to_fork_ai/features/suggestions/domain/entities/period.dart';
