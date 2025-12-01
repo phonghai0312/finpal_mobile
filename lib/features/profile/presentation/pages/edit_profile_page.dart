@@ -3,7 +3,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:fridge_to_fork_ai/core/presentation/widget/button/button.dart';
+import 'package:fridge_to_fork_ai/core/presentation/widget/header/header_with_back.dart';
 import 'package:fridge_to_fork_ai/features/profile/presentation/provider/editprofie/edit_profile_provider.dart';
+
 import '../../../../../core/presentation/theme/app_colors.dart';
 
 class EditProfilePage extends ConsumerWidget {
@@ -16,27 +20,18 @@ class EditProfilePage extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: AppColors.bgSecondary,
-      appBar: AppBar(
-        backgroundColor: AppColors.bgWhite,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: AppColors.typoHeading),
-          onPressed: () => notifier.goBack(context),
-        ),
-        title: Text(
-          "Chỉnh sửa thông tin",
-          style: Theme.of(
-            context,
-          ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
-        ),
-        centerTitle: true,
+      appBar: HeaderWithBack(
+        title: "Chỉnh sửa thông tin",
+        onBack: () => notifier.onBack(context),
       ),
       body: SingleChildScrollView(
         padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 24.h),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            /// Avatar + Tên + ID
+            /// ===========================
+            /// 🔥 Avatar + Name + ID
+            /// ===========================
             Center(
               child: Column(
                 children: [
@@ -44,6 +39,7 @@ class EditProfilePage extends ConsumerWidget {
                     children: [
                       CircleAvatar(
                         radius: 60.r,
+                        backgroundColor: AppColors.bgGray.withOpacity(0.2),
                         backgroundImage: NetworkImage(
                           state.user?.avatarUrl ??
                               "https://www.gravatar.com/avatar/?d=mp",
@@ -53,9 +49,9 @@ class EditProfilePage extends ConsumerWidget {
                         bottom: 0,
                         right: 0,
                         child: Container(
-                          padding: EdgeInsets.all(4.w),
-                          decoration: BoxDecoration(
-                            color: AppColors.primaryGreen,
+                          padding: EdgeInsets.all(6.w),
+                          decoration: const BoxDecoration(
+                            color: AppColors.bgDarkGreen,
                             shape: BoxShape.circle,
                           ),
                           child: Icon(
@@ -67,20 +63,26 @@ class EditProfilePage extends ConsumerWidget {
                       ),
                     ],
                   ),
+
                   SizedBox(height: 16.h),
+
                   Text(
                     state.user?.name ?? "Người dùng",
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    style: GoogleFonts.poppins(
+                      fontSize: 20.sp,
+                      fontWeight: FontWeight.w700,
                       color: AppColors.typoHeading,
-                      fontWeight: FontWeight.bold,
                     ),
                   ),
+
                   SizedBox(height: 4.h),
+
                   Text(
                     "ID: ${state.user?.id ?? "N/A"}",
-                    style: Theme.of(
-                      context,
-                    ).textTheme.bodyMedium?.copyWith(color: AppColors.typoBody),
+                    style: GoogleFonts.poppins(
+                      fontSize: 14.sp,
+                      color: AppColors.typoBody,
+                    ),
                   ),
                 ],
               ),
@@ -88,16 +90,23 @@ class EditProfilePage extends ConsumerWidget {
 
             SizedBox(height: 32.h),
 
+            /// ===========================
+            /// 🔥 Section Title (Style mới)
+            /// ===========================
             Text(
-              "Account Settings",
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: AppColors.typoHeading,
+              "Cài đặt tài khoản",
+              style: GoogleFonts.poppins(
+                fontSize: 16.sp,
+                fontWeight: FontWeight.w700,
+                color: AppColors.bgDarkGreen,
               ),
             ),
-            SizedBox(height: 16.h),
 
-            /// Name
+            SizedBox(height: 20.h),
+
+            /// ===========================
+            /// 🔥 INPUT FIELDS
+            /// ===========================
             _inputField(
               context,
               controller: notifier.nameController,
@@ -107,7 +116,6 @@ class EditProfilePage extends ConsumerWidget {
 
             SizedBox(height: 16.h),
 
-            /// Phone
             _inputField(
               context,
               controller: notifier.phoneController,
@@ -117,7 +125,6 @@ class EditProfilePage extends ConsumerWidget {
 
             SizedBox(height: 16.h),
 
-            /// Email (read-only)
             _inputField(
               context,
               controller: notifier.emailController,
@@ -128,33 +135,34 @@ class EditProfilePage extends ConsumerWidget {
 
             SizedBox(height: 32.h),
 
-            /// SAVE BUTTON
-            ElevatedButton(
-              onPressed: state.isLoading ? null : () => notifier.save(context),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primaryGreen,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12.r),
-                ),
-                padding: EdgeInsets.symmetric(vertical: 16.h),
-                minimumSize: Size(double.infinity, 50.h),
-              ),
-              child: state.isLoading
-                  ? const CircularProgressIndicator(color: Colors.white)
-                  : Text(
-                      "Cập nhật",
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: AppColors.typoWhite,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+            /// =============================
+            /// 🔥 Save Button
+            /// =============================
+            Button(
+              text: "Cập nhật",
+              onPressed: state.isLoading
+                  ? null
+                  : () => notifier.onUpdate(context),
             ),
+
+            if (state.isLoading)
+              Padding(
+                padding: EdgeInsets.only(top: 12.h),
+                child: const Center(
+                  child: CircularProgressIndicator(
+                    color: AppColors.primaryGreen,
+                  ),
+                ),
+              ),
           ],
         ),
       ),
     );
   }
 
+  /// =============================
+  /// 🔥 INPUT FIELD STYLE MỚI
+  /// =============================
   Widget _inputField(
     BuildContext context, {
     required TextEditingController controller,
@@ -166,22 +174,26 @@ class EditProfilePage extends ConsumerWidget {
       controller: controller,
       keyboardType: keyboard,
       readOnly: readOnly,
-      style: TextStyle(color: AppColors.typoHeading),
+      style: GoogleFonts.poppins(fontSize: 15.sp, color: AppColors.typoHeading),
       decoration: InputDecoration(
         labelText: label,
+        labelStyle: GoogleFonts.poppins(
+          fontSize: 14.sp,
+          color: AppColors.typoBody,
+        ),
         filled: true,
         fillColor: AppColors.bgWhite,
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12.r),
+          borderRadius: BorderRadius.circular(14.r),
           borderSide: BorderSide.none,
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12.r),
-          borderSide: BorderSide(color: AppColors.bgGray.withOpacity(0.5)),
+          borderRadius: BorderRadius.circular(14.r),
+          borderSide: BorderSide(color: AppColors.bgGray.withOpacity(0.35)),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12.r),
-          borderSide: BorderSide(color: AppColors.primaryGreen),
+          borderRadius: BorderRadius.circular(14.r),
+          borderSide: const BorderSide(color: AppColors.primaryGreen),
         ),
         contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
       ),

@@ -12,7 +12,7 @@ part of 'transaction_api.dart';
 
 class _TransactionApi implements TransactionApi {
   _TransactionApi(this._dio, {this.baseUrl, this.errorLogger}) {
-    baseUrl ??= 'http://localhost:3001';
+    baseUrl ??= 'https://63060dc58e8b.ngrok-free.app/';
   }
 
   final Dio _dio;

@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously, deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -65,33 +67,34 @@ class _BudgetDetailPageState extends ConsumerState<BudgetDetailPage> {
       body: budgetDetailState.isLoading && budgetDetailState.budget == null
           ? const Center(child: CircularProgressIndicator())
           : budgetDetailState.errorMessage != null &&
-                  budgetDetailState.budget == null
-              ? _ErrorView(
-                  message: budgetDetailState.errorMessage!,
-                  onRetry: () {
-                    // Refresh bằng cách set lại selected budget ID
-                    ref.read(selectedBudgetIdProvider.notifier).state = widget.budgetId;
-                  },
-                )
-              : budgetDetailState.budget == null
-                  ? const _EmptyView()
-                  : SingleChildScrollView(
-                      padding: EdgeInsets.all(16.w),
-                      child: Column(
-                        children: [
-                          _BudgetHeroCard(budget: budgetDetailState.budget!),
-                          SizedBox(height: 16.h),
-                          _BudgetInfoCard(budget: budgetDetailState.budget!),
-                          SizedBox(height: 16.h),
-                          _TimelineCard(budget: budgetDetailState.budget!),
-                          SizedBox(height: 24.h),
-                          _ActionButtons(
-                            onEdit: () => notifier.goToEdit(context),
-                            onDelete: () => _confirmDelete(context, notifier),
-                          ),
-                        ],
-                      ),
-                    ),
+                budgetDetailState.budget == null
+          ? _ErrorView(
+              message: budgetDetailState.errorMessage!,
+              onRetry: () {
+                // Refresh bằng cách set lại selected budget ID
+                ref.read(selectedBudgetIdProvider.notifier).state =
+                    widget.budgetId;
+              },
+            )
+          : budgetDetailState.budget == null
+          ? const _EmptyView()
+          : SingleChildScrollView(
+              padding: EdgeInsets.all(16.w),
+              child: Column(
+                children: [
+                  _BudgetHeroCard(budget: budgetDetailState.budget!),
+                  SizedBox(height: 16.h),
+                  _BudgetInfoCard(budget: budgetDetailState.budget!),
+                  SizedBox(height: 16.h),
+                  _TimelineCard(budget: budgetDetailState.budget!),
+                  SizedBox(height: 24.h),
+                  _ActionButtons(
+                    onEdit: () => notifier.goToEdit(context),
+                    onDelete: () => _confirmDelete(context, notifier),
+                  ),
+                ],
+              ),
+            ),
     );
   }
 
@@ -113,9 +116,7 @@ class _BudgetDetailPageState extends ConsumerState<BudgetDetailPage> {
           ),
           FilledButton(
             onPressed: () => context.pop(true),
-            style: FilledButton.styleFrom(
-              backgroundColor: AppColors.bgError,
-            ),
+            style: FilledButton.styleFrom(backgroundColor: AppColors.bgError),
             child: const Text('Xóa'),
           ),
         ],
@@ -158,9 +159,9 @@ class _BudgetHeroCard extends StatelessWidget {
           Text(
             budget.categoryName,
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
           ),
           SizedBox(height: 6.h),
           Text(
@@ -169,12 +170,14 @@ class _BudgetHeroCard extends StatelessWidget {
           ),
           SizedBox(height: 18.h),
           Text(
-            NumberFormat.currency(locale: 'vi_VN', symbol: '₫')
-                .format(budget.amount),
+            NumberFormat.currency(
+              locale: 'vi_VN',
+              symbol: '₫',
+            ).format(budget.amount),
             style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
           ),
           SizedBox(height: 8.h),
           Wrap(
@@ -236,8 +239,10 @@ class _BudgetInfoCard extends StatelessWidget {
           _infoRow(
             context,
             'Hạn mức',
-            NumberFormat.currency(locale: 'vi_VN', symbol: '₫')
-                .format(budget.amount),
+            NumberFormat.currency(
+              locale: 'vi_VN',
+              symbol: '₫',
+            ).format(budget.amount),
           ),
           const Divider(),
           _infoRow(
@@ -263,16 +268,15 @@ class _BudgetInfoCard extends StatelessWidget {
         Text(
           label,
           style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                fontWeight: FontWeight.w600,
-                color: AppColors.typoHeading,
-              ),
+            fontWeight: FontWeight.w600,
+            color: AppColors.typoHeading,
+          ),
         ),
         Text(
           value,
-          style: Theme.of(context)
-              .textTheme
-              .bodyLarge
-              ?.copyWith(color: AppColors.typoBody),
+          style: Theme.of(
+            context,
+          ).textTheme.bodyLarge?.copyWith(color: AppColors.typoBody),
         ),
       ],
     );
@@ -285,7 +289,9 @@ class _TimelineCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final startDate = DateTime.fromMillisecondsSinceEpoch(budget.startDate * 1000);
+    final startDate = DateTime.fromMillisecondsSinceEpoch(
+      budget.startDate * 1000,
+    );
     final endDate = DateTime.fromMillisecondsSinceEpoch(budget.endDate * 1000);
     return Container(
       width: double.infinity,
@@ -331,7 +337,10 @@ class _TimelineCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label, style: TextStyle(color: AppColors.typoBody, fontSize: 13.sp)),
+          Text(
+            label,
+            style: TextStyle(color: AppColors.typoBody, fontSize: 13.sp),
+          ),
           SizedBox(height: 4.h),
           Text(
             date,
@@ -400,8 +409,11 @@ class _ErrorView extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text('Có lỗi xảy ra:\n$message',
-              textAlign: TextAlign.center, style: TextStyle(fontSize: 14.sp)),
+          Text(
+            'Có lỗi xảy ra:\n$message',
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 14.sp),
+          ),
           SizedBox(height: 12.h),
           FilledButton(onPressed: onRetry, child: const Text('Thử lại')),
         ],

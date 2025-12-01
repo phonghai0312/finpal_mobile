@@ -1,7 +1,9 @@
 // ignore_for_file: use_build_context_synchronously
 
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fridge_to_fork_ai/core/presentation/theme/app_colors.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../../core/config/routing/app_routes.dart';
@@ -36,18 +38,18 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
   /// -------------------------------------
   /// LOAD THÔNG TIN TRANG PROFILE
   /// -------------------------------------
-  Future<void> init() async {
+  Future<void> init(BuildContext context) async {
     if (state.user != null) return;
-    await fetchProfile();
+    await fetchProfile(context);
   }
 
-  Future<void> fetchProfile() async {
+  Future<void> fetchProfile(BuildContext context) async {
     state = state.copyWith(isLoading: true, error: null);
     try {
       final user = await getUserProfile.call();
       state = state.copyWith(user: user, isLoading: false);
     } catch (e) {
-      state = state.copyWith(isLoading: false, error: e.toString());
+      _handleError(context, e);
     }
   }
 
@@ -61,10 +63,7 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
       state = const ProfileState(user: null);
       context.go(AppRoutes.login);
     } catch (e) {
-      state = state.copyWith(isLoading: false, error: e.toString());
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text("Lỗi đăng xuất: $e")));
+      _handleError(context, e);
     }
   }
 
@@ -83,5 +82,31 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
   }
   void setUser(User updatedUser) {
     state = state.copyWith(user: updatedUser);
+  }
+
+  /// ERROR handler
+  void _handleError(BuildContext context, Object error) {
+    String message = 'Unknown error';
+
+    if (error is DioException) {
+      final data = error.response?.data;
+      if (data is Map<String, dynamic>) {
+        message = data['message'] ?? message;
+      } else {
+        message = error.message ?? message;
+      }
+    } else {
+      message = error.toString();
+    }
+
+    state = state.copyWith(isLoading: false, error: message);
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: AppColors.typoError,
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
   }
 }

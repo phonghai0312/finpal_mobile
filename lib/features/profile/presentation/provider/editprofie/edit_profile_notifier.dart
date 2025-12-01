@@ -49,7 +49,7 @@ class EditProfileNotifier extends StateNotifier<EditProfileState> {
   final phoneController = TextEditingController();
 
   EditProfileNotifier(this.updateUserUseCase, this.ref)
-      : super(const EditProfileState()) {
+    : super(const EditProfileState()) {
     _loadUser();
     _initListeners();
   }
@@ -85,22 +85,39 @@ class EditProfileNotifier extends StateNotifier<EditProfileState> {
     }
   }
 
-  Future<void> save(BuildContext context) async {
+  Future<void> onUpdate(BuildContext context) async {
     try {
       state = state.copyWith(isLoading: true);
 
+      // 1. Gửi API UPDATE
       final updatedUser = await updateUserUseCase(
         name: nameController.text.trim(),
         phone: phoneController.text.trim(),
       );
 
-      ref.read(profileNotifierProvider.notifier).setUser(updatedUser);
+      await ref.read(profileNotifierProvider.notifier).fetchProfile(context);
 
-      state = state.copyWith(
-        user: updatedUser,
-        isLoading: false,
-        hasChanges: false,
-      );
+      final newUser = ref.read(profileNotifierProvider).user;
+
+      if (newUser != null) {
+        nameController.text = newUser.name ?? "";
+        phoneController.text = newUser.phone ?? "";
+        emailController.text = newUser.email ?? "";
+
+        // cập nhật luôn state của EditPage
+        state = state.copyWith(
+          user: newUser,
+          isLoading: false,
+          hasChanges: false,
+        );
+      } else {
+        // fallback: dùng updatedUser
+        state = state.copyWith(
+          user: updatedUser,
+          isLoading: false,
+          hasChanges: false,
+        );
+      }
 
       if (context.mounted) {
         context.go(AppRoutes.profile);
@@ -139,10 +156,7 @@ class EditProfileNotifier extends StateNotifier<EditProfileState> {
     super.dispose();
   }
 
-  void goBack(BuildContext context) {
+  void onBack(BuildContext context) {
     context.go(AppRoutes.profile);
   }
 }
-
-
-

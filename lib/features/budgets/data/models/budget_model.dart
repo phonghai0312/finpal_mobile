@@ -35,6 +35,7 @@ class BudgetModel extends Budget {
     );
   }
 
+  @override
   Map<String, dynamic> toJson() {
     return {
       '_id': id,
@@ -104,4 +105,3 @@ class BudgetListResponseModel {
     };
   }
 }
-

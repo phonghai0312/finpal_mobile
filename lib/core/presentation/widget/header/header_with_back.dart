@@ -22,6 +22,7 @@ class HeaderWithBack extends StatelessWidget implements PreferredSizeWidget {
     return AppBar(
       elevation: 0,
       centerTitle: true,
+      backgroundColor: AppColors.typoWhite,
       // Title
       title: Text(
         title,

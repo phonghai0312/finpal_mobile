@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -25,7 +27,7 @@ class _StatsPageState extends ConsumerState<StatsPage> {
     super.initState();
 
     Future.microtask(() {
-      ref.read(statsNotifierProvider.notifier).init();
+      ref.read(statsNotifierProvider.notifier).init(context);
     });
   }
 
@@ -41,7 +43,7 @@ class _StatsPageState extends ConsumerState<StatsPage> {
       backgroundColor: const Color(0xFFF5F5F5),
       body: SafeArea(
         child: RefreshIndicator(
-          onRefresh: () => notifier.refresh(),
+          onRefresh: () => notifier.refresh(context),
           child: _buildBody(state, notifier),
         ),
       ),
@@ -65,7 +67,7 @@ class _StatsPageState extends ConsumerState<StatsPage> {
           StatsHeader(
             selectedMonth: state.month,
             selectedYear: state.year,
-            onMonthChanged: (m) => notifier.changeMonth(m, state.year),
+            onMonthChanged: (m) => notifier.changeMonth(context, m, state.year),
           ),
 
           const SizedBox(height: 16),

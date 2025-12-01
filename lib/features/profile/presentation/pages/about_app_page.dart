@@ -3,68 +3,72 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:fridge_to_fork_ai/core/presentation/theme/app_colors.dart';
-import 'package:go_router/go_router.dart';
+import 'package:fridge_to_fork_ai/core/presentation/widget/header/header_with_back.dart';
+import 'package:google_fonts/google_fonts.dart';
+
+import '../../../../../core/presentation/theme/app_colors.dart';
+import '../provider/aboutapp/about_app_provider.dart';
 
 class AboutAppPage extends ConsumerWidget {
   const AboutAppPage({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(aboutAppNotifierProvider);
+    final notifier = ref.read(aboutAppNotifierProvider.notifier);
+
     return Scaffold(
       backgroundColor: AppColors.bgSecondary,
-      appBar: AppBar(
-        backgroundColor: AppColors.bgWhite,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(
-            Icons.arrow_back,
-            color: AppColors.typoHeading,
-            size: 24.sp,
-          ),
-          onPressed: () => context.pop(),
-        ),
-        title: Text(
-          'Về ứng dụng',
-          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-            color: AppColors.typoHeading,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        centerTitle: true,
+      appBar: HeaderWithBack(
+        title: 'Về ứng dụng',
+        onBack: () => notifier.onBack(context),
       ),
       body: SingleChildScrollView(
         padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 24.h),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
+            /// LOGO
             Image.asset(
-              'assets/image/logo_finpal.png', // Placeholder for app logo
-              height: 120.h,
+              'assets/image/logo_finpal.png',
+              height: 200.h,
               width: 120.w,
             ),
             SizedBox(height: 16.h),
+
+            /// APP NAME
             Text(
-              'Ví thông minh - FinPal',
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+              state.appName,
+              style: GoogleFonts.poppins(
+                fontSize: 20.sp,
                 fontWeight: FontWeight.bold,
-                color: AppColors.typoHeading,
+                color: AppColors.bgDarkGreen,
               ),
             ),
+
             SizedBox(height: 8.h),
+
+            /// VERSION
             Text(
-              'Phiên bản 1.0.0',
-              style: Theme.of(
-                context,
-              ).textTheme.bodyLarge?.copyWith(color: AppColors.typoBody),
+              'Phiên bản ${state.version}',
+              style: GoogleFonts.poppins(
+                fontSize: 15.sp,
+                color: AppColors.typoBody,
+              ),
             ),
+
+            /// BUILD NUMBER
             Text(
-              'Build 20251113',
-              style: Theme.of(
-                context,
-              ).textTheme.bodyMedium?.copyWith(color: AppColors.typoBody),
+              'Build ${state.buildNumber}',
+              style: GoogleFonts.poppins(
+                fontSize: 14.sp,
+                color: AppColors.typoBody,
+              ),
             ),
+
             SizedBox(height: 24.h),
+
+            /// DESCRIPTION
             Container(
               padding: EdgeInsets.all(16.w),
               decoration: BoxDecoration(
@@ -73,26 +77,33 @@ class AboutAppPage extends ConsumerWidget {
                 border: Border.all(color: AppColors.bgGray.withOpacity(0.5)),
               ),
               child: Text(
-                'Ví Thông Minh - FinPal là ứng dụng quản lý tài chính cá nhân sử dụng AI để tự động phân loại giao dịch từ Sepay và đưa ra những gợi ý tài chính thông minh, giúp bạn kiểm soát chi tiêu hiệu quả hơn.',
-                style: Theme.of(
-                  context,
-                ).textTheme.bodyMedium?.copyWith(color: AppColors.typoBody),
+                state.description,
+                style: GoogleFonts.poppins(
+                  fontSize: 14.sp,
+                  color: AppColors.typoBody,
+                  height: 1.4,
+                ),
                 textAlign: TextAlign.center,
               ),
             ),
+
             SizedBox(height: 24.h),
+
+            /// FEATURE TITLE
             Align(
               alignment: Alignment.centerLeft,
               child: Text(
                 'Tính năng chính',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                style: GoogleFonts.poppins(
                   fontSize: 18.sp,
                   fontWeight: FontWeight.bold,
-                  color: AppColors.typoHeading,
+                  color: AppColors.bgDarkGreen,
                 ),
               ),
             ),
+
             SizedBox(height: 12.h),
+
             _buildFeatureItem(context, 'Tự động đồng bộ giao dịch từ Sepay'),
             SizedBox(height: 8.h),
             _buildFeatureItem(context, 'Phân loại thông minh bằng AI Gemini'),
@@ -102,26 +113,34 @@ class AboutAppPage extends ConsumerWidget {
             _buildFeatureItem(context, 'Gợi ý tài chính cá nhân hóa'),
             SizedBox(height: 8.h),
             _buildFeatureItem(context, 'Quản lý ngân sách theo danh mục'),
+
             SizedBox(height: 24.h),
+
+            /// CONTACT TITLE
             Align(
               alignment: Alignment.centerLeft,
               child: Text(
                 'Liên hệ',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                style: GoogleFonts.poppins(
                   fontSize: 18.sp,
                   fontWeight: FontWeight.bold,
-                  color: AppColors.typoHeading,
+                  color: AppColors.bgDarkGreen,
                 ),
               ),
             ),
+
             SizedBox(height: 12.h),
-            _buildContactInfo(context, Icons.email, 'CEOFinPal@gmail.com', () {
-              // Handle email tap
-            }),
+
+            _buildContactInfo(
+              context,
+              Icons.email,
+              'CEOFinPal@gmail.com',
+              () {},
+            ),
+
             SizedBox(height: 8.h),
-            _buildContactInfo(context, Icons.language, 'www.FinPal.com', () {
-              // Handle website tap
-            }),
+
+            _buildContactInfo(context, Icons.language, 'www.FinPal.com', () {}),
           ],
         ),
       ),
@@ -134,16 +153,17 @@ class AboutAppPage extends ConsumerWidget {
       children: [
         Icon(
           Icons.check_circle_outline,
-          color: AppColors.primaryGreen,
+          color: AppColors.bgDarkGreen,
           size: 20.sp,
         ),
         SizedBox(width: 8.w),
         Expanded(
           child: Text(
             text,
-            style: Theme.of(
-              context,
-            ).textTheme.bodyLarge?.copyWith(color: AppColors.typoBody),
+            style: GoogleFonts.poppins(
+              fontSize: 15.sp,
+              color: AppColors.typoBody,
+            ),
           ),
         ),
       ],
@@ -167,14 +187,15 @@ class AboutAppPage extends ConsumerWidget {
         ),
         child: Row(
           children: [
-            Icon(icon, color: AppColors.primaryGreen, size: 24.sp),
+            Icon(icon, color: AppColors.bgDarkGreen, size: 24.sp),
             SizedBox(width: 12.w),
             Expanded(
               child: Text(
                 text,
-                style: Theme.of(
-                  context,
-                ).textTheme.bodyLarge?.copyWith(color: AppColors.typoHeading),
+                style: GoogleFonts.poppins(
+                  fontSize: 16.sp,
+                  color: AppColors.typoHeading,
+                ),
               ),
             ),
           ],

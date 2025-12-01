@@ -1,7 +1,8 @@
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class ApiBaseDev {
-  static const String baseUrlDevelopment = 'http://localhost:3001';
+  static const String baseUrlDevelopment =
+      'https://63060dc58e8b.ngrok-free.app/';
 }
 
 class ApiBaseProd {

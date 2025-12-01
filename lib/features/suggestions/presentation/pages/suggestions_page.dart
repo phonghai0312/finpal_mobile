@@ -1,4 +1,4 @@
-// ignore_for_file: deprecated_member_use, depend_on_referenced_packages
+// ignore_for_file: deprecated_member_use, depend_on_referenced_packages, unnecessary_to_list_in_spreads
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -82,7 +82,7 @@ class SuggestionsPage extends ConsumerWidget {
                       onTap: () => context.push(
                         '${AppRoutes.suggestionDetail}/${alertInsight.id}',
                       ),
-                      // ignore: deprecated_member_use
+
                       cardColor: AppColors.bgWarning.withOpacity(0.1),
                     ),
                   ),
@@ -124,9 +124,8 @@ class SuggestionsPage extends ConsumerWidget {
               switch (insight.type) {
                 case 'monthly_summary':
                   icon = Icons.arrow_upward_rounded;
-                  iconColor = AppColors.primaryGreen;
-                  // ignore: deprecated_member_use
-                  cardColor = AppColors.primaryGreen.withOpacity(0.1);
+                  iconColor = AppColors.bgDarkGreen;
+                  cardColor = AppColors.bgDarkGreen.withOpacity(0.1);
                   break;
                 case 'budget_alert':
                   icon = Icons.money;
@@ -141,7 +140,6 @@ class SuggestionsPage extends ConsumerWidget {
                 default:
                   icon = Icons.info_outline;
                   iconColor = AppColors.typoBody;
-                  // ignore: deprecated_member_use
                   cardColor = AppColors.bgGray.withOpacity(0.1);
               }
               return Padding(
@@ -180,7 +178,6 @@ class SuggestionsPage extends ConsumerWidget {
       decoration: BoxDecoration(
         color: cardColor,
         borderRadius: BorderRadius.circular(12.r),
-        // ignore: deprecated_member_use
         border: Border.all(color: iconColor.withOpacity(0.5)),
       ),
       child: Column(

@@ -1,4 +1,9 @@
+// ignore_for_file: use_build_context_synchronously
+
+import 'package:dio/dio.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fridge_to_fork_ai/core/presentation/theme/app_colors.dart';
 import 'package:fridge_to_fork_ai/features/stats/domain/entities/stats_by_category.dart';
 import 'package:fridge_to_fork_ai/features/stats/domain/entities/stats_overview.dart';
 import 'package:fridge_to_fork_ai/features/stats/domain/usecases/get_category_transactions.dart';
@@ -64,14 +69,14 @@ class StatsNotifier extends StateNotifier<StatsState> {
   // ------------------------------
   // INIT
   // ------------------------------
-  Future<void> init() async {
-    await loadStats();
+  Future<void> init(BuildContext context) async {
+    await loadStats(context);
   }
 
   // ------------------------------
   // LOAD DATA
   // ------------------------------
-  Future<void> loadStats() async {
+  Future<void> loadStats(BuildContext context) async {
     state = state.copyWith(isLoading: true, clearError: true);
 
     try {
@@ -86,27 +91,27 @@ class StatsNotifier extends StateNotifier<StatsState> {
         isLoading: false,
       );
     } catch (e) {
-      state = state.copyWith(isLoading: false, errorMessage: e.toString());
+      _handleError(context, e);
     }
   }
 
   // ------------------------------
   // Refresh
   // ------------------------------
-  Future<void> refresh() async {
+  Future<void> refresh(BuildContext context) async {
     state = state.copyWith(isRefreshing: true, clearError: true);
 
     try {
-      await loadStats();
-    } catch (_) {}
-
-    state = state.copyWith(isRefreshing: false);
+      await loadStats(context);
+    } catch (e) {
+      _handleError(context, e);
+    }
   }
 
   // ------------------------------
   // Change month
   // ------------------------------
-  Future<void> changeMonth(int month, int year) async {
+  Future<void> changeMonth(BuildContext context, int month, int year) async {
     state = state.copyWith(
       month: month,
       year: year,
@@ -114,7 +119,7 @@ class StatsNotifier extends StateNotifier<StatsState> {
       byCategory: null,
     );
 
-    await loadStats();
+    await loadStats(context);
   }
 
   // ------------------------------
@@ -146,6 +151,36 @@ class StatsNotifier extends StateNotifier<StatsState> {
     return (
       start.toUtc().millisecondsSinceEpoch ~/ 1000,
       end.toUtc().millisecondsSinceEpoch ~/ 1000,
+    );
+  }
+
+  /// ERROR handler
+  void _handleError(BuildContext context, Object error) {
+    String message = 'Unknown error';
+
+    if (error is DioException) {
+      final data = error.response?.data;
+      if (data is Map<String, dynamic>) {
+        message = data['message'] ?? message;
+      } else {
+        message = error.message ?? message;
+      }
+    } else {
+      message = error.toString();
+    }
+
+    state = state.copyWith(
+      isLoading: false,
+      isRefreshing: false,
+      errorMessage: message,
+    );
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: AppColors.typoError,
+        behavior: SnackBarBehavior.floating,
+      ),
     );
   }
 }
