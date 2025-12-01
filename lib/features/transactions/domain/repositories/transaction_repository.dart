@@ -1,4 +1,5 @@
 import '../../domain/entities/transaction.dart';
+import '../entities/spend_amount.dart';
 
 abstract class TransactionRepository {
   Future<List<Transaction>> getTransactions();
@@ -20,4 +21,6 @@ abstract class TransactionRepository {
     required int occurredAt, // unix timestamp
     String? note,
   });
+
+  Future<List<SpendAmount>> getSpendAmounts({String? categoryId});
 }

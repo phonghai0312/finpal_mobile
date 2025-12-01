@@ -74,6 +74,30 @@ class AppRouter {
         path: AppRoutes.editTransaction,
         builder: (context, state) => const CreateTransactionPage(),
       ),
+
+      // Budgets
+      GoRoute(
+        path: '${AppRoutes.budgetDetail}/:id',
+        builder: (context, state) =>
+            BudgetDetailPage(budgetId: state.pathParameters['id']!),
+      ),
+      GoRoute(
+        path: AppRoutes.budgetDetail,
+        builder: (context, state) =>
+            const Scaffold(body: Center(child: Text('Budget ID không hợp lệ'))),
+      ),
+      GoRoute(
+        path: AppRoutes.budgetForm,
+        builder: (context, state) =>
+            BudgetFormPage(budgetId: state.extra as String?),
+      ),
+      // Suggestions
+      GoRoute(
+        path: '${AppRoutes.suggestionDetail}/:id',
+        builder: (context, state) =>
+            SuggestionDetailPage(insightId: state.pathParameters['id']!),
+      ),
+      // Profile
       GoRoute(
         path: AppRoutes.userSettings,
         builder: (context, state) => const UserSettingsPage(),
@@ -83,21 +107,9 @@ class AppRouter {
         builder: (context, state) => const AboutAppPage(),
       ),
       GoRoute(
-        path: '${AppRoutes.suggestionDetail}/:id',
-        builder: (context, state) =>
-            SuggestionDetailPage(insightId: state.pathParameters['id']!),
+        path: AppRoutes.editProfile,
+        builder: (context, state) => const EditProfilePage(),
       ),
-      GoRoute(
-        path: '${AppRoutes.budgetDetail}/:id',
-        builder: (context, state) =>
-            BudgetDetailPage(budgetId: state.pathParameters['id']!),
-      ),
-      GoRoute(
-        path: AppRoutes.budgetForm,
-        builder: (context, state) =>
-            BudgetFormPage(budgetId: state.extra as String?),
-      ),
-
       // Shell router have nav bar
       ShellRoute(
         builder: (context, state, child) {
@@ -127,10 +139,6 @@ class AppRouter {
           GoRoute(
             path: AppRoutes.profile,
             builder: (context, state) => const ProfilePage(),
-          ),
-          GoRoute(
-            path: AppRoutes.editProfile,
-            builder: (context, state) => const EditProfilePage(),
           ),
         ],
       ),

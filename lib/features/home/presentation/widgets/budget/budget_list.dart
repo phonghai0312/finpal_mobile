@@ -1,20 +1,53 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:fridge_to_fork_ai/core/config/routing/app_routes.dart';
 import 'package:fridge_to_fork_ai/core/presentation/theme/app_chart_colors.dart';
 import 'package:fridge_to_fork_ai/core/presentation/theme/app_colors.dart';
-import 'package:fridge_to_fork_ai/features/budgets/domain/entities/budget.dart';
+import 'package:fridge_to_fork_ai/features/budgets/presentation/providers/budget_provider.dart';
+import 'package:fridge_to_fork_ai/features/categories/presentation/provider/category_provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import 'package:fridge_to_fork_ai/core/config/routing/app_routes.dart';
 
-class BudgetList extends StatelessWidget {
-  final List<Budget> budgets;
+class BudgetList extends ConsumerStatefulWidget {
+  const BudgetList({super.key});
 
-  const BudgetList({super.key, required this.budgets});
+  @override
+  ConsumerState<BudgetList> createState() => _BudgetListState();
+}
+
+class _BudgetListState extends ConsumerState<BudgetList> {
+  @override
+  void initState() {
+    super.initState();
+    // Fetch budgets when widget is first built
+    Future.microtask(() {
+      ref.read(budgetNotifierProvider.notifier).fetchBudgets();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    if (budgets.isEmpty) {
+    final budgetState = ref.watch(budgetNotifierProvider);
+    final categoryState = ref.watch(categoryNotifierProvider);
+
+    // Show loading state
+    if (budgetState.isLoading && budgetState.budgets.isEmpty) {
+      return Container(
+        width: double.infinity,
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 24.h),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16.r),
+        ),
+        child: const Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    // Show error state
+    if (budgetState.errorMessage != null && budgetState.budgets.isEmpty) {
       return Container(
         width: double.infinity,
         padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 24.h),
@@ -23,7 +56,48 @@ class BudgetList extends StatelessWidget {
           borderRadius: BorderRadius.circular(16.r),
         ),
         child: Column(
-          mainAxisSize: MainAxisSize.min, // 👈 tránh cao dư
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.error_outline, size: 48.sp, color: Colors.red[300]),
+            SizedBox(height: 12.h),
+            Text(
+              'Lỗi tải ngân sách',
+              style: TextStyle(
+                fontSize: 16.sp,
+                fontWeight: FontWeight.w600,
+                color: Colors.red[700],
+              ),
+              textAlign: TextAlign.center,
+            ),
+            SizedBox(height: 8.h),
+            Text(
+              budgetState.errorMessage ?? 'Đã xảy ra lỗi',
+              style: TextStyle(fontSize: 12.sp, color: Colors.grey[600]),
+              textAlign: TextAlign.center,
+            ),
+            SizedBox(height: 12.h),
+            ElevatedButton(
+              onPressed: () {
+                ref.read(budgetNotifierProvider.notifier).fetchBudgets();
+              },
+              child: const Text('Thử lại'),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // Show empty state
+    if (budgetState.budgets.isEmpty) {
+      return Container(
+        width: double.infinity,
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 24.h),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16.r),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
             Icon(Icons.money_off, size: 48.sp, color: Colors.grey[400]),
             SizedBox(height: 12.h),
@@ -53,25 +127,33 @@ class BudgetList extends StatelessWidget {
         ),
         SizedBox(height: 16.h),
         SizedBox(
-          // 👇 tăng nhẹ chiều cao list, tránh card bị chật
           height: 190.h,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
-            itemCount: budgets.length,
+            itemCount: budgetState.budgets.length,
             itemBuilder: (context, index) {
-              final budget = budgets[index];
+              final budget = budgetState.budgets[index];
               final color =
                   AppChartColors.colors[index % AppChartColors.colors.length];
-              final spentAmount = 3000000.0; // Mock
-              final progress = (spentAmount / budget.amount).clamp(0.0, 1.0);
+              final spentAmount = budget.spentAmount;
+              final amount = budget.amount <= 0 ? 1 : budget.amount;
+              final progress = (spentAmount / amount).clamp(0.0, 1.0);
               final formatter = NumberFormat.currency(
                 locale: 'vi_VN',
                 symbol: '₫',
               );
 
+              String? iconName;
+              for (final category in categoryState.categories) {
+                if (category.id == budget.categoryId) {
+                  iconName = category.icon;
+                  break;
+                }
+              }
+
               return GestureDetector(
                 onTap: () {
-                  // Navigate to BudgetDetailPage
+                  if (budget.id.isEmpty) return;
                   context.push('${AppRoutes.budgetDetail}/${budget.id}');
                 },
                 child: Container(
@@ -91,8 +173,7 @@ class BudgetList extends StatelessWidget {
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment:
-                        MainAxisAlignment.spaceBetween, // 👈 dàn đều trên–dưới
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Row(
                         children: [
@@ -104,7 +185,7 @@ class BudgetList extends StatelessWidget {
                               shape: BoxShape.circle,
                             ),
                             child: Icon(
-                              Icons.fastfood, // Placeholder icon
+                              _iconFromName(iconName),
                               color: color,
                               size: 24.sp,
                             ),
@@ -113,7 +194,7 @@ class BudgetList extends StatelessWidget {
                           Expanded(
                             child: Text(
                               budget.categoryName,
-                              maxLines: 1, // 👈 hạn chế xuống nhiều dòng
+                              maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: Theme.of(context).textTheme.titleMedium
                                   ?.copyWith(
@@ -124,7 +205,6 @@ class BudgetList extends StatelessWidget {
                           ),
                         ],
                       ),
-                      // bỏ bớt SizedBox cao quá, để column tự co lại
                       Text(
                         formatter.format(budget.amount),
                         maxLines: 1,
@@ -143,7 +223,7 @@ class BudgetList extends StatelessWidget {
                         ),
                       ),
                       LinearProgressIndicator(
-                        value: progress,
+                        value: progress.isNaN ? 0 : progress,
                         backgroundColor: Colors.grey[200],
                         valueColor: AlwaysStoppedAnimation<Color>(color),
                         minHeight: 6.h,
@@ -158,5 +238,33 @@ class BudgetList extends StatelessWidget {
         ),
       ],
     );
+  }
+}
+
+IconData _iconFromName(String? iconName) {
+  const fallback = Icons.category;
+  switch (iconName) {
+    case 'fastfood':
+      return Icons.fastfood;
+    case 'shopping_bag':
+      return Icons.shopping_bag;
+    case 'attach_money':
+      return Icons.attach_money;
+    case 'directions_car':
+      return Icons.directions_car;
+    case 'medical_services':
+      return Icons.medical_services;
+    case 'home':
+      return Icons.home;
+    case 'favorite':
+      return Icons.favorite;
+    case 'local_cafe':
+      return Icons.local_cafe;
+    case 'water_drop':
+      return Icons.water_drop;
+    case 'flash_on':
+      return Icons.flash_on;
+    default:
+      return fallback;
   }
 }

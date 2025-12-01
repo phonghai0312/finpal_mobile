@@ -1,4 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fridge_to_fork_ai/core/network/api_client.dart';
+import 'package:fridge_to_fork_ai/features/budgets/data/api/budget_api.dart';
 import 'package:fridge_to_fork_ai/features/budgets/data/datasources/budget_remote_data_source.dart';
 import 'package:fridge_to_fork_ai/features/budgets/data/datasources/budget_remote_data_source_impl.dart';
 import 'package:fridge_to_fork_ai/features/budgets/data/repositories/budget_repository_impl.dart';
@@ -11,10 +13,18 @@ import 'package:fridge_to_fork_ai/features/budgets/domain/usecases/delete_budget
 import 'package:fridge_to_fork_ai/features/budgets/presentation/providers/budget_notifier.dart';
 import 'package:fridge_to_fork_ai/features/budgets/presentation/providers/budget_detail_notifier.dart';
 import 'package:fridge_to_fork_ai/features/budgets/presentation/providers/budget_form_notifier.dart';
+import 'package:fridge_to_fork_ai/features/transactions/presentation/provider/transaction/transaction_provider.dart';
+
+/// API PROVIDER
+final budgetApiProvider = Provider<BudgetApi>(
+  (ref) => ApiClient().create(BudgetApi.new),
+);
 
 /// DATASOURCE
 final budgetRemoteDataSourceProvider = Provider<BudgetRemoteDataSource>((ref) {
-  return BudgetRemoteDataSourceImpl();
+  return BudgetRemoteDataSourceImpl(
+    api: ref.read(budgetApiProvider),
+  );
 });
 
 /// REPOSITORY
@@ -52,20 +62,22 @@ final deleteBudgetUseCaseProvider = Provider<DeleteBudgetUseCase>((ref) {
 /// NOTIFIER
 final budgetNotifierProvider =
     StateNotifierProvider<BudgetNotifier, BudgetState>((ref) {
-      return BudgetNotifier(ref.read(getBudgetsUseCaseProvider));
+      return BudgetNotifier(
+        ref.read(getBudgetsUseCaseProvider),
+        ref.read(getSpendAmountsUseCaseProvider),
+      );
     });
+
+/// SELECTED BUDGET ID PROVIDER
+final selectedBudgetIdProvider = StateProvider<String?>((ref) => null);
 
 /// NOTIFIER: Budget Detail
 final budgetDetailNotifierProvider =
-    StateNotifierProvider.family<
-      BudgetDetailNotifier,
-      BudgetDetailState,
-      String
-    >((ref, budgetId) {
+    StateNotifierProvider<BudgetDetailNotifier, BudgetDetailState>((ref) {
       return BudgetDetailNotifier(
-        budgetId,
         ref.read(getBudgetByIdUseCaseProvider),
         ref.read(deleteBudgetUseCaseProvider),
+        ref,
       );
     });
 

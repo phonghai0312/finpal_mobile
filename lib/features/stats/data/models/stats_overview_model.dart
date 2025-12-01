@@ -11,10 +11,12 @@ class StatsOverviewModel extends StatsOverview {
   });
 
   factory StatsOverviewModel.fromJson(Map<String, dynamic> json) {
+    final periodJson = json['period'] as Map<String, dynamic>?;
+
     return StatsOverviewModel(
       period: StatsPeriod(
-        from: json['from'] as int,
-        to: json['to'] as int,
+        from: (periodJson?['from'] ?? json['from']) as int,
+        to: (periodJson?['to'] ?? json['to']) as int,
       ),
       currency: json['currency'] as String? ?? 'VND',
       totalExpense: (json['totalExpense'] as num).toDouble(),
@@ -24,8 +26,10 @@ class StatsOverviewModel extends StatsOverview {
   }
 
   Map<String, dynamic> toJson() => {
-        'from': period.from,
-        'to': period.to,
+        'period': {
+          'from': period.from,
+          'to': period.to,
+        },
         'currency': currency,
         'totalExpense': totalExpense,
         'totalIncome': totalIncome,

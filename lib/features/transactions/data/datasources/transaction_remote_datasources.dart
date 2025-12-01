@@ -1,325 +1,39 @@
-import 'dart:async';
+import 'package:dio/dio.dart';
 
-import 'package:fridge_to_fork_ai/features/transactions/data/models/transaction_ai_model.dart';
-import 'package:fridge_to_fork_ai/features/transactions/data/models/transaction_normalized_model.dart';
+import 'package:fridge_to_fork_ai/core/network/api_client.dart';
+import 'package:fridge_to_fork_ai/features/transactions/data/api/transaction_api.dart';
+import 'package:fridge_to_fork_ai/features/transactions/data/models/transaction_model.dart';
+import 'package:fridge_to_fork_ai/features/transactions/data/models/spend_amount_model.dart';
 
-import '../models/transaction_model.dart';
-
-/// Fake datasource for Transactions
 class TransactionRemoteDataSource {
-  final List<TransactionModel> _mock = [
-    const TransactionModel(
-      id: 't001',
-      userId: 'u001',
-      accountId: 'a001',
-      amount: 45000,
-      currency: 'VND',
-      direction: 'out',
-      type: 'expense',
-      categoryId: 'c001',
-      categoryName: 'Ăn uống',
-      merchant: 'The Coffee House',
-      occurredAt: 1739693400, // 17/02/2025 14:30
-      rawMessage: 'TCH 45000VND',
-      normalized: TransactionNormalizedModel(
-        title: 'The Coffee House',
-        description: 'Ăn uống',
-        peerName: 'The Coffee House',
-      ),
-      ai: TransactionAIModel(categorySuggestionId: 'c001', confidence: 0.91),
-      source: 'sepay',
-      userNote: null,
-      createdAt: 1739693400,
-      updatedAt: 1739693400,
-    ),
+  TransactionRemoteDataSource({TransactionApi? api, ApiClient? client})
+    : _api = api ?? (client ?? ApiClient()).create(TransactionApi.new);
 
-    // Shopee
-    TransactionModel(
-      id: 't002',
-      userId: 'u001',
-      accountId: 'a001',
-      amount: 250000,
-      currency: 'VND',
-      direction: 'out',
-      type: 'expense',
-      categoryId: 'c002',
-      categoryName: 'Mua sắm',
-      merchant: 'Shopee',
-      occurredAt: 1739690100, // 17/02/2025 10:15
-      rawMessage: 'Shopee Order #123',
-      normalized: const TransactionNormalizedModel(
-        title: 'Shopee - Đơn hàng #123',
-        description: 'Mua sắm',
-        peerName: 'Shopee',
-      ),
-      ai: const TransactionAIModel(
-        categorySuggestionId: 'c002',
-        confidence: 0.83,
-      ),
-      source: 'sepay',
-      userNote: null,
-      createdAt: 1739690100,
-      updatedAt: 1739690100,
-    ),
+  final TransactionApi _api;
 
-    // Thu nhập
-    TransactionModel(
-      id: 't003',
-      userId: 'u001',
-      accountId: 'a001',
-      amount: 15000000,
-      currency: 'VND',
-      direction: 'in',
-      type: 'income',
-      categoryId: 'c003',
-      categoryName: 'Thu nhập',
-      merchant: 'Công ty ABC',
-      occurredAt: 1739690100, // same as above
-      rawMessage: 'Lương tháng 11',
-      normalized: const TransactionNormalizedModel(
-        title: 'Lương tháng 11',
-        description: 'Thu nhập',
-        peerName: 'Công ty ABC',
-      ),
-      ai: const TransactionAIModel(
-        categorySuggestionId: 'c003',
-        confidence: 0.95,
-      ),
-      source: 'manual',
-      userNote: null,
-      createdAt: 1739690100,
-      updatedAt: 1739690100,
-    ),
-
-    // Highlands Coffee
-    TransactionModel(
-      id: 't004',
-      userId: 'u001',
-      accountId: 'a001',
-      amount: 65000,
-      currency: 'VND',
-      direction: 'out',
-      type: 'expense',
-      categoryId: 'c001',
-      categoryName: 'Ăn uống',
-      merchant: 'Highlands Coffee',
-      occurredAt: 1739527200, // 15/02/2025
-      rawMessage: 'Highlands Coffee 65000₫',
-      normalized: const TransactionNormalizedModel(
-        title: 'Highlands Coffee',
-        description: 'Ăn uống',
-        peerName: 'Highlands Coffee',
-      ),
-      ai: const TransactionAIModel(
-        categorySuggestionId: 'c001',
-        confidence: 0.88,
-      ),
-      source: 'sepay',
-      userNote: null,
-      createdAt: 1739527200,
-      updatedAt: 1739527200,
-    ),
-
-    // Grab
-    TransactionModel(
-      id: 't005',
-      userId: 'u001',
-      accountId: 'a001',
-      amount: 250000,
-      currency: 'VND',
-      direction: 'out',
-      type: 'expense',
-      categoryId: 'c004',
-      categoryName: 'Di chuyển',
-      merchant: 'Grab',
-      occurredAt: 1739613900, // 16/02/2025 18:45
-      rawMessage: 'Grab from home to work',
-      normalized: const TransactionNormalizedModel(
-        title: 'Grab - Từ nhà đến công ty',
-        description: 'Di chuyển',
-        peerName: 'Grab',
-      ),
-      ai: const TransactionAIModel(
-        categorySuggestionId: 'c004',
-        confidence: 0.92,
-      ),
-      source: 'sepay',
-      userNote: null,
-      createdAt: 1739613900,
-      updatedAt: 1739613900,
-    ),
-
-    // Phòng khám ABC
-    TransactionModel(
-      id: 't006',
-      userId: 'u001',
-      accountId: 'a001',
-      amount: 5000000,
-      currency: 'VND',
-      direction: 'out',
-      type: 'expense',
-      categoryId: 'c005',
-      categoryName: 'Sức khỏe',
-      merchant: 'Phòng khám ABC',
-      occurredAt: 1739440800, // 14/02/2025
-      rawMessage: 'Phòng khám ABC 5.000.000đ',
-      normalized: const TransactionNormalizedModel(
-        title: 'Phòng khám ABC',
-        description: 'Sức khỏe',
-        peerName: 'Phòng khám ABC',
-      ),
-      ai: const TransactionAIModel(
-        categorySuggestionId: 'c005',
-        confidence: 0.80,
-      ),
-      source: 'manual',
-      userNote: null,
-      createdAt: 1739440800,
-      updatedAt: 1739440800,
-    ),
-
-    // CGV
-    TransactionModel(
-      id: 't007',
-      userId: 'u001',
-      accountId: 'a001',
-      amount: 120000,
-      currency: 'VND',
-      direction: 'out',
-      type: 'expense',
-      categoryId: 'c006',
-      categoryName: 'Giải trí',
-      merchant: 'CGV Vincom',
-      occurredAt: 1739354400, // 13/02/2025
-      rawMessage: 'CGV Movie',
-      normalized: const TransactionNormalizedModel(
-        title: 'CGV - Vé xem phim',
-        description: 'Giải trí',
-        peerName: 'CGV',
-      ),
-      ai: const TransactionAIModel(
-        categorySuggestionId: 'c006',
-        confidence: 0.87,
-      ),
-      source: 'sepay',
-      userNote: null,
-      createdAt: 1739354400,
-      updatedAt: 1739354400,
-    ),
-
-    // Udemy
-    TransactionModel(
-      id: 't008',
-      userId: 'u001',
-      accountId: 'a001',
-      amount: 300000,
-      currency: 'VND',
-      direction: 'out',
-      type: 'expense',
-      categoryId: 'c007',
-      categoryName: 'Giáo dục',
-      merchant: 'Udemy',
-      occurredAt: 1739268000, // 12/02/2025
-      rawMessage: 'Udemy Payment',
-      normalized: const TransactionNormalizedModel(
-        title: 'Udemy - Khoá học Flutter',
-        description: 'Giáo dục',
-        peerName: 'Udemy',
-      ),
-      ai: const TransactionAIModel(
-        categorySuggestionId: 'c007',
-        confidence: 0.79,
-      ),
-      source: 'manual',
-      userNote: null,
-      createdAt: 1739268000,
-      updatedAt: 1739268000,
-    ),
-
-    // Pizza Home
-    TransactionModel(
-      id: 't009',
-      userId: 'u001',
-      accountId: 'a001',
-      amount: 98000,
-      currency: 'VND',
-      direction: 'out',
-      type: 'expense',
-      categoryId: 'c001',
-      categoryName: 'Ăn uống',
-      merchant: 'Pizza Home',
-      occurredAt: 1739181600, // 11/02/2025
-      rawMessage: 'Pizza Home order',
-      normalized: const TransactionNormalizedModel(
-        title: 'Pizza Home',
-        description: 'Ăn uống',
-        peerName: 'Pizza Home',
-      ),
-      ai: const TransactionAIModel(
-        categorySuggestionId: 'c001',
-        confidence: 0.86,
-      ),
-      source: 'sepay',
-      userNote: null,
-      createdAt: 1739181600,
-      updatedAt: 1739181600,
-    ),
-  ];
-
-  /// GET ALL
   Future<List<TransactionModel>> getTransactions() async {
-    await Future.delayed(const Duration(milliseconds: 300));
-    return _mock;
+    final response = await _guardRequest(() => _api.getTransactions());
+    return response.items;
   }
 
-  /// DETAIL
-  Future<TransactionModel> getTransactionDetail(String id) async {
-    await Future.delayed(const Duration(milliseconds: 300));
-    return _mock.firstWhere(
-      (t) => t.id == id,
-      orElse: () => throw Exception('Transaction not found'),
-    );
+  Future<TransactionModel> getTransactionDetail(String id) {
+    return _guardRequest(() => _api.getTransactionDetail(id));
   }
 
-  /// UPDATE
   Future<void> updateTransaction(
     String id, {
     String? categoryId,
     String? userNote,
     String? merchant,
   }) async {
-    await Future.delayed(const Duration(milliseconds: 300));
+    final body = <String, dynamic>{};
+    if (categoryId != null) body['categoryId'] = categoryId;
+    if (userNote != null) body['userNote'] = userNote;
+    if (merchant != null) body['merchant'] = merchant;
 
-    final index = _mock.indexWhere((t) => t.id == id);
-    if (index == -1) throw Exception('Transaction not found');
-
-    final t = _mock[index];
-
-    final updated = TransactionModel(
-      id: t.id,
-      userId: t.userId,
-      accountId: t.accountId,
-      amount: t.amount,
-      currency: t.currency,
-      direction: t.direction,
-      type: t.type,
-      categoryId: categoryId ?? t.categoryId,
-      categoryName: t.categoryName,
-      merchant: merchant ?? t.merchant,
-      occurredAt: t.occurredAt,
-      rawMessage: t.rawMessage,
-      normalized: t.normalized,
-      ai: t.ai,
-      userNote: userNote ?? t.userNote,
-      source: t.source,
-      createdAt: t.createdAt,
-      updatedAt: DateTime.now().millisecondsSinceEpoch ~/ 1000,
-    );
-
-    _mock[index] = updated;
+    await _guardRequest(() => _api.updateTransaction(id, body));
   }
 
-  /// CREATE
   Future<void> createTransaction({
     required double amount,
     required String type,
@@ -328,33 +42,37 @@ class TransactionRemoteDataSource {
     required int occurredAt,
     String? note,
   }) async {
-    await Future.delayed(const Duration(milliseconds: 300));
+    final body = <String, dynamic>{
+      'amount': amount,
+      'type': type,
+      'categoryId': categoryId,
+      'description': description,
+      'occurredAt': occurredAt,
+    };
 
-    final newModel = TransactionModel(
-      id: "t${_mock.length + 1}",
-      userId: 'u001',
-      accountId: 'a001',
-      amount: amount,
-      currency: 'VND',
-      direction: type == "income" ? "in" : "out",
-      type: type,
-      categoryId: categoryId,
-      categoryName: description,
-      merchant: description,
-      occurredAt: occurredAt,
-      rawMessage: description,
-      normalized: TransactionNormalizedModel(
-        title: description,
-        description: description,
-        peerName: description,
-      ),
-      ai: TransactionAIModel(categorySuggestionId: categoryId, confidence: 1.0),
-      userNote: note,
-      source: 'manual',
-      createdAt: occurredAt,
-      updatedAt: occurredAt,
+    if (note != null) body['userNote'] = note;
+
+    await _guardRequest(() => _api.createTransaction(body));
+  }
+
+  Future<List<SpendAmountModel>> getSpendAmounts({String? categoryId}) async {
+    final response = await _guardRequest(
+      () => _api.getSpendAmounts(categoryId: categoryId),
     );
+    return response.items;
+  }
 
-    _mock.insert(0, newModel);
+  Future<T> _guardRequest<T>(Future<T> Function() request) async {
+    try {
+      return await request();
+    } on DioException catch (dioError) {
+      final dynamic data = dioError.response?.data;
+      final message = (data is Map && data['message'] is String)
+          ? data['message'] as String
+          : dioError.message;
+      throw Exception(message ?? 'Unexpected server error');
+    } catch (error) {
+      throw Exception(error.toString());
+    }
   }
 }

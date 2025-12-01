@@ -37,9 +37,13 @@ class CreateTransactionState {
     String? error,
     bool? success,
     double? amount,
+    bool updateAmount = false,
     String? description,
+    bool updateDescription = false,
     String? note,
+    bool updateNote = false,
     String? categoryId,
+    bool updateCategoryId = false,
     String? type,
     DateTime? date,
     TimeOfDay? time,
@@ -48,10 +52,10 @@ class CreateTransactionState {
       isLoading: isLoading ?? this.isLoading,
       error: error,
       success: success ?? this.success,
-      amount: amount ?? this.amount,
-      description: description ?? this.description,
-      note: note ?? this.note,
-      categoryId: categoryId ?? this.categoryId,
+      amount: updateAmount ? amount : this.amount,
+      description: updateDescription ? description : this.description,
+      note: updateNote ? note : this.note,
+      categoryId: updateCategoryId ? categoryId : this.categoryId,
       type: type ?? this.type,
       date: date ?? this.date,
       time: time ?? this.time,
@@ -61,30 +65,71 @@ class CreateTransactionState {
 
 class CreateTransactionNotifier extends StateNotifier<CreateTransactionState> {
   final CreateTransaction _createTransaction;
+  final TextEditingController amountController = TextEditingController();
+  final TextEditingController descriptionController = TextEditingController();
+  final TextEditingController noteController = TextEditingController();
 
   CreateTransactionNotifier(this._createTransaction)
       : super(
     CreateTransactionState(date: DateTime.now(), time: TimeOfDay.now()),
-  );
+  ) {
+    _initControllers();
+  }
+
+  void _initControllers() {
+    amountController.text = state.amount?.toString() ?? '';
+    descriptionController.text = state.description ?? '';
+    noteController.text = state.note ?? '';
+
+    amountController.addListener(() {
+      setAmount(amountController.text);
+    });
+    descriptionController.addListener(() {
+      setDescription(descriptionController.text);
+    });
+    noteController.addListener(() {
+      setNote(noteController.text);
+    });
+  }
+
+  @override
+  void dispose() {
+    amountController.dispose();
+    descriptionController.dispose();
+    noteController.dispose();
+    super.dispose();
+  }
 
   void setType(String value) {
     state = state.copyWith(type: value);
   }
 
   void setAmount(String value) {
-    state = state.copyWith(amount: double.tryParse(value));
+    state = state.copyWith(
+      amount: double.tryParse(value),
+      updateAmount: true,
+    );
   }
 
   void setDescription(String value) {
-    state = state.copyWith(description: value);
+    state = state.copyWith(
+      description: value,
+      updateDescription: true,
+    );
   }
 
   void setNote(String value) {
-    state = state.copyWith(note: value);
+    state = state.copyWith(
+      note: value,
+      updateNote: true,
+    );
   }
 
   void setCategory(String id) {
-    state = state.copyWith(categoryId: id);
+    state = state.copyWith(
+      categoryId: id,
+      updateCategoryId: true,
+    );
   }
 
   void setDate(DateTime value) {

@@ -16,7 +16,7 @@ class HeaderSimple extends StatelessWidget implements PreferredSizeWidget {
     return AppBar(
       elevation: 0,
       automaticallyImplyLeading: false,
-
+      backgroundColor: AppColors.typoWhite,
       // Title
       title: Text(
         title,

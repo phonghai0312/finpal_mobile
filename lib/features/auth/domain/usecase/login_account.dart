@@ -5,7 +5,7 @@ class LoginAccount {
   final AuthRepository repository;
   LoginAccount(this.repository);
 
-  Future<Login> call(String username, String password, String origin) {
-    return repository.login(username, password);
+  Future<Login> call(String email, String password) {
+    return repository.login(email, password);
   }
 }

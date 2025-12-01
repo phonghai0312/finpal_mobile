@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use, depend_on_referenced_packages, unnecessary_to_list_in_spreads
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -80,6 +82,7 @@ class SuggestionsPage extends ConsumerWidget {
                       onTap: () => context.push(
                         '${AppRoutes.suggestionDetail}/${alertInsight.id}',
                       ),
+
                       cardColor: AppColors.bgWarning.withOpacity(0.1),
                     ),
                   ),
@@ -121,8 +124,8 @@ class SuggestionsPage extends ConsumerWidget {
               switch (insight.type) {
                 case 'monthly_summary':
                   icon = Icons.arrow_upward_rounded;
-                  iconColor = AppColors.primaryGreen;
-                  cardColor = AppColors.primaryGreen.withOpacity(0.1);
+                  iconColor = AppColors.bgDarkGreen;
+                  cardColor = AppColors.bgDarkGreen.withOpacity(0.1);
                   break;
                 case 'budget_alert':
                   icon = Icons.money;

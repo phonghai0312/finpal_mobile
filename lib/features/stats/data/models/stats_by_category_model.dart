@@ -18,10 +18,12 @@ class StatsByCategoryModel extends StatsByCategory {
         )
         .toList();
 
+    final periodJson = json['period'] as Map<String, dynamic>?;
+
     return StatsByCategoryModel(
       period: StatsPeriod(
-        from: json['from'] as int,
-        to: json['to'] as int,
+        from: (periodJson?['from'] ?? json['from']) as int,
+        to: (periodJson?['to'] ?? json['to']) as int,
       ),
       currency: json['currency'] as String? ?? 'VND',
       totalExpense: (json['totalExpense'] as num).toDouble(),
@@ -30,12 +32,11 @@ class StatsByCategoryModel extends StatsByCategory {
   }
 
   Map<String, dynamic> toJson() => {
-        'from': period.from,
-        'to': period.to,
-        'currency': currency,
-        'totalExpense': totalExpense,
-        'items': items
-            .map((item) => (item as StatsByCategoryItemModel).toJson())
-            .toList(),
-      };
+    'period': {'from': period.from, 'to': period.to},
+    'currency': currency,
+    'totalExpense': totalExpense,
+    'items': items
+        .map((item) => (item as StatsByCategoryItemModel).toJson())
+        .toList(),
+  };
 }

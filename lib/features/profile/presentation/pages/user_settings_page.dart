@@ -1,146 +1,111 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:fridge_to_fork_ai/core/presentation/theme/app_colors.dart';
-import 'package:fridge_to_fork_ai/features/profile/presentation/provider/profile_provider.dart';
-import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 
-class UserSettingsPage extends ConsumerStatefulWidget {
+import '../../../../../core/presentation/theme/app_colors.dart';
+import '../../../../../core/presentation/widget/header/header_with_back.dart';
+import '../provider/usersetting/user_setting_provider.dart';
+
+class UserSettingsPage extends ConsumerWidget {
   const UserSettingsPage({super.key});
 
   @override
-  ConsumerState<UserSettingsPage> createState() => _UserSettingsPageState();
-}
-
-class _UserSettingsPageState extends ConsumerState<UserSettingsPage> {
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(profileNotifierProvider.notifier).init();
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final profileState = ref.watch(profileNotifierProvider);
-    final notifier = ref.read(profileNotifierProvider.notifier);
+  Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(userSettingsNotifierProvider);
+    final notifier = ref.read(userSettingsNotifierProvider.notifier);
 
     return Scaffold(
       backgroundColor: AppColors.bgSecondary,
-      appBar: AppBar(
-        backgroundColor: AppColors.bgWhite,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(
-            Icons.arrow_back,
-            color: AppColors.typoHeading,
-            size: 24.sp,
-          ),
-          onPressed: () => context.pop(),
-        ),
-        title: Text(
-          'Cài đặt',
-          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-            color: AppColors.typoHeading,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        centerTitle: true,
+      appBar: HeaderWithBack(
+        title: "Cài đặt",
+        onBack: () => notifier.onBack(context),
       ),
       body: SingleChildScrollView(
-        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 24.h),
+        padding: EdgeInsets.all(16.w),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'CÀI ĐẶT CHUNG',
-              style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                color: AppColors.typoBody,
-                fontWeight: FontWeight.bold,
+            /// ================================
+            /// SECTION: CÀI ĐẶT CHUNG
+            /// ================================
+            Padding(
+              padding: EdgeInsets.only(left: 4.w, bottom: 10.h),
+              child: Text(
+                "CÀI ĐẶT CHUNG",
+                style: GoogleFonts.poppins(
+                  fontSize: 13.sp,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.typoHeading,
+                ),
               ),
             ),
-            SizedBox(height: 12.h),
-            _buildSettingsMenuItem(
-              context,
+
+            _settingItem(
+              context: context,
               icon: Icons.language,
-              label: 'Ngôn ngữ',
-              value: profileState.user?.settings?.language == 'vi'
-                  ? 'Tiếng Việt'
-                  : 'English',
-              onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text(
-                      'Chức năng đổi ngôn ngữ chưa được triển khai.',
-                    ),
-                  ),
-                );
-              },
+              title: "Ngôn ngữ",
+              subtitle: state.language,
+              onTap: notifier.openLanguage,
             ),
-            SizedBox(height: 8.h),
-            _buildSettingsMenuItem(
-              context,
-              icon: Icons.currency_exchange,
-              label: 'Đơn vị tiền tệ',
-              value: profileState.user?.settings?.currency ?? 'N/A',
-              onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text(
-                      'Chức năng đổi đơn vị tiền tệ chưa được triển khai.',
-                    ),
-                  ),
-                );
-              },
+
+            _settingItem(
+              context: context,
+              icon: Icons.attach_money,
+              title: "Đơn vị tiền tệ",
+              subtitle: state.currency,
+              onTap: notifier.openCurrency,
             ),
-            SizedBox(height: 8.h),
-            _buildSettingsMenuItem(
-              context,
+
+            _settingItem(
+              context: context,
               icon: Icons.access_time,
-              label: 'Múi giờ',
-              value: profileState.user?.settings?.timezone ?? 'N/A',
-              onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text(
-                      'Chức năng đổi múi giờ chưa được triển khai.',
-                    ),
-                  ),
-                );
-              },
+              title: "Múi giờ",
+              subtitle: state.timezone,
+              onTap: notifier.openTimezone,
             ),
+
             SizedBox(height: 24.h),
-            Text(
-              'THÔNG BÁO',
-              style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                color: AppColors.typoBody,
-                fontWeight: FontWeight.bold,
+
+            /// ================================
+            /// SECTION: THÔNG BÁO
+            /// ================================
+            Padding(
+              padding: EdgeInsets.only(left: 4.w, bottom: 10.h),
+              child: Text(
+                "THÔNG BÁO",
+                style: GoogleFonts.poppins(
+                  fontSize: 13.sp,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.typoHeading,
+                ),
               ),
             ),
-            SizedBox(height: 12.h),
-            _buildNotificationSwitch(
-              context,
-              'Thông báo push',
-              'Nhận thông báo giao dịch mới',
-              profileState.user?.settings?.notificationEnabled ?? false,
-              (value) => notifier.updateNotificationEnabled(value),
+
+            _toggleItem(
+              context: context,
+              title: "Thông báo push",
+              subtitle: "Nhận thông báo giao dịch mới",
+              value: state.pushNewTransaction,
+              onChanged: notifier.togglePushNewTransaction,
             ),
-            SizedBox(height: 8.h),
-            _buildNotificationSwitch(
-              context,
-              'Thông báo gợi ý tài chính',
-              'Nhận gợi ý từ AI hàng tuần',
-              true, // Placeholder for financial tips notification
-              (value) {},
+
+            _toggleItem(
+              context: context,
+              title: "Thông báo gợi ý tài chính",
+              subtitle: "Nhận gợi ý từ AI hàng tuần",
+              value: state.pushFinanceSuggestion,
+              onChanged: notifier.togglePushFinanceSuggestion,
             ),
-            SizedBox(height: 8.h),
-            _buildNotificationSwitch(
-              context,
-              'Báo cáo tháng',
-              'Báo cáo chi tiêu cuối tháng',
-              true, // Placeholder for monthly report notification
-              (value) {},
+
+            _toggleItem(
+              context: context,
+              title: "Báo cáo tháng",
+              subtitle: "Báo cáo chi tiêu cuối tháng",
+              value: state.pushMonthlyReport,
+              onChanged: notifier.togglePushMonthlyReport,
             ),
           ],
         ),
@@ -148,45 +113,60 @@ class _UserSettingsPageState extends ConsumerState<UserSettingsPage> {
     );
   }
 
-  Widget _buildSettingsMenuItem(
-    BuildContext context, {
+  /// =====================================
+  /// SETTING ITEM STYLE (Language, Timezone, Currency...)
+  /// =====================================
+  Widget _settingItem({
+    required BuildContext context,
     required IconData icon,
-    required String label,
-    required String value,
+    required String title,
+    required String subtitle,
     required VoidCallback onTap,
   }) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
+        margin: EdgeInsets.only(bottom: 12.h),
         padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
         decoration: BoxDecoration(
           color: AppColors.bgWhite,
-          borderRadius: BorderRadius.circular(12.r),
-          border: Border.all(color: AppColors.bgGray.withOpacity(0.5)),
+          borderRadius: BorderRadius.circular(14.r),
+          border: Border.all(color: AppColors.bgGray.withOpacity(0.35)),
         ),
         child: Row(
           children: [
-            Icon(icon, color: AppColors.primaryGreen, size: 24.sp),
+            Icon(icon, color: AppColors.bgDarkGreen, size: 24.sp),
             SizedBox(width: 12.w),
-            Text(
-              label,
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                color: AppColors.typoHeading,
-                fontWeight: FontWeight.w600,
+
+            /// Title + Subtitle
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: GoogleFonts.poppins(
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.typoHeading,
+                    ),
+                  ),
+                  SizedBox(height: 4.h),
+                  Text(
+                    subtitle,
+                    style: GoogleFonts.poppins(
+                      fontSize: 14.sp,
+                      color: AppColors.typoBody,
+                    ),
+                  ),
+                ],
               ),
             ),
-            const Spacer(),
-            Text(
-              value,
-              style: Theme.of(
-                context,
-              ).textTheme.bodyLarge?.copyWith(color: AppColors.typoBody),
-            ),
-            SizedBox(width: 8.w),
+
             Icon(
               Icons.arrow_forward_ios,
-              color: AppColors.typoBody,
               size: 18.sp,
+              color: AppColors.typoBody,
             ),
           ],
         ),
@@ -194,46 +174,56 @@ class _UserSettingsPageState extends ConsumerState<UserSettingsPage> {
     );
   }
 
-  Widget _buildNotificationSwitch(
-    BuildContext context,
-    String title,
-    String subtitle,
-    bool value,
-    Function(bool) onChanged,
-  ) {
+  /// =====================================
+  /// TOGGLE ITEM STYLE
+  /// =====================================
+  Widget _toggleItem({
+    required BuildContext context,
+    required String title,
+    required String subtitle,
+    required bool value,
+    required Function(bool) onChanged,
+  }) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+      margin: EdgeInsets.only(bottom: 14.h),
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
       decoration: BoxDecoration(
         color: AppColors.bgWhite,
-        borderRadius: BorderRadius.circular(12.r),
-        border: Border.all(color: AppColors.bgGray.withOpacity(0.5)),
+        borderRadius: BorderRadius.circular(14.r),
+        border: Border.all(color: AppColors.bgGray.withOpacity(0.35)),
       ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: AppColors.typoHeading,
-                  fontWeight: FontWeight.w600,
+          /// Text side
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: GoogleFonts.poppins(
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.typoHeading,
+                  ),
                 ),
-              ),
-              SizedBox(height: 4.h),
-              Text(
-                subtitle,
-                style: Theme.of(
-                  context,
-                ).textTheme.bodyMedium?.copyWith(color: AppColors.typoBody),
-              ),
-            ],
+                SizedBox(height: 4.h),
+                Text(
+                  subtitle,
+                  style: GoogleFonts.poppins(
+                    fontSize: 14.sp,
+                    color: AppColors.typoBody,
+                  ),
+                ),
+              ],
+            ),
           ),
+
+          /// Switch
           Switch(
             value: value,
+            activeColor: AppColors.bgDarkGreen,
             onChanged: onChanged,
-            activeColor: AppColors.primaryGreen,
           ),
         ],
       ),

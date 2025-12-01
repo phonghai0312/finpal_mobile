@@ -24,8 +24,8 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<RefreshToken> refreshToken(String refreshToken) async {
-    return remoteDataSource.refreshToken(refreshToken);
+  Future<RefreshToken> refreshToken() async {
+    return remoteDataSource.refreshToken();
   }
 
   @override

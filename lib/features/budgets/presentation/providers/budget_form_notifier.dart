@@ -17,6 +17,8 @@ class BudgetFormState {
   final BudgetPeriod period;
   final int? startDate;
   final int? endDate;
+  final String? categoryId;
+  final String? categoryName;
 
   const BudgetFormState({
     this.budget,
@@ -26,6 +28,8 @@ class BudgetFormState {
     this.period = BudgetPeriod.monthly,
     this.startDate,
     this.endDate,
+    this.categoryId,
+    this.categoryName,
   });
 
   BudgetFormState copyWith({
@@ -37,6 +41,9 @@ class BudgetFormState {
     int? startDate,
     int? endDate,
     bool clearBudget = false,
+    String? categoryId,
+    String? categoryName,
+    bool clearCategory = false,
   }) {
     return BudgetFormState(
       budget: clearBudget ? null : (budget ?? this.budget),
@@ -46,6 +53,9 @@ class BudgetFormState {
       period: period ?? this.period,
       startDate: startDate ?? this.startDate,
       endDate: endDate ?? this.endDate,
+      categoryId: clearCategory ? null : (categoryId ?? this.categoryId),
+      categoryName:
+          clearCategory ? null : (categoryName ?? this.categoryName),
     );
   }
 }
@@ -86,18 +96,35 @@ class BudgetFormNotifier extends StateNotifier<BudgetFormState> {
             : BudgetPeriod.weekly,
         startDate: budget.startDate,
         endDate: budget.endDate,
+        categoryId: budget.categoryId,
+        categoryName: budget.categoryName,
       );
     } catch (e) {
       state = state.copyWith(isLoading: false, errorMessage: e.toString());
     }
   }
 
+  void setCategory({
+    required String id,
+    required String name,
+  }) {
+    state = state.copyWith(categoryId: id, categoryName: name);
+  }
+
   Future<void> createBudget({
-    required String categoryId,
-    required String categoryName,
     required double amount,
     required double alertThreshold,
   }) async {
+    if (state.categoryId == null) {
+      state = state.copyWith(errorMessage: 'Vui lòng chọn danh mục');
+      return;
+    }
+    if (state.startDate == null || state.endDate == null) {
+      state = state.copyWith(
+        errorMessage: 'Vui lòng chọn khoảng thời gian phù hợp',
+      );
+      return;
+    }
     state = state.copyWith(
       isLoading: true,
       errorMessage: null,
@@ -105,7 +132,7 @@ class BudgetFormNotifier extends StateNotifier<BudgetFormState> {
     );
     try {
       final request = CreateBudgetRequest(
-        categoryId: categoryId,
+        categoryId: state.categoryId!,
         amount: amount,
         period: state.period.name, // Use the selected period
         startDate: state.startDate!,
@@ -113,7 +140,11 @@ class BudgetFormNotifier extends StateNotifier<BudgetFormState> {
         alertThreshold: alertThreshold,
       );
       await _createBudgetUseCase(request);
-      state = state.copyWith(isLoading: false, isSuccess: true);
+      state = state.copyWith(
+        isLoading: false,
+        isSuccess: true,
+        clearBudget: true,
+      );
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
@@ -125,11 +156,14 @@ class BudgetFormNotifier extends StateNotifier<BudgetFormState> {
 
   Future<void> updateBudget({
     required String budgetId,
-    String? categoryId,
-    String? categoryName,
     double? amount,
     double? alertThreshold,
   }) async {
+    final categoryId = state.categoryId ?? state.budget?.categoryId;
+    if (categoryId == null) {
+      state = state.copyWith(errorMessage: 'Vui lòng chọn danh mục');
+      return;
+    }
     state = state.copyWith(
       isLoading: true,
       errorMessage: null,

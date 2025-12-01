@@ -9,6 +9,8 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../../core/presentation/theme/app_colors.dart';
 import '../../../../../core/presentation/widget/header/header_with_back.dart';
+import 'package:fridge_to_fork_ai/features/categories/presentation/provider/category.notifier.dart';
+import 'package:fridge_to_fork_ai/features/categories/presentation/provider/category_provider.dart';
 import '../provider/createtransaction/create_transaction_provider.dart';
 import '../provider/createtransaction/create_transaction_notifier.dart';
 import '../../../../../core/config/routing/app_routes.dart';
@@ -21,49 +23,12 @@ class CreateTransactionPage extends ConsumerStatefulWidget {
 }
 
 class CreateTransactionPageState extends ConsumerState<CreateTransactionPage> {
-  late TextEditingController _amountController;
-  late TextEditingController _descriptionController;
-  late TextEditingController _noteController;
-
-  @override
-  void initState() {
-    super.initState();
-
-    final state = ref.read(createTransactionNotifierProvider);
-    final notifier = ref.read(createTransactionNotifierProvider.notifier);
-
-    _amountController = TextEditingController(
-      text: state.amount?.toString() ?? "",
-    );
-    _descriptionController = TextEditingController(
-      text: state.description ?? "",
-    );
-    _noteController = TextEditingController(text: state.note ?? "");
-
-    // đồng bộ text → state
-    _amountController.addListener(() {
-      notifier.setAmount(_amountController.text);
-    });
-    _descriptionController.addListener(() {
-      notifier.setDescription(_descriptionController.text);
-    });
-    _noteController.addListener(() {
-      notifier.setNote(_noteController.text);
-    });
-  }
-
-  @override
-  void dispose() {
-    _amountController.dispose();
-    _descriptionController.dispose();
-    _noteController.dispose();
-    super.dispose();
-  }
-
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(createTransactionNotifierProvider);
     final notifier = ref.read(createTransactionNotifierProvider.notifier);
+    final categoryState = ref.watch(categoryNotifierProvider);
+    final categoryNotifier = ref.read(categoryNotifierProvider.notifier);
 
     return Scaffold(
       appBar: HeaderWithBack(
@@ -93,12 +58,15 @@ class CreateTransactionPageState extends ConsumerState<CreateTransactionPage> {
 
             _inputField(
               label: "Số tiền",
-              controller: _amountController,
+              controller: notifier.amountController,
               keyboardType: TextInputType.number,
             ),
             SizedBox(height: 16.h),
 
-            _inputField(label: "Mô tả", controller: _descriptionController),
+            _inputField(
+              label: "Mô tả",
+              controller: notifier.descriptionController,
+            ),
 
             SizedBox(height: 16.h),
             _dateTimeRow(context, state, notifier),
@@ -110,7 +78,12 @@ class CreateTransactionPageState extends ConsumerState<CreateTransactionPage> {
             /// ========================
             _sectionTitle("Chọn danh mục"),
             SizedBox(height: 12.h),
-            _categorySelector(state, notifier),
+            _categorySelector(
+              state,
+              notifier,
+              categoryState,
+              () => categoryNotifier.fetchCategories(),
+            ),
 
             SizedBox(height: 28.h),
 
@@ -122,7 +95,7 @@ class CreateTransactionPageState extends ConsumerState<CreateTransactionPage> {
 
             _inputField(
               label: "Ghi chú (không bắt buộc)",
-              controller: _noteController,
+              controller: notifier.noteController,
               maxLines: 3,
             ),
 
@@ -319,18 +292,33 @@ class CreateTransactionPageState extends ConsumerState<CreateTransactionPage> {
   Widget _categorySelector(
     CreateTransactionState state,
     CreateTransactionNotifier notifier,
+    CategoryState categoryState,
+    VoidCallback onRetry,
   ) {
-    final categories = [
-      ("c001", "Ăn uống", Icons.fastfood, Colors.redAccent),
-      ("c008", "Cà phê", Icons.local_cafe, Colors.brown),
-      ("c002", "Mua sắm", Icons.shopping_bag, Colors.purple),
-      ("c004", "Di chuyển", Icons.directions_car, Colors.blue),
-      ("c005", "Sức khỏe", Icons.favorite, Colors.pink),
-      ("c009", "Nhà cửa", Icons.home, Colors.green),
-      ("c003", "Lương", Icons.attach_money, Colors.teal),
-      ("c010", "Nước", Icons.water_drop, Colors.blueAccent),
-      ("c011", "Điện", Icons.flash_on, Colors.amber),
-    ];
+    if (categoryState.isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (categoryState.errorMessage != null) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Không thể tải danh mục: ${categoryState.errorMessage}',
+            style: TextStyle(color: AppColors.typoError, fontSize: 13.sp),
+          ),
+          TextButton(onPressed: onRetry, child: const Text('Thử lại')),
+        ],
+      );
+    }
+
+    final categories = categoryState.categories;
+    if (categories.isEmpty) {
+      return Text(
+        'Chưa có danh mục nào, hãy tạo mới trước khi ghi giao dịch.',
+        style: TextStyle(fontSize: 13.sp, color: AppColors.typoBody),
+      );
+    }
 
     return GridView.builder(
       shrinkWrap: true,
@@ -343,16 +331,12 @@ class CreateTransactionPageState extends ConsumerState<CreateTransactionPage> {
         childAspectRatio: 1,
       ),
       itemBuilder: (context, index) {
-        final item = categories[index];
-        final id = item.$1;
-        final label = item.$2;
-        final icon = item.$3;
-        final color = item.$4;
-
-        final isSelected = id == state.categoryId;
+        final category = categories[index];
+        final color = _categoryColor(index);
+        final isSelected = category.id == state.categoryId;
 
         return GestureDetector(
-          onTap: () => notifier.setCategory(id),
+          onTap: () => notifier.setCategory(category.id),
           child: Container(
             padding: EdgeInsets.symmetric(vertical: 12.h),
             decoration: BoxDecoration(
@@ -366,7 +350,6 @@ class CreateTransactionPageState extends ConsumerState<CreateTransactionPage> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // Icon circle
                 Container(
                   width: 40.w,
                   height: 40.w,
@@ -375,17 +358,15 @@ class CreateTransactionPageState extends ConsumerState<CreateTransactionPage> {
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
-                    icon,
+                    _categoryIcon(category.icon),
                     size: 18.sp,
                     color: isSelected ? Colors.white : color,
                   ),
                 ),
-
                 SizedBox(height: 8.h),
-
-                // Label
                 Text(
-                  label,
+                  category.displayName,
+                  textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 13.sp,
                     fontWeight: FontWeight.w600,
@@ -398,6 +379,48 @@ class CreateTransactionPageState extends ConsumerState<CreateTransactionPage> {
         );
       },
     );
+  }
+
+  IconData _categoryIcon(String? iconName) {
+    const fallback = Icons.category;
+    if (iconName == null) return fallback;
+    switch (iconName) {
+      case 'fastfood':
+        return Icons.fastfood;
+      case 'shopping_bag':
+        return Icons.shopping_bag;
+      case 'attach_money':
+        return Icons.attach_money;
+      case 'directions_car':
+        return Icons.directions_car;
+      case 'medical_services':
+        return Icons.medical_services;
+      case 'home':
+        return Icons.home;
+      case 'favorite':
+        return Icons.favorite;
+      case 'local_cafe':
+        return Icons.local_cafe;
+      case 'water_drop':
+        return Icons.water_drop;
+      case 'flash_on':
+        return Icons.flash_on;
+      default:
+        return fallback;
+    }
+  }
+
+  Color _categoryColor(int index) {
+    const palette = [
+      AppColors.primaryGreen,
+      AppColors.bgWarning,
+      AppColors.bgDarkGreen,
+      AppColors.darkRed,
+      AppColors.lightGreen,
+      AppColors.bgInfo,
+      AppColors.bgError,
+    ];
+    return palette[index % palette.length];
   }
 
   // ============================================================

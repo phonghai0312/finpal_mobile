@@ -1,7 +1,9 @@
 // ignore_for_file: use_build_context_synchronously
 
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fridge_to_fork_ai/core/presentation/theme/app_colors.dart';
 import 'package:fridge_to_fork_ai/features/home/domain/usecases/get_lastest_suggestion.dart';
 import 'package:fridge_to_fork_ai/features/home/domain/usecases/get_stats_by_category.dart';
 import 'package:fridge_to_fork_ai/features/home/domain/usecases/get_stats_overview.dart';
@@ -106,13 +108,24 @@ class HomeNotifier extends StateNotifier<HomeState> {
         isRefreshing: false,
       );
     } catch (e) {
-      _handleFailure(context, e);
+      _handleError(context, e);
     }
   }
 
   /// HANDLE ERROR
-  void _handleFailure(BuildContext context, Object error) {
-    final message = error.toString().replaceFirst('Exception: ', '').trim();
+  void _handleError(BuildContext context, Object error) {
+    String message = 'Unknown error';
+
+    if (error is DioException) {
+      final data = error.response?.data;
+      if (data is Map<String, dynamic>) {
+        message = data['message'] ?? message;
+      } else {
+        message = error.message ?? message;
+      }
+    } else {
+      message = error.toString();
+    }
 
     state = state.copyWith(
       isLoading: false,
@@ -123,7 +136,7 @@ class HomeNotifier extends StateNotifier<HomeState> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: Colors.red,
+        backgroundColor: AppColors.typoError,
         behavior: SnackBarBehavior.floating,
       ),
     );

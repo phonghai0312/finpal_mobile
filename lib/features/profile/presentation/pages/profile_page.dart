@@ -3,11 +3,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:fridge_to_fork_ai/core/config/routing/app_routes.dart';
-import 'package:fridge_to_fork_ai/core/presentation/theme/app_colors.dart';
-import 'package:fridge_to_fork_ai/core/presentation/widget/header/header_with_back.dart';
-import 'package:fridge_to_fork_ai/features/profile/presentation/provider/profile_provider.dart';
-import 'package:go_router/go_router.dart';
+import 'package:fridge_to_fork_ai/core/presentation/widget/button/button.dart';
+import 'package:google_fonts/google_fonts.dart';
+
+import '../../../../../core/presentation/theme/app_colors.dart';
+import '../../../../../core/presentation/widget/header/header_simple.dart';
+import '../provider/profile/profile_provider.dart';
 
 class ProfilePage extends ConsumerStatefulWidget {
   const ProfilePage({super.key});
@@ -17,28 +18,17 @@ class ProfilePage extends ConsumerStatefulWidget {
 }
 
 class _ProfilePageState extends ConsumerState<ProfilePage> {
-  // Removed TextEditingControllers as fields are now read-only
-
   @override
   void initState() {
     super.initState();
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(profileNotifierProvider.notifier).init();
+      ref.read(profileNotifierProvider.notifier).init(context);
     });
   }
 
-  // Removed didUpdateWidget as controllers are no longer managed here
-
-  @override
-  void dispose() {
-    // No controllers to dispose of now
-    super.dispose();
-  }
-
-  // Removed _updateControllers method
-
-  Widget _buildProfileMenuItem(
-    BuildContext context, {
+  Widget _menuItem({
+    required BuildContext context,
     required IconData icon,
     required String label,
     required VoidCallback onTap,
@@ -55,11 +45,12 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         ),
         child: Row(
           children: [
-            Icon(icon, color: AppColors.primaryGreen, size: 24.sp),
+            Icon(icon, color: AppColors.bgDarkGreen, size: 22.sp),
             SizedBox(width: 12.w),
             Text(
               label,
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+              style: GoogleFonts.poppins(
+                fontSize: 16.sp,
                 color: AppColors.typoHeading,
                 fontWeight: FontWeight.w600,
               ),
@@ -76,211 +67,140 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     );
   }
 
-  Widget _buildBottomNavigationBar(BuildContext context) {
+  Widget _profileCard(BuildContext context, dynamic user) {
     return Container(
-      height: 80.h,
+      width: double.infinity,
+      margin: EdgeInsets.symmetric(horizontal: 16.w),
+      padding: EdgeInsets.symmetric(vertical: 20.h),
       decoration: BoxDecoration(
-        color: AppColors.bgWhite,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 10,
-            spreadRadius: 1,
-            offset: const Offset(0, -2),
+        color: AppColors.bgDarkGreen,
+        borderRadius: BorderRadius.circular(16.r),
+      ),
+      child: Column(
+        children: [
+          CircleAvatar(
+            radius: 40.r,
+            backgroundColor: AppColors.bgWhite,
+            backgroundImage: NetworkImage(
+              user?.avatarUrl ?? "https://www.gravatar.com/avatar/?d=mp",
+            ),
+          ),
+          SizedBox(height: 12.h),
+          Text(
+            user?.name ?? "Người dùng",
+            style: GoogleFonts.poppins(
+              fontSize: 18.sp,
+              fontWeight: FontWeight.w700,
+              color: AppColors.typoWhite,
+            ),
+          ),
+          SizedBox(height: 4.h),
+          Text(
+            "Email: ${user?.email ?? "N/A"}",
+            style: GoogleFonts.poppins(
+              fontSize: 14.sp,
+              color: AppColors.typoWhite.withOpacity(0.9),
+            ),
           ),
         ],
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(24.r),
-          topRight: Radius.circular(24.r),
-        ),
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    final profileState = ref.watch(profileNotifierProvider);
+    final state = ref.watch(profileNotifierProvider);
     final notifier = ref.read(profileNotifierProvider.notifier);
 
-    if (profileState.isLoading && profileState.user == null) {
+    if (state.isLoading && state.user == null) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
     return Scaffold(
       backgroundColor: AppColors.bgSecondary,
-      body: Stack(
-        children: [
-          SingleChildScrollView(
-            padding: EdgeInsets.only(
-              bottom: 80.h,
-            ), // Space for bottom navigation
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  width: double.infinity,
-                  padding: EdgeInsets.symmetric(
-                    vertical: 24.h,
-                    horizontal: 16.w,
-                  ),
-                  decoration: BoxDecoration(
-                    color: AppColors.primaryGreen,
-                    borderRadius: BorderRadius.only(
-                      bottomLeft: Radius.circular(24.r),
-                      bottomRight: Radius.circular(24.r),
-                    ),
-                  ),
-                  child: Column(
-                    children: [
-                      SizedBox(height: 24.h), // For status bar
-                      Text(
-                        'Cá nhân',
-                        style: Theme.of(context).textTheme.headlineSmall
-                            ?.copyWith(
-                              color: AppColors.typoWhite,
-                              fontWeight: FontWeight.bold,
-                            ),
-                      ),
-                      SizedBox(height: 24.h),
-                      CircleAvatar(
-                        radius: 50.r,
-                        backgroundColor: AppColors.bgWhite.withOpacity(0.2),
-                        backgroundImage: NetworkImage(
-                          profileState.user?.avatarUrl ??
-                              'https://www.gravatar.com/avatar/?d=mp',
-                        ),
-                      ),
-                      SizedBox(height: 12.h),
-                      Text(
-                        profileState.user?.name ?? 'Người dùng',
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          color: AppColors.typoWhite,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      SizedBox(height: 4.h),
-                      Text(
-                        'ID: ${profileState.user?.id ?? 'N/A'}',
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: AppColors.typoWhite.withOpacity(0.7),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                SizedBox(height: 24.h),
-                _buildProfileMenuItem(
-                  context,
-                  icon: Icons.person_outline,
-                  label: 'Chỉnh sửa thông tin cá nhân',
-                  onTap: () {
-                    context.push(AppRoutes.editProfile);
-                  },
-                ),
-                SizedBox(height: 8.h),
-                _buildProfileMenuItem(
-                  context,
-                  icon: Icons.settings_outlined,
-                  label: 'Cài đặt',
-                  onTap: () {
-                    context.push(AppRoutes.userSettings);
-                  },
-                ),
-                SizedBox(height: 24.h),
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 16.w),
-                  child: Text(
-                    'THÔNG TIN',
-                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                      color: AppColors.typoBody,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-                SizedBox(height: 12.h),
-                _buildProfileMenuItem(
-                  context,
-                  icon: Icons.info_outline,
-                  label: 'Về ứng dụng',
-                  onTap: () {
-                    context.push(AppRoutes.aboutApp);
-                  },
-                ),
-                SizedBox(height: 8.h),
-                _buildProfileMenuItem(
-                  context,
-                  icon: Icons.help_outline,
-                  label: 'Trợ giúp',
-                  onTap: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text(
-                          'Chức năng trợ giúp chưa được triển khai.',
-                        ),
-                      ),
-                    );
-                  },
-                ),
-                SizedBox(height: 8.h),
-                _buildProfileMenuItem(
-                  context,
-                  icon: Icons.security,
-                  label: 'Chính sách bảo mật',
-                  onTap: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text(
-                          'Chức năng chính sách bảo mật chưa được triển khai.',
-                        ),
-                      ),
-                    );
-                  },
-                ),
-                SizedBox(height: 24.h),
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 16.w),
-                  child: OutlinedButton(
-                    onPressed: profileState.isLoading
-                        ? null
-                        : () => notifier.logout(context),
-                    style: OutlinedButton.styleFrom(
-                      side: BorderSide(color: AppColors.bgError),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12.r),
-                      ),
-                      padding: EdgeInsets.symmetric(vertical: 16.h),
-                      minimumSize: Size(double.infinity, 50.h),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.logout,
-                          color: AppColors.bgError,
-                          size: 24.sp,
-                        ),
-                        SizedBox(width: 8.w),
-                        Text(
-                          'Đăng xuất',
-                          style: Theme.of(context).textTheme.titleMedium
-                              ?.copyWith(
-                                color: AppColors.bgError,
-                                fontSize: 16.sp,
-                                fontWeight: FontWeight.bold,
-                              ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
+      appBar: const HeaderSimple(title: "Cá nhân"),
+      body: SingleChildScrollView(
+        padding: EdgeInsets.only(bottom: 24.h),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(height: 16.h),
+
+            _profileCard(context, state.user),
+
+            SizedBox(height: 24.h),
+
+            _menuItem(
+              context: context,
+              icon: Icons.person_outline,
+              label: "Chỉnh sửa thông tin cá nhân",
+              onTap: () => notifier.goToEditProfile(context),
             ),
-          ),
-          // Align(
-          //   alignment: Alignment.bottomCenter,
-          //   child: _buildBottomNavigationBar(context),
-          // ),
-        ],
+            SizedBox(height: 8.h),
+
+            _menuItem(
+              context: context,
+              icon: Icons.settings_outlined,
+              label: "Cài đặt",
+              onTap: () => notifier.goToSettings(context),
+            ),
+
+            SizedBox(height: 28.h),
+
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16.w),
+              child: Text(
+                "THÔNG TIN",
+                style: GoogleFonts.poppins(
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.typoBody,
+                ),
+              ),
+            ),
+
+            SizedBox(height: 12.h),
+
+            _menuItem(
+              context: context,
+              icon: Icons.info_outline,
+              label: "Về ứng dụng",
+              onTap: () => notifier.goToAboutApp(context),
+            ),
+
+            SizedBox(height: 8.h),
+
+            _menuItem(
+              context: context,
+              icon: Icons.help_outline,
+              label: "Trợ giúp",
+              onTap: () => notifier.goToHelpSupport(context),
+            ),
+
+            SizedBox(height: 8.h),
+
+            _menuItem(
+              context: context,
+              icon: Icons.privacy_tip_outlined,
+              label: "Chính sách bảo mật",
+              onTap: () {},
+            ),
+
+            SizedBox(height: 24.h),
+
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16.w),
+              child: Button(
+                text: "Đăng xuất",
+                color: AppColors.bgError, // Nút rỗng để giống OutlinedButton
+                textColor: AppColors.typoWhite, // Màu chữ đỏ
+                onPressed: state.isLoading
+                    ? null
+                    : () => notifier.logout(context),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
