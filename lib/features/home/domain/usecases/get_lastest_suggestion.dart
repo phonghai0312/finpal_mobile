@@ -1,11 +1,11 @@
-import 'package:fridge_to_fork_ai/features/suggestions/domain/entities/suggestions.dart';
-import '../repositories/home_repository.dart';
+// import 'package:fridge_to_fork_ai/features/suggestions/domain/entities/insight.dart';
+// import '../repositories/home_repository.dart';
 
-class GetLatestSuggestionUseCase {
-  final HomeRepository repository;
-  GetLatestSuggestionUseCase(this.repository);
+// class GetLatestSuggestionUseCase {
+//   final HomeRepository repository;
+//   GetLatestSuggestionUseCase(this.repository);
 
-  Future<Suggestions?> call() {
-    return repository.getLatestSuggestion();
-  }
-}
+//   Future<Insight?> call() {
+//     return repository.getLatestSuggestion();
+//   }
+// }

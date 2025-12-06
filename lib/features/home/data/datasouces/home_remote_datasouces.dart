@@ -4,9 +4,11 @@ import 'package:fridge_to_fork_ai/features/home/data/models/stats_by_category_it
 import 'package:fridge_to_fork_ai/features/home/data/models/stats_by_category_model.dart';
 import 'package:fridge_to_fork_ai/features/home/data/models/stats_overview_model.dart';
 import 'package:fridge_to_fork_ai/features/home/data/models/stats_period_model.dart';
-import 'package:fridge_to_fork_ai/features/home/data/models/suggestions_model.dart';
+
 import 'package:fridge_to_fork_ai/features/home/data/models/user_model.dart'
     show UserModel;
+
+import '../../../suggestions/data/models/insight_model.dart';
 
 class HomeRemoteDataSource {
   Future<UserModel> getUserInfo() async {
@@ -74,26 +76,4 @@ class HomeRemoteDataSource {
 
   // ==========================
   // 📌 3) MOCK Latest Suggestion
-  // ==========================
-  Future<SuggestionModel> getLatestSuggestion() async {
-    await Future.delayed(const Duration(milliseconds: 220));
-
-    return SuggestionModel(
-      id: "sug_001",
-      userId: "", // tạm để trống
-      type: "", // chưa dùng
-      period: StatsPeriodModel(
-        // period rỗng
-        from: 0,
-        to: 0,
-      ),
-      title: "Gợi ý thông minh",
-      message:
-          "Giao dịch này được AI phân loại vào danh mục ‘Ăn uống – Cà phê’ với độ chính xác 95%.",
-      data: const {}, // chưa có data bổ sung
-      read: false,
-      createdAt: DateTime.now().millisecondsSinceEpoch,
-      updatedAt: 0, // chưa cập nhật
-    );
-  }
 }

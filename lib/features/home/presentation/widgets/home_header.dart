@@ -5,7 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fridge_to_fork_ai/core/config/routing/app_routes.dart';
 import 'package:fridge_to_fork_ai/core/presentation/theme/app_colors.dart';
-import 'package:fridge_to_fork_ai/features/suggestions/presentation/provider/suggestion_provider.dart';
+import 'package:fridge_to_fork_ai/features/suggestions/presentation/provider/insight/insight_provider.dart';
 import 'package:go_router/go_router.dart';
 
 class HomeHeader extends ConsumerWidget {
@@ -24,7 +24,7 @@ class HomeHeader extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final unreadCount = ref.watch(unreadInsightsCountProvider);
+    final unreadCount = ref.watch(insightsNotifierProvider).insights.length;
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(

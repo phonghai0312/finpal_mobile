@@ -22,8 +22,8 @@ class StatsByCategoryModel extends StatsByCategory {
 
     return StatsByCategoryModel(
       period: StatsPeriod(
-        from: (periodJson?['from'] ?? json['from']) as int,
-        to: (periodJson?['to'] ?? json['to']) as int,
+        from: ((periodJson?['from'] ?? json['from']) as int) * 1000,
+        to: ((periodJson?['to'] ?? json['to']) as int) * 1000,
       ),
       currency: json['currency'] as String? ?? 'VND',
       totalExpense: (json['totalExpense'] as num).toDouble(),

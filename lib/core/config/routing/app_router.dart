@@ -93,9 +93,8 @@ class AppRouter {
       ),
       // Suggestions
       GoRoute(
-        path: '${AppRoutes.suggestionDetail}/:id',
-        builder: (context, state) =>
-            SuggestionDetailPage(insightId: state.pathParameters['id']!),
+        path: AppRoutes.suggestionDetail,
+        builder: (context, state) => SuggestionDetailPage(),
       ),
       // Profile
       GoRoute(

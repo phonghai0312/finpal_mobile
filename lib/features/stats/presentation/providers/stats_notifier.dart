@@ -80,10 +80,10 @@ class StatsNotifier extends StateNotifier<StatsState> {
     state = state.copyWith(isLoading: true, clearError: true);
 
     try {
-      final (from, to) = _monthRange(state.month, state.year);
+      final (fromMs, toMs) = _monthRange(state.month, state.year);
 
-      final overview = await _getStatsOverview(from: from, to: to);
-      final byCategory = await _getStatsByCategory(from: from, to: to);
+      final overview = await _getStatsOverview(from: fromMs, to: toMs);
+      final byCategory = await _getStatsByCategory(from: fromMs, to: toMs);
 
       state = state.copyWith(
         overview: overview,
@@ -126,8 +126,8 @@ class StatsNotifier extends StateNotifier<StatsState> {
   // Get transactions for a category
   // ------------------------------
   Future<List<Transaction>> getTransactionsByCategory(String id) async {
-    final (from, to) = _monthRange(state.month, state.year);
-    return _getCategoryTx(from: from, to: to, categoryKey: id);
+    final (fromMs, toMs) = _monthRange(state.month, state.year);
+    return _getCategoryTx(from: fromMs, to: toMs, categoryKey: id);
   }
 
   // ------------------------------
@@ -138,19 +138,19 @@ class StatsNotifier extends StateNotifier<StatsState> {
   }
 
   // ------------------------------
-  // Helper: Build month range
+  // Helper: Build month range (return MS)
   // ------------------------------
   (int, int) _monthRange(int month, int year) {
-    final start = DateTime(year, month, 1);
-    final end = DateTime(
+    final start = DateTime.utc(year, month, 1);
+    final end = DateTime.utc(
       year,
       month + 1,
       1,
     ).subtract(const Duration(seconds: 1));
 
     return (
-      start.toUtc().millisecondsSinceEpoch ~/ 1000,
-      end.toUtc().millisecondsSinceEpoch ~/ 1000,
+      start.millisecondsSinceEpoch, // MS UTC
+      end.millisecondsSinceEpoch,
     );
   }
 
