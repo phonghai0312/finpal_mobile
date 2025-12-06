@@ -36,8 +36,6 @@ class _StatsPageState extends ConsumerState<StatsPage> {
     final state = ref.watch(statsNotifierProvider);
     final notifier = ref.read(statsNotifierProvider.notifier);
 
-    _listenError(state, notifier);
-
     return Scaffold(
       appBar: HeaderSimple(title: "Thống kê"),
       backgroundColor: const Color(0xFFF5F5F5),
@@ -90,9 +88,8 @@ class _StatsPageState extends ConsumerState<StatsPage> {
                   _openCategoryModal(item.categoryId, item.categoryName, state),
             ),
           ] else
-            _buildEmptyState(),
-
-          const SizedBox(height: 40),
+            // _buildEmptyState(),
+            const SizedBox(height: 40),
         ],
       ),
     );
@@ -115,38 +112,5 @@ class _StatsPageState extends ConsumerState<StatsPage> {
         future: notifier.getTransactionsByCategory(categoryId),
       ),
     );
-  }
-
-  // -------------------------------------------------------
-  // EMPTY STATE
-  // -------------------------------------------------------
-  Widget _buildEmptyState() {
-    return Padding(
-      padding: const EdgeInsets.only(top: 40),
-      child: Center(
-        child: Column(
-          children: const [
-            Icon(Icons.insert_chart, size: 48, color: Colors.grey),
-            SizedBox(height: 12),
-            Text("Chưa có dữ liệu thống kê"),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // -------------------------------------------------------
-  // HANDLE ERROR FROM NOTIFIER
-  // -------------------------------------------------------
-  void _listenError(StatsState state, StatsNotifier notifier) {
-    final error = state.errorMessage;
-    if (error == null) return;
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(error), backgroundColor: Colors.red),
-      );
-      notifier.clearError();
-    });
   }
 }

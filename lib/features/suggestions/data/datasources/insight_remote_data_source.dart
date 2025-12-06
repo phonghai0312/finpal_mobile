@@ -1,7 +1,17 @@
-import 'package:fridge_to_fork_ai/features/suggestions/domain/entities/insight.dart';
+import 'package:fridge_to_fork_ai/features/suggestions/data/api/insight_api.dart';
+import 'package:fridge_to_fork_ai/features/suggestions/data/models/insight_model.dart';
 
-abstract class InsightRemoteDataSource {
-  Future<List<Insight>> getInsights({String? type, int? page, int? pageSize});
-  Future<Insight> getInsightById(String id);
-  Future<Insight> updateInsight(String id, bool read);
+class InsightRemoteDataSource {
+  final InsightApi api;
+
+  InsightRemoteDataSource(this.api);
+
+  Future<List<InsightModel>> getInsights({
+    String? type,
+    int? page,
+    int? pageSize,
+  }) async {
+    final response = await api.getInsights(type, page, pageSize);
+    return response.items;
+  }
 }

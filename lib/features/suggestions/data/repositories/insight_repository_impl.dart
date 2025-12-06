@@ -5,7 +5,7 @@ import 'package:fridge_to_fork_ai/features/suggestions/domain/repositories/insig
 class InsightRepositoryImpl implements InsightRepository {
   final InsightRemoteDataSource remoteDataSource;
 
-  InsightRepositoryImpl({required this.remoteDataSource});
+  InsightRepositoryImpl(this.remoteDataSource);
 
   @override
   Future<List<Insight>> getInsights({
@@ -13,20 +13,13 @@ class InsightRepositoryImpl implements InsightRepository {
     int? page,
     int? pageSize,
   }) async {
-    return await remoteDataSource.getInsights(
+    final models = await remoteDataSource.getInsights(
       type: type,
       page: page,
       pageSize: pageSize,
     );
-  }
 
-  @override
-  Future<Insight> getInsightById(String id) async {
-    return await remoteDataSource.getInsightById(id);
-  }
-
-  @override
-  Future<Insight> updateInsight(String id, bool read) async {
-    return await remoteDataSource.updateInsight(id, read);
+    // InsightModel extends Insight → cast sang List<Insight>
+    return models.map((m) => m as Insight).toList();
   }
 }

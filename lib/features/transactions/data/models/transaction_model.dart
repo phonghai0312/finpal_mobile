@@ -56,7 +56,7 @@ class TransactionModel {
       categoryId: json['categoryId']?.toString(),
       categoryName: json['categoryName']?.toString(),
       merchant: json['merchant']?.toString(),
-      occurredAt: (json['occurredAt'] as num?)?.toInt() ?? 0,
+      occurredAt: ((json['occurredAt'] as num?)?.toInt() ?? 0) * 1000,
       rawMessage: json['rawMessage']?.toString(),
       normalized: TransactionNormalizedModel.fromJson(
         (json['normalized'] as Map<String, dynamic>? ?? const {}),
@@ -66,8 +66,8 @@ class TransactionModel {
       ),
       userNote: json['userNote']?.toString(),
       source: json['source']?.toString() ?? 'manual',
-      createdAt: (json['createdAt'] as num?)?.toInt() ?? 0,
-      updatedAt: (json['updatedAt'] as num?)?.toInt() ?? 0,
+      createdAt: ((json['createdAt'] as num?)?.toInt() ?? 0) * 1000,
+      updatedAt: ((json['updatedAt'] as num?)?.toInt() ?? 0) * 1000,
     );
   }
 

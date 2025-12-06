@@ -3,8 +3,6 @@ import 'package:fridge_to_fork_ai/features/home/data/datasouces/home_remote_data
     show HomeRemoteDataSource;
 import 'package:fridge_to_fork_ai/features/home/data/repositories/home_repository_impl.dart'
     show HomeRepositoryImpl;
-import 'package:fridge_to_fork_ai/features/home/domain/usecases/get_lastest_suggestion.dart'
-    show GetLatestSuggestionUseCase;
 import 'package:fridge_to_fork_ai/features/home/domain/usecases/get_user_info.dart'
     show GetUserInfo;
 
@@ -36,9 +34,9 @@ final getStatsByCategoryProvider = Provider<GetStatsByCategoryUseCase>((ref) {
 });
 
 /// USECASE: Suggestion
-final getLatestSuggestionProvider = Provider<GetLatestSuggestionUseCase>((ref) {
-  return GetLatestSuggestionUseCase(ref.read(homeRepositoryProvider));
-});
+// final getLatestSuggestionProvider = Provider<GetLatestSuggestionUseCase>((ref) {
+//   return GetLatestSuggestionUseCase(ref.read(homeRepositoryProvider));
+// });
 
 /// USECASE: User info
 final getUserInfoProvider = Provider<GetUserInfo>((ref) {
@@ -53,7 +51,7 @@ final homeNotifierProvider = StateNotifierProvider<HomeNotifier, HomeState>((
     ref,
     ref.read(getStatsOverviewProvider),
     ref.read(getStatsByCategoryProvider),
-    ref.read(getLatestSuggestionProvider),
+    //ref.read(getLatestSuggestionProvider),
     ref.read(getUserInfoProvider),
   );
 });
