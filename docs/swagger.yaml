@@ -487,6 +487,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+
   /transactions/spend-amount:
     get:
       tags:
@@ -512,6 +513,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+
   /transactions/{id}:
     get:
       tags:
@@ -666,7 +668,7 @@ paths:
           name: type
           schema:
             type: string
-            enum: [weekly_summary, monthly_summary, alert, tip]
+            enum: [budget_alert, saving_performance_daily, saving_performance_month, budget_recommend]
         - in: query
           name: page
           schema:
@@ -1188,6 +1190,37 @@ components:
         total:
           type: integer
 
+    TransactionSpendAmountItem:
+      type: object
+      properties:
+        categoryId:
+          type: string
+          nullable: true
+        name:
+          type: string
+          nullable: true
+        displayName:
+          type: string
+          nullable: true
+        totalSpent:
+          type: number
+
+    TransactionSpendAmountResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/TransactionSpendAmountItem'
+        total:
+          type: integer
+        filters:
+          type: object
+          properties:
+            categoryId:
+              type: string
+              nullable: true
+
     TransactionUpdateRequest:
       type: object
       properties:
@@ -1266,7 +1299,7 @@ components:
           type: string
         type:
           type: string
-          enum: [weekly_summary, monthly_summary, alert, tip, budget_alert, daily_report, monthly_report]
+          enum: [budget_alert, saving_performance_daily, saving_performance_month, budget_recommend]
         period:
           $ref: '#/components/schemas/Period'
         title:

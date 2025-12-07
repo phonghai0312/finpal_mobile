@@ -15,20 +15,38 @@ class StatsRemoteDataSource {
   final StatsApi _api;
   final TransactionRemoteDataSource _transactionRemote;
 
+  /// ============================
+  /// 1) GET /stats/overview
+  /// FE → gửi timestamps dạng seconds
+  /// ============================
   Future<StatsOverviewModel> getStatsOverview({
     required int from,
     required int to,
   }) async {
-    return _api.getStatsOverview(from: from, to: to);
+    final fromSeconds = from ~/ 1000; // FE ms → BE seconds
+    final toSeconds = to ~/ 1000;
+
+    return _api.getStatsOverview(from: fromSeconds, to: toSeconds);
   }
 
+  /// ============================
+  /// 2) GET /stats/by-category
+  /// FE → gửi timestamps dạng seconds
+  /// ============================
   Future<StatsByCategoryModel> getStatsByCategory({
     required int from,
     required int to,
   }) async {
-    return _api.getStatsByCategory(from: from, to: to);
+    final fromSeconds = from ~/ 1000;
+    final toSeconds = to ~/ 1000;
+
+    return _api.getStatsByCategory(from: fromSeconds, to: toSeconds);
   }
 
+  /// ============================
+  /// 3) Lấy transaction từ local cache API
+  /// Filter theo milliseconds (FE toàn ms)
+  /// ============================
   Future<List<TransactionModel>> getTransactionsByCategory({
     required int from,
     required int to,
@@ -39,8 +57,8 @@ class StatsRemoteDataSource {
     return all
         .where(
           (tx) =>
-              tx.occurredAt >= from &&
-              tx.occurredAt <= to &&
+              tx.occurredAt >= from && // occurredAt = milliseconds
+              tx.occurredAt <= to && // FE filter = milliseconds
               ((tx.categoryId ?? tx.categoryName ?? 'others') == categoryKey),
         )
         .toList();

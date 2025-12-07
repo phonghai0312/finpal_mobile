@@ -2,7 +2,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class ApiBaseDev {
   static const String baseUrlDevelopment =
-      'https://63060dc58e8b.ngrok-free.app/';
+      'https://f5f4be25a51a.ngrok-free.app/';
 }
 
 class ApiBaseProd {

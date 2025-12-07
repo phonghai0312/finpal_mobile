@@ -1,5 +1,3 @@
-/// Stats By Category Item Model
-/// Dùng cho JSON parsing từ API
 library;
 
 import '../../domain/entities/stats_by_category_item.dart';

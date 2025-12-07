@@ -11,15 +11,14 @@ import 'package:fridge_to_fork_ai/features/home/domain/usecases/get_user_info.da
 import 'package:fridge_to_fork_ai/features/stats/domain/entities/stats_by_category.dart'
     show StatsByCategory;
 import 'package:fridge_to_fork_ai/features/stats/domain/entities/stats_overview.dart';
-import 'package:fridge_to_fork_ai/features/suggestions/domain/entities/suggestions.dart'
-    show Suggestions;
+import 'package:fridge_to_fork_ai/features/suggestions/domain/entities/insight.dart';
 
 /// State
 class HomeState {
   final String userName;
   final StatsOverview? overview;
   final StatsByCategory? statsByCategory;
-  final Suggestions? suggestion;
+  final Insight? suggestion;
   final bool isLoading;
   final bool isRefreshing;
   final String? errorMessage;
@@ -38,7 +37,7 @@ class HomeState {
     String? userName,
     StatsOverview? overview,
     StatsByCategory? statsByCategory,
-    Suggestions? suggestion,
+    Insight? suggestion,
     bool? isLoading,
     bool? isRefreshing,
     String? errorMessage,
@@ -59,7 +58,7 @@ class HomeState {
 class HomeNotifier extends StateNotifier<HomeState> {
   final GetStatsOverviewUseCase _getStatsOverview;
   final GetStatsByCategoryUseCase _getStatsByCategory;
-  final GetLatestSuggestionUseCase _getLatestSuggestion;
+  //final GetLatestSuggestionUseCase _getLatestSuggestion;
   final GetUserInfo _getUserInfo;
   final Ref ref;
 
@@ -67,7 +66,7 @@ class HomeNotifier extends StateNotifier<HomeState> {
     this.ref,
     this._getStatsOverview,
     this._getStatsByCategory,
-    this._getLatestSuggestion,
+    //this._getLatestSuggestion,
     this._getUserInfo,
   ) : super(const HomeState());
 
@@ -96,13 +95,13 @@ class HomeNotifier extends StateNotifier<HomeState> {
 
       final overview = await _getStatsOverview();
       final stats = await _getStatsByCategory();
-      final suggestion = await _getLatestSuggestion();
+      //final suggestion = await _getLatestSuggestion();
       final user = await _getUserInfo();
 
       state = state.copyWith(
         overview: overview,
         statsByCategory: stats,
-        suggestion: suggestion,
+        //suggestion: suggestion,
         userName: user.name,
         isLoading: false,
         isRefreshing: false,

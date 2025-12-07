@@ -12,7 +12,7 @@ part of 'auth_api.dart';
 
 class _AuthApi implements AuthApi {
   _AuthApi(this._dio, {this.baseUrl, this.errorLogger}) {
-    baseUrl ??= 'https://63060dc58e8b.ngrok-free.app/';
+    baseUrl ??= 'https://f5f4be25a51a.ngrok-free.app/';
   }
 
   final Dio _dio;

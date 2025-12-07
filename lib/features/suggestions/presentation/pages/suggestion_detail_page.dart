@@ -1,135 +1,224 @@
-// ignore_for_file: deprecated_member_use, use_build_context_synchronously
+// ignore_for_file: use_build_context_synchronously, deprecated_member_use
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:fridge_to_fork_ai/core/presentation/theme/app_colors.dart';
-import 'package:fridge_to_fork_ai/features/suggestions/presentation/provider/suggestion_provider.dart';
-import 'package:go_router/go_router.dart';
+import 'package:fridge_to_fork_ai/features/suggestions/presentation/provider/insight_detail/insight_detail_provider.dart';
+import 'package:google_fonts/google_fonts.dart';
 
-class SuggestionDetailPage extends ConsumerWidget {
-  final String insightId;
+import '../../../../../core/presentation/theme/app_colors.dart';
+import '../../../../../core/presentation/widget/header/header_with_back.dart';
 
-  const SuggestionDetailPage({super.key, required this.insightId});
+class SuggestionDetailPage extends ConsumerStatefulWidget {
+  const SuggestionDetailPage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final suggestionDetailState = ref.watch(
-      suggestionDetailNotifierProvider(insightId),
-    );
-    final notifier = ref.read(
-      suggestionDetailNotifierProvider(insightId).notifier,
-    );
+  ConsumerState<SuggestionDetailPage> createState() =>
+      _SuggestionDetailPageState();
+}
 
-    if (suggestionDetailState.insight == null &&
-        suggestionDetailState.isLoading) {
+class _SuggestionDetailPageState extends ConsumerState<SuggestionDetailPage> {
+  bool _init = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    if (!_init) {
+      _init = true;
+      Future.microtask(() {
+        ref.read(insightDetailNotifierProvider.notifier).init(context);
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final state = ref.watch(insightDetailNotifierProvider);
+    final notifier = ref.read(insightDetailNotifierProvider.notifier);
+
+    final insight = state.insight;
+    if (insight == null) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
-    if (suggestionDetailState.insight == null &&
-        suggestionDetailState.error != null) {
-      return Scaffold(
-        body: Center(child: Text('Error: ${suggestionDetailState.error}')),
-      );
-    }
-
-    if (suggestionDetailState.insight == null) {
-      return const Scaffold(body: Center(child: Text('Insight not found')));
-    }
-
-    final insight = suggestionDetailState.insight!;
+    /// Get style theo type
+    final typeUI = notifier.getDesign(insight.type);
+    final Color typeColor = typeUI["color"];
+    final IconData typeIcon = typeUI["icon"];
 
     return Scaffold(
-      backgroundColor: AppColors.bgSecondary,
-      appBar: AppBar(
-        backgroundColor: AppColors.bgWhite,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(
-            Icons.arrow_back,
-            color: AppColors.typoHeading,
-            size: 24.sp,
-          ),
-          onPressed: () => context.pop(),
-        ),
-        title: Text(
-          'Chi tiết gợi ý',
-          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-            color: AppColors.typoHeading,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        centerTitle: true,
+      backgroundColor: AppColors.bgWhite,
+      appBar: HeaderWithBack(
+        title: "Insight Detail",
+        onBack: () => notifier.onBack(context),
       ),
+
       body: SingleChildScrollView(
-        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 24.h),
+        padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 12.h),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            /// ===============================
+            ///  TYPE SECTION
+            /// ===============================
             Container(
               padding: EdgeInsets.all(16.w),
               decoration: BoxDecoration(
-                color: AppColors.bgWhite,
-                borderRadius: BorderRadius.circular(12.r),
-                border: Border.all(color: AppColors.bgGray.withOpacity(0.5)),
+                color: typeColor.withOpacity(.12),
+                borderRadius: BorderRadius.circular(16.r),
+                border: Border.all(color: typeColor.withOpacity(.4)),
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              child: Row(
                 children: [
-                  Text(
-                    insight.title,
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.typoHeading,
+                  Icon(typeIcon, color: typeColor, size: 30.sp),
+                  SizedBox(width: 12.w),
+
+                  Expanded(
+                    child: Text(
+                      insight.type.toUpperCase(),
+                      style: GoogleFonts.poppins(
+                        fontSize: 15.sp,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.typoHeading,
+                      ),
                     ),
-                  ),
-                  SizedBox(height: 16.h),
-                  Text(
-                    insight.message,
-                    style: Theme.of(
-                      context,
-                    ).textTheme.bodyLarge?.copyWith(color: AppColors.typoBody),
                   ),
                 ],
               ),
             ),
-            SizedBox(height: 24.h),
-            if (suggestionDetailState.isLoading)
-              const Center(child: CircularProgressIndicator())
-            else if (suggestionDetailState.error != null)
-              Text(
-                'Error: ${suggestionDetailState.error}',
-                style: TextStyle(color: AppColors.bgError),
-              )
-            else
-              Align(
-                alignment: Alignment.bottomRight,
-                child: ElevatedButton(
-                  onPressed: () async {
-                    await notifier.markAsRead();
-                    context.pop();
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primaryGreen,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12.r),
-                    ),
-                    padding: EdgeInsets.symmetric(
-                      vertical: 16.h,
-                      horizontal: 24.w,
-                    ),
-                    elevation: 4,
-                    shadowColor: AppColors.primaryGreen.withOpacity(0.3),
-                  ),
-                  child: Text(
-                    'Đánh dấu đã đọc',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: AppColors.typoWhite,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+
+            SizedBox(height: 20.h),
+
+            /// ===============================
+            ///  TITLE
+            /// ===============================
+            Text(
+              insight.title,
+              style: GoogleFonts.poppins(
+                fontSize: 20.sp,
+                fontWeight: FontWeight.w700,
+                color: AppColors.typoHeading,
+              ),
+            ),
+
+            SizedBox(height: 12.h),
+
+            /// ===============================
+            ///  MESSAGE BOX
+            /// ===============================
+            Container(
+              padding: EdgeInsets.all(16.w),
+              decoration: BoxDecoration(
+                color: AppColors.bgHover,
+                borderRadius: BorderRadius.circular(16.r),
+                border: Border.all(color: AppColors.bgGray.withOpacity(.3)),
+              ),
+              child: Text(
+                insight.message,
+                style: GoogleFonts.poppins(
+                  fontSize: 14.sp,
+                  height: 1.4,
+                  color: AppColors.typoBody,
                 ),
               ),
+            ),
+
+            SizedBox(height: 28.h),
+
+            /// ===============================
+            /// PERIOD
+            /// ===============================
+            Text(
+              "Period",
+              style: GoogleFonts.poppins(
+                fontSize: 16.sp,
+                fontWeight: FontWeight.w600,
+                color: AppColors.typoHeading,
+              ),
+            ),
+
+            SizedBox(height: 10.h),
+
+            Container(
+              padding: EdgeInsets.all(14.w),
+              decoration: BoxDecoration(
+                color: AppColors.bgWhite,
+                borderRadius: BorderRadius.circular(16.r),
+                border: Border.all(color: AppColors.bgGray.withOpacity(.4)),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      "From: ${insight.period.from}",
+                      style: GoogleFonts.poppins(
+                        fontSize: 14.sp,
+                        color: AppColors.typoBody,
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: Text(
+                      "To: ${insight.period.to}",
+                      textAlign: TextAlign.right,
+                      style: GoogleFonts.poppins(
+                        fontSize: 14.sp,
+                        color: AppColors.typoBody,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            SizedBox(height: 28.h),
+
+            /// ===============================
+            /// DATA (nếu có)
+            /// ===============================
+            if (insight.data.isNotEmpty)
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "Details",
+                    style: GoogleFonts.poppins(
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  SizedBox(height: 12.h),
+
+                  Container(
+                    padding: EdgeInsets.all(16.w),
+                    decoration: BoxDecoration(
+                      color: AppColors.bgWhite,
+                      borderRadius: BorderRadius.circular(16.r),
+                      border: Border.all(
+                        color: AppColors.bgGray.withOpacity(.35),
+                      ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: insight.data.map((e) {
+                        return Padding(
+                          padding: EdgeInsets.only(bottom: 10.h),
+                          child: Text(
+                            "- $e",
+                            style: GoogleFonts.poppins(
+                              fontSize: 14.sp,
+                              color: AppColors.typoBody,
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                  ),
+                ],
+              ),
+
+            SizedBox(height: 40.h),
           ],
         ),
       ),
