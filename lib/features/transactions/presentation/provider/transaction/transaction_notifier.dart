@@ -16,6 +16,8 @@ class TransactionState {
   final bool isLoading;
   final bool isRefreshing;
   final String currentFilter;
+  final String? currentCategoryId;
+  final String searchQuery;
   final String? errorMessage;
 
   final List<Transaction> all;
@@ -25,6 +27,8 @@ class TransactionState {
     this.isLoading = false,
     this.isRefreshing = false,
     this.currentFilter = "all",
+    this.currentCategoryId,
+    this.searchQuery = "",
     this.errorMessage,
     this.all = const [],
     this.filtered = const [],
@@ -34,6 +38,9 @@ class TransactionState {
     bool? isLoading,
     bool? isRefreshing,
     String? currentFilter,
+    String? currentCategoryId,
+    bool clearCategoryId = false,
+    String? searchQuery,
     String? errorMessage,
     List<Transaction>? all,
     List<Transaction>? filtered,
@@ -42,6 +49,10 @@ class TransactionState {
       isLoading: isLoading ?? this.isLoading,
       isRefreshing: isRefreshing ?? this.isRefreshing,
       currentFilter: currentFilter ?? this.currentFilter,
+      currentCategoryId: clearCategoryId
+          ? null
+          : (currentCategoryId ?? this.currentCategoryId),
+      searchQuery: searchQuery ?? this.searchQuery,
       errorMessage: errorMessage,
       all: all ?? this.all,
       filtered: filtered ?? this.filtered,
@@ -65,15 +76,13 @@ class TransactionNotifier extends StateNotifier<TransactionState> {
   /// INIT PAGE
   /// ============================================
   Future<void> init(BuildContext context) async {
-    state = state.copyWith(isLoading: true);
+    _debounce?.cancel();
+    state = state.copyWith(isLoading: true, searchQuery: "");
 
     try {
       final list = await _getTransactions();
-      state = state.copyWith(
-        isLoading: false,
-        all: list,
-        filtered: list, // mặc định filter = all
-      );
+      state = state.copyWith(isLoading: false, all: list);
+      _applyFilters();
     } catch (e) {
       _showError(context, e.toString());
     }
@@ -83,17 +92,19 @@ class TransactionNotifier extends StateNotifier<TransactionState> {
   /// FILTER: all | income | expense
   /// ============================================
   void filter(String type) {
-    List<Transaction> result;
+    state = state.copyWith(currentFilter: type);
+    _applyFilters();
+  }
 
-    if (type == "income") {
-      result = state.all.where((t) => t.type == "income").toList();
-    } else if (type == "expense") {
-      result = state.all.where((t) => t.type == "expense").toList();
-    } else {
-      result = state.all;
-    }
-
-    state = state.copyWith(currentFilter: type, filtered: result);
+  /// ============================================
+  /// FILTER BY CATEGORY
+  /// ============================================
+  void setCategoryFilter(String? categoryId) {
+    state = state.copyWith(
+      currentCategoryId: categoryId,
+      clearCategoryId: categoryId == null,
+    );
+    _applyFilters();
   }
 
   /// ============================================
@@ -108,7 +119,7 @@ class TransactionNotifier extends StateNotifier<TransactionState> {
       state = state.copyWith(all: list, isRefreshing: false);
 
       /// giữ nguyên filter hiện tại
-      filter(state.currentFilter);
+      _applyFilters();
     } catch (e) {
       state = state.copyWith(isRefreshing: false);
       _showError(context, e.toString());
@@ -151,24 +162,69 @@ class TransactionNotifier extends StateNotifier<TransactionState> {
   void onSearchChanged(String query) {
     _debounce?.cancel();
 
+    final cleanQuery = query.trim().toLowerCase();
+
+    // Reset ngay khi ô tìm kiếm rỗng (tránh chờ debounce và tránh giữ filter cũ)
+    if (cleanQuery.isEmpty) {
+      state = state.copyWith(searchQuery: "");
+      _applyFilters();
+      return;
+    }
+
     _debounce = Timer(const Duration(milliseconds: 500), () {
-      final cleanQuery = query.trim().toLowerCase();
-
-      // Khôi phục danh sách nếu ô tìm kiếm rỗng
-      if (cleanQuery.isEmpty) {
-        state = state.copyWith(filtered: state.all);
-        return;
-      }
-
-      final filtered = state.all.where((tx) {
-        final amountStr = tx.amount.toString();
-        return tx.merchant?.toLowerCase().contains(cleanQuery) == true ||
-            tx.categoryName?.toLowerCase().contains(cleanQuery) == true ||
-            tx.source.toLowerCase().contains(cleanQuery) ||
-            amountStr.contains(cleanQuery);
-      }).toList();
-
-      state = state.copyWith(filtered: filtered);
+      state = state.copyWith(searchQuery: cleanQuery);
+      _applyFilters();
     });
+  }
+
+  void _applyFilters() {
+    Iterable<Transaction> result = state.all;
+
+    // type filter
+    if (state.currentFilter == "income") {
+      result = result.where((t) => t.type == "income");
+    } else if (state.currentFilter == "expense") {
+      result = result.where((t) => t.type == "expense");
+    }
+
+    // category filter
+    if (state.currentCategoryId != null) {
+      final categoryId = state.currentCategoryId!;
+      result = result.where((t) => t.categoryId == categoryId);
+    }
+
+    // search filter
+    final q = _normalizeForSearch(state.searchQuery);
+    final rawQuery = state.searchQuery.trim();
+    if (q.isNotEmpty) {
+      result = result.where((tx) {
+        final amountStr = tx.amount.toString();
+        bool containsNormalized(String? value) {
+          if (value == null || value.isEmpty) return false;
+          return _normalizeForSearch(value).contains(q);
+        }
+
+        // Search theo "tên" (merchant/title) thay vì danh mục.
+        return containsNormalized(tx.normalized.title) ||
+            containsNormalized(tx.rawMessage) ||
+            (rawQuery.isNotEmpty && amountStr.contains(rawQuery));
+      });
+    }
+
+    state = state.copyWith(filtered: result.toList());
+  }
+
+  String _normalizeForSearch(String input) {
+    final value = input.toLowerCase().trim().replaceAll(RegExp(r'\\s+'), ' ');
+    if (value.isEmpty) return '';
+
+    return value
+        .replaceAll(RegExp(r'[àáạảãâầấậẩẫăằắặẳẵ]'), 'a')
+        .replaceAll(RegExp(r'[èéẹẻẽêềếệểễ]'), 'e')
+        .replaceAll(RegExp(r'[ìíịỉĩ]'), 'i')
+        .replaceAll(RegExp(r'[òóọỏõôồốộổỗơờớợởỡ]'), 'o')
+        .replaceAll(RegExp(r'[ùúụủũưừứựửữ]'), 'u')
+        .replaceAll(RegExp(r'[ỳýỵỷỹ]'), 'y')
+        .replaceAll(RegExp(r'[đ]'), 'd');
   }
 }

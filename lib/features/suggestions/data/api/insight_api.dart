@@ -3,7 +3,6 @@ import 'package:fridge_to_fork_ai/features/suggestions/data/models/insight_respo
 import 'package:retrofit/retrofit.dart';
 
 import '../../../../core/config/constant/api_base.dart';
-import '../models/insight_model.dart';
 
 part 'insight_api.g.dart';
 

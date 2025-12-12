@@ -17,7 +17,7 @@ class InsightModel extends Insight {
 
   factory InsightModel.fromJson(Map<String, dynamic> json) {
     // parse data linh hoạt: null / List / Map đều không crash
-    List<String> _parseData(dynamic raw) {
+    List<String> parseData(dynamic raw) {
       if (raw == null) return const [];
 
       if (raw is List) {
@@ -39,7 +39,7 @@ class InsightModel extends Insight {
       period: Period.fromJson((json['period'] as Map<String, dynamic>? ?? {})),
       title: json['title']?.toString() ?? '',
       message: json['message']?.toString() ?? '',
-      data: _parseData(json['data']),
+      data: parseData(json['data']),
       read: (json['read'] as bool?) ?? false,
       createdAt: (json['createdAt'] as num?)?.toInt() ?? 0,
       updatedAt: (json['updatedAt'] as num?)?.toInt() ?? 0,

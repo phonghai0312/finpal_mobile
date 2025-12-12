@@ -74,7 +74,7 @@ class _TransactionDetailPageState extends ConsumerState<TransactionDetailPage> {
     final tx = state.data!;
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.grey.shade50,
       appBar: HeaderWithBack(
         title: "Chi tiết giao dịch",
         onBack: () => notifier.onBack(context),
@@ -129,18 +129,15 @@ class _TransactionDetailPageState extends ConsumerState<TransactionDetailPage> {
       padding: EdgeInsets.all(20.w),
       decoration: BoxDecoration(
         color: isIncome ? AppColors.lightGreen : AppColors.lightRed,
-        borderRadius: BorderRadius.circular(20.r),
+        borderRadius: BorderRadius.circular(16.r),
       ),
       child: Column(
         children: [
           CircleAvatar(
             radius: 26.r,
-            backgroundColor: Colors.white,
-            child: Icon(
-              isIncome ? Icons.arrow_downward : Icons.arrow_upward,
-              color: isIncome ? AppColors.darkGreen : AppColors.darkRed,
-              size: 26.sp,
-            ),
+            backgroundColor:
+                isIncome ? AppColors.darkGreen : AppColors.darkRed,
+            child: Icon(Icons.receipt_long, color: Colors.white, size: 22.sp),
           ),
           SizedBox(height: 12.h),
           Text(
@@ -178,11 +175,23 @@ class _TransactionDetailPageState extends ConsumerState<TransactionDetailPage> {
           Icon(Icons.auto_awesome, color: Colors.orange[700]),
           SizedBox(width: 10.w),
           Expanded(
-            child: Text(
-              "Phân loại tự động bởi AI\n"
-              "Giao dịch được AI phân loại: “${tx.categoryName}” "
-              "với độ chính xác ${(tx.ai.confidence! * 100).toInt()}%",
-              style: TextStyle(fontSize: 13.sp, color: Colors.orange[900]),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "Phân loại tự động bởi AI",
+                  style: TextStyle(
+                    fontSize: 13.sp,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.orange[900],
+                  ),
+                ),
+                SizedBox(height: 4.h),
+                Text(
+                  "Giao dịch này được AI phân loại vào danh mục: “${tx.categoryName}” với độ chính xác ${(tx.ai.confidence! * 100).toInt()}%",
+                  style: TextStyle(fontSize: 12.5.sp, color: Colors.orange[900]),
+                ),
+              ],
             ),
           ),
         ],
@@ -197,8 +206,16 @@ class _TransactionDetailPageState extends ConsumerState<TransactionDetailPage> {
       padding: EdgeInsets.all(14.w),
       margin: EdgeInsets.only(bottom: 10.h),
       decoration: BoxDecoration(
+        color: Colors.white,
         borderRadius: BorderRadius.circular(14.r),
-        border: Border.all(color: Colors.grey.shade300),
+        border: Border.all(color: Colors.grey.shade200),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Row(
         children: [
@@ -210,14 +227,19 @@ class _TransactionDetailPageState extends ConsumerState<TransactionDetailPage> {
               children: [
                 Text(
                   title,
-                  style: TextStyle(fontSize: 12.sp, color: Colors.grey),
+                  style: TextStyle(
+                    fontSize: 13.sp,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.typoBlack,
+                  ),
                 ),
                 SizedBox(height: 4.h),
                 Text(
-                  value,
+                  value.isEmpty ? "Không có" : value,
                   style: TextStyle(
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.w600,
+                    fontSize: 13.sp,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.grey.shade700,
                   ),
                 ),
               ],
@@ -240,8 +262,16 @@ class _TransactionDetailPageState extends ConsumerState<TransactionDetailPage> {
       padding: EdgeInsets.all(14.w),
       margin: EdgeInsets.only(bottom: 10.h),
       decoration: BoxDecoration(
+        color: Colors.white,
         borderRadius: BorderRadius.circular(14.r),
-        border: Border.all(color: Colors.grey.shade300),
+        border: Border.all(color: Colors.grey.shade200),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Row(
         children: [
@@ -253,7 +283,11 @@ class _TransactionDetailPageState extends ConsumerState<TransactionDetailPage> {
               children: [
                 Text(
                   title,
-                  style: TextStyle(fontSize: 12.sp, color: Colors.grey),
+                  style: TextStyle(
+                    fontSize: 13.sp,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.typoBlack,
+                  ),
                 ),
                 SizedBox(height: 4.h),
                 isEditing
@@ -265,10 +299,11 @@ class _TransactionDetailPageState extends ConsumerState<TransactionDetailPage> {
                         ),
                       )
                     : Text(
-                        ctrl.text.isEmpty ? " " : ctrl.text,
+                        ctrl.text.isEmpty ? "Không có" : ctrl.text,
                         style: TextStyle(
-                          fontSize: 14.sp,
-                          fontWeight: FontWeight.w600,
+                          fontSize: 13.sp,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.grey.shade700,
                         ),
                       ),
               ],
@@ -329,7 +364,7 @@ class _TransactionDetailPageState extends ConsumerState<TransactionDetailPage> {
             child: SizedBox(
               height: buttonHeight,
               child: ElevatedButton(
-                onPressed: () => notifier.onDelete(context, tx),
+                onPressed: () => _showDeleteConfirmSheet(context, notifier, tx),
                 style: ElevatedButton.styleFrom(
                   minimumSize: Size(buttonWidth, buttonHeight),
                   padding: EdgeInsets.zero, // FIX tràn
@@ -417,6 +452,84 @@ class _TransactionDetailPageState extends ConsumerState<TransactionDetailPage> {
           ),
         ),
       ],
+    );
+  }
+
+  void _showDeleteConfirmSheet(
+    BuildContext context,
+    TransactionDetailNotifier notifier,
+    Transaction tx,
+  ) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16.r)),
+      ),
+      builder: (sheetContext) {
+        return SafeArea(
+          child: Padding(
+            padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 20.h),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 40.w,
+                  height: 4.h,
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade400,
+                    borderRadius: BorderRadius.circular(2.r),
+                  ),
+                ),
+                SizedBox(height: 12.h),
+                Text(
+                  "Bạn chắc chắn muốn xóa ?",
+                  style:
+                      TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w600),
+                ),
+                SizedBox(height: 14.h),
+                Row(
+                  children: [
+                    Expanded(
+                      child: ElevatedButton.icon(
+                        onPressed: () async {
+                          Navigator.pop(sheetContext);
+                          await notifier.onDelete(context, tx);
+                        },
+                        icon: const Icon(Icons.delete, size: 18),
+                        label: const Text("Xóa"),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.darkRed,
+                          foregroundColor: Colors.white,
+                          padding: EdgeInsets.symmetric(vertical: 12.h),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12.r),
+                          ),
+                          elevation: 0,
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: 12.w),
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () => Navigator.pop(sheetContext),
+                        style: OutlinedButton.styleFrom(
+                          side: BorderSide(color: Colors.grey.shade400),
+                          padding: EdgeInsets.symmetric(vertical: 12.h),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12.r),
+                          ),
+                        ),
+                        child: const Text("Hủy"),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 

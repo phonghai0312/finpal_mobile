@@ -7,6 +7,8 @@ import 'package:intl/intl.dart';
 
 import '../../../../core/presentation/theme/app_colors.dart';
 import '../../../../core/presentation/widget/header/header_simple.dart';
+import '../../../categories/presentation/provider/category.notifier.dart';
+import '../../../categories/presentation/provider/category_provider.dart';
 import '../../domain/entities/transaction.dart';
 import '../provider/transaction/transaction_provider.dart';
 import '../provider/transaction/transaction_notifier.dart';
@@ -51,7 +53,6 @@ class TransactionsPageState extends ConsumerState<TransactionsPage> {
             _buildSummaryCards(context, state),
             _buildSearchBar(context, notifier),
             _buildFilterBar(context, state, notifier),
-            _buildCategoryButton(),
             Expanded(child: _buildTransactionList(context, state, notifier)),
           ],
         ),
@@ -195,7 +196,13 @@ class TransactionsPageState extends ConsumerState<TransactionsPage> {
           const Spacer(),
           _iconButton(Icons.calendar_today),
           SizedBox(width: 8.w),
-          _iconButton(Icons.filter_list),
+          _iconButton(
+            Icons.filter_list,
+            onTap: () {
+              final categoryState = ref.read(categoryNotifierProvider);
+              _showCategoryFilterSheet(context, categoryState, notifier);
+            },
+          ),
         ],
       ),
     );
@@ -239,8 +246,8 @@ class TransactionsPageState extends ConsumerState<TransactionsPage> {
     );
   }
 
-  Widget _iconButton(IconData icon) {
-    return Container(
+  Widget _iconButton(IconData icon, {VoidCallback? onTap}) {
+    final button = Container(
       width: 38.w,
       height: 38.w,
       decoration: BoxDecoration(
@@ -249,32 +256,99 @@ class TransactionsPageState extends ConsumerState<TransactionsPage> {
       ),
       child: Icon(icon, size: 18.sp),
     );
+
+    if (onTap == null) return button;
+
+    return GestureDetector(onTap: onTap, child: button);
   }
 
-  // ---------------------------------------------------------------------------
-  // CATEGORY BUTTON
-  // ---------------------------------------------------------------------------
-
-  Widget _buildCategoryButton() {
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 4.h),
-      child: Row(
-        children: [
-          Container(
-            padding: EdgeInsets.all(10.w),
-            decoration: const BoxDecoration(
-              shape: BoxShape.circle,
-              color: AppColors.darkGreen,
-            ),
-            child: const Icon(Icons.folder_open, color: Colors.white),
-          ),
-          SizedBox(width: 12.w),
-          Text(
-            "Xem danh mục",
-            style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w600),
-          ),
-        ],
+  void _showCategoryFilterSheet(
+    BuildContext context,
+    CategoryState categoryState,
+    TransactionNotifier notifier,
+  ) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16.r)),
       ),
+      builder: (sheetContext) {
+        final currentCategoryId = ref
+            .read(transactionNotifierProvider)
+            .currentCategoryId;
+        final categories = categoryState.categories;
+
+        return SafeArea(
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 40.w,
+                  height: 4.h,
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade400,
+                    borderRadius: BorderRadius.circular(2.r),
+                  ),
+                ),
+                SizedBox(height: 12.h),
+                Text(
+                  'Lọc theo danh mục',
+                  style: TextStyle(
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                SizedBox(height: 8.h),
+                if (categoryState.isLoading)
+                  const Padding(
+                    padding: EdgeInsets.all(16),
+                    child: CircularProgressIndicator(),
+                  )
+                else if (categoryState.errorMessage != null)
+                  Padding(
+                    padding: EdgeInsets.symmetric(vertical: 8.h),
+                    child: Text(
+                      'Không thể tải danh mục: ${categoryState.errorMessage}',
+                      style: TextStyle(color: Colors.red, fontSize: 13.sp),
+                    ),
+                  )
+                else
+                  ConstrainedBox(
+                    constraints: BoxConstraints(
+                      maxHeight: MediaQuery.of(sheetContext).size.height * 0.6,
+                    ),
+                    child: ListView(
+                      shrinkWrap: true,
+                      children: [
+                        ListTile(
+                          leading: const Icon(Icons.clear_all),
+                          title: const Text('Tất cả danh mục'),
+                          selected: currentCategoryId == null,
+                          onTap: () {
+                            notifier.setCategoryFilter(null);
+                            Navigator.pop(sheetContext);
+                          },
+                        ),
+                        for (final category in categories)
+                          ListTile(
+                            title: Text(category.displayName),
+                            selected: category.id == currentCategoryId,
+                            onTap: () {
+                              notifier.setCategoryFilter(category.id);
+                              Navigator.pop(sheetContext);
+                            },
+                          ),
+                      ],
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 
