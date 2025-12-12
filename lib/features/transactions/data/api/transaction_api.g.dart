@@ -12,7 +12,7 @@ part of 'transaction_api.dart';
 
 class _TransactionApi implements TransactionApi {
   _TransactionApi(this._dio, {this.baseUrl, this.errorLogger}) {
-    baseUrl ??= 'https://f5f4be25a51a.ngrok-free.app/';
+    baseUrl ??= 'https://finpal.id.vn/';
   }
 
   final Dio _dio;
@@ -123,6 +123,25 @@ class _TransactionApi implements TransactionApi {
       rethrow;
     }
     return _value;
+  }
+
+  @override
+  Future<void> deleteTransaction(String id) async {
+    final _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{};
+    const Map<String, dynamic>? _data = null;
+    final _options = _setStreamType<void>(
+      Options(method: 'DELETE', headers: _headers, extra: _extra)
+          .compose(
+            _dio.options,
+            '/transactions/${id}',
+            queryParameters: queryParameters,
+            data: _data,
+          )
+          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
+    );
+    await _dio.fetch<void>(_options);
   }
 
   @override

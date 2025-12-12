@@ -34,7 +34,11 @@ class TransactionRemoteDataSource {
     await _guardRequest(() => _api.updateTransaction(id, body));
   }
 
-  Future<void> createTransaction({
+  Future<void> deleteTransaction(String id) async {
+     await _guardRequest(() => _api.deleteTransaction(id));
+  }
+
+  Future<TransactionModel> createTransaction({
     required double amount,
     required String type,
     required String categoryId,
@@ -52,7 +56,8 @@ class TransactionRemoteDataSource {
 
     if (note != null) body['userNote'] = note;
 
-    await _guardRequest(() => _api.createTransaction(body));
+    final result = await _guardRequest(() => _api.createTransaction(body));
+    return result;
   }
 
   Future<List<SpendAmountModel>> getSpendAmounts({String? categoryId}) async {

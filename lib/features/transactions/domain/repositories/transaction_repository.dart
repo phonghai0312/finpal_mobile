@@ -13,7 +13,9 @@ abstract class TransactionRepository {
     String? merchant,
   });
 
-  Future<void> createTransaction({
+  Future<void> deleteTransaction(String id);
+
+  Future<Transaction> createTransaction({
     required double amount,
     required String type, // income | expense
     required String categoryId,

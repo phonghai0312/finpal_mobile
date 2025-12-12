@@ -33,6 +33,9 @@ abstract class TransactionApi {
     @Body() Map<String, dynamic> body,
   );
 
+  @DELETE('/transactions/{id}')
+  Future<void> deleteTransaction(@Path('id') String id);
+
   @POST('/transactions')
   Future<TransactionModel> createTransaction(@Body() Map<String, dynamic> body);
 

@@ -45,6 +45,7 @@ class Transaction {
   Transaction copyWith({
     String? merchant,
     String? userNote,
+    String? categoryName,
   }) {
     return Transaction(
       id: id,
@@ -55,7 +56,7 @@ class Transaction {
       direction: direction,
       type: type,
       categoryId: categoryId,
-      categoryName: categoryName,
+      categoryName: categoryName ?? this.categoryName,
       merchant: merchant ?? this.merchant,
       occurredAt: occurredAt,
       rawMessage: rawMessage,

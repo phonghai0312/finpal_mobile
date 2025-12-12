@@ -322,7 +322,7 @@ class TransactionsPageState extends ConsumerState<TransactionsPage> {
 
     final dateString = DateFormat(
       "dd/MM/yyyy, HH:mm",
-    ).format(DateTime.fromMillisecondsSinceEpoch(tx.occurredAt * 1000));
+    ).format(DateTime.fromMillisecondsSinceEpoch(tx.occurredAt));
 
     return InkWell(
       borderRadius: BorderRadius.circular(14.r),

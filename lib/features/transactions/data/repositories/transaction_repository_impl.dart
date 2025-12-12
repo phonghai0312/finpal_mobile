@@ -37,8 +37,12 @@ class TransactionRepositoryImpl implements TransactionRepository {
   }
 
   @override
+  Future<void> deleteTransaction(String id) async {
+    await remote.deleteTransaction(id);
+  }
+
   @override
-  Future<void> createTransaction({
+  Future<Transaction> createTransaction({
     required double amount,
     required String type,
     required String categoryId,
@@ -46,7 +50,7 @@ class TransactionRepositoryImpl implements TransactionRepository {
     required int occurredAt,
     String? note,
   }) async {
-    await remote.createTransaction(
+    final model = await remote.createTransaction(
       amount: amount,
       type: type,
       categoryId: categoryId,
@@ -54,6 +58,8 @@ class TransactionRepositoryImpl implements TransactionRepository {
       occurredAt: occurredAt,
       note: note,
     );
+
+    return model.toEntity();
   }
 
   @override
