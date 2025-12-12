@@ -64,8 +64,8 @@ class CreateTransactionPageState extends ConsumerState<CreateTransactionPage> {
             SizedBox(height: 16.h),
 
             _inputField(
-              label: "Mô tả",
-              controller: notifier.descriptionController,
+              label: "Tiêu đề",
+              controller: notifier.titleController,
             ),
 
             SizedBox(height: 16.h),

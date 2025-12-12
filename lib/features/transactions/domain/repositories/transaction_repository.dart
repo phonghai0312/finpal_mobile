@@ -19,7 +19,7 @@ abstract class TransactionRepository {
     required double amount,
     required String type, // income | expense
     required String categoryId,
-    required String description,
+    required String title,
     required int occurredAt, // unix timestamp
     String? note,
   });

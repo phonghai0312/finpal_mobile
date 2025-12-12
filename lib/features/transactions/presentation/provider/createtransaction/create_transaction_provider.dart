@@ -1,18 +1,27 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:fridge_to_fork_ai/core/network/api_client.dart';
+import 'package:fridge_to_fork_ai/features/transactions/data/api/transaction_api.dart';
 import '../../../data/datasources/transaction_remote_datasources.dart';
 import '../../../data/repositories/transaction_repository_impl.dart';
 import '../../../domain/usecase/create_transaction.dart';
-import '../transaction/transaction_provider.dart' show transactionApiProvider;
 import 'create_transaction_notifier.dart';
+
+/// ===============================
+/// API PROVIDER
+/// ===============================
+final createTransactionApiProvider = Provider<TransactionApi>(
+  (ref) => ApiClient().create(TransactionApi.new),
+);
 
 /// ===============================
 /// DATASOURCE PROVIDER
 /// ===============================
 final createTransactionRemoteDataSourceProvider =
     Provider<TransactionRemoteDataSource>(
-      (ref) =>
-          TransactionRemoteDataSource(api: ref.read(transactionApiProvider)),
+      (ref) => TransactionRemoteDataSource(
+        api: ref.read(createTransactionApiProvider),
+      ),
     );
 
 /// ===============================
@@ -38,6 +47,5 @@ final createTransactionNotifierProvider =
     StateNotifierProvider<CreateTransactionNotifier, CreateTransactionState>(
       (ref) => CreateTransactionNotifier(
         ref.read(createTransactionUsecaseProvider),
-        ref,
       ),
     );

@@ -42,19 +42,28 @@ class TransactionRemoteDataSource {
     required double amount,
     required String type,
     required String categoryId,
-    required String description,
+    required String title,
     required int occurredAt,
     String? note,
   }) async {
+    // Calculate direction from type: expense -> 'out', income -> 'in'
+    final direction = type == 'expense' ? 'out' : 'in';
+    
     final body = <String, dynamic>{
       'amount': amount,
       'type': type,
-      'categoryId': categoryId,
-      'description': description,
+      'direction': direction,
+      'currency': 'VND', // Default currency
+      'category': categoryId,
+      'userNote': note ?? '',
       'occurredAt': occurredAt,
+      'source': 'manual', // Manual transaction creation
+      'normalized': {
+        'title': title.isNotEmpty ? title : null,
+      },
     };
 
-    if (note != null) body['userNote'] = note;
+    // Note: user and account are handled by backend from auth token
 
     final result = await _guardRequest(() => _api.createTransaction(body));
     return result;

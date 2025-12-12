@@ -10,7 +10,7 @@ part 'budget_api.g.dart';
 abstract class BudgetApi {
   factory BudgetApi(Dio dio, {String? baseUrl}) = _BudgetApi;
 
-  @GET('/budgets')
+  @GET('/budgets/spend')
   Future<BudgetListResponseModel> getBudgets({
     @Query('period') String? period,
     @Query('categoryId') String? categoryId,

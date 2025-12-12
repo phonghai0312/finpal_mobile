@@ -46,7 +46,7 @@ class TransactionRepositoryImpl implements TransactionRepository {
     required double amount,
     required String type,
     required String categoryId,
-    required String description,
+    required String title,
     required int occurredAt,
     String? note,
   }) async {
@@ -54,7 +54,7 @@ class TransactionRepositoryImpl implements TransactionRepository {
       amount: amount,
       type: type,
       categoryId: categoryId,
-      description: description,
+      title: title,
       occurredAt: occurredAt,
       note: note,
     );

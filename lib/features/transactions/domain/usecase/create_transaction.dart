@@ -9,7 +9,7 @@ class CreateTransaction {
     required double amount,
     required String type, // income | expense
     required String categoryId,
-    required String description,
+    required String title,
     required int occurredAt, // timestamp
     String? note,
   }) async {
@@ -17,7 +17,7 @@ class CreateTransaction {
       amount: amount,
       type: type,
       categoryId: categoryId,
-      description: description,
+      title: title,
       occurredAt: occurredAt,
       note: note,
     );

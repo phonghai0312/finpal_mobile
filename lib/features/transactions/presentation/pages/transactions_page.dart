@@ -359,7 +359,7 @@ class TransactionsPageState extends ConsumerState<TransactionsPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    tx.normalized.title ?? "Không có tiêu đề",
+                    tx.normalized.title ?? tx.userNote ?? "Không có tiêu đề",
                     style: TextStyle(
                       fontWeight: FontWeight.w600,
                       fontSize: 14.sp,

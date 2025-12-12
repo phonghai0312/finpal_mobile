@@ -143,93 +143,104 @@ class _BudgetListState extends ConsumerState<BudgetList> {
                 symbol: '₫',
               );
 
-              String? iconName;
+              // Find category from categoryState to get name
+              String? categoryName;
               for (final category in categoryState.categories) {
                 if (category.id == budget.categoryId) {
-                  iconName = category.icon;
+                  categoryName = category.displayName;
                   break;
                 }
               }
+              // Fallback to budget.categoryName nếu không tìm thấy
+              final displayName =
+                  categoryName ??
+                  (budget.categoryName.isNotEmpty
+                      ? budget.categoryName
+                      : 'Không xác định');
 
-              return GestureDetector(
-                onTap: () {
-                  if (budget.id.isEmpty) return;
-                  context.push('${AppRoutes.budgetDetail}/${budget.id}');
-                },
-                child: Container(
-                  width: 180.w,
-                  margin: EdgeInsets.only(right: 16.w),
-                  padding: EdgeInsets.all(16.w),
-                  decoration: BoxDecoration(
-                    color: AppColors.bgWhite,
-                    borderRadius: BorderRadius.circular(16.r),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
-                        blurRadius: 10,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        children: [
-                          Container(
-                            width: 40.w,
-                            height: 40.w,
-                            decoration: BoxDecoration(
-                              color: color.withOpacity(0.1),
-                              shape: BoxShape.circle,
-                            ),
-                            child: Icon(
-                              _iconFromName(iconName),
-                              color: color,
-                              size: 24.sp,
-                            ),
-                          ),
-                          SizedBox(width: 8.w),
-                          Expanded(
-                            child: Text(
-                              budget.categoryName,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: Theme.of(context).textTheme.titleMedium
-                                  ?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                    color: AppColors.typoHeading,
-                                  ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      Text(
-                        formatter.format(budget.amount),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.typoBody,
+              return Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(16.r),
+                  onTap: () {
+                    if (budget.id.isEmpty) return;
+                    context.push('${AppRoutes.budgetDetail}/${budget.id}');
+                  },
+                  child: Container(
+                    width: 180.w,
+                    margin: EdgeInsets.only(right: 16.w),
+                    padding: EdgeInsets.all(16.w),
+                    decoration: BoxDecoration(
+                      color: AppColors.bgWhite,
+                      borderRadius: BorderRadius.circular(16.r),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.05),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
                         ),
-                      ),
-                      Text(
-                        'Đã chi ${formatter.format(spentAmount)}',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: AppColors.typoBody,
+                      ],
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          children: [
+                            Container(
+                              width: 40.w,
+                              height: 40.w,
+                              decoration: BoxDecoration(
+                                color: color.withOpacity(0.1),
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(
+                                _iconFromName(displayName),
+                                color: color,
+                                size: 24.sp,
+                              ),
+                            ),
+                            SizedBox(width: 8.w),
+                            Expanded(
+                              child: Text(
+                                displayName,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: Theme.of(context).textTheme.titleMedium
+                                    ?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                      color: AppColors.typoHeading,
+                                    ),
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
-                      LinearProgressIndicator(
-                        value: progress.isNaN ? 0 : progress,
-                        backgroundColor: Colors.grey[200],
-                        valueColor: AlwaysStoppedAnimation<Color>(color),
-                        minHeight: 6.h,
-                        borderRadius: BorderRadius.circular(3.r),
-                      ),
-                    ],
+                        Text(
+                          formatter.format(budget.amount),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.typoBody,
+                          ),
+                        ),
+                        Text(
+                          'Đã chi ${formatter.format(spentAmount)}',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: AppColors.typoBody,
+                          ),
+                        ),
+                        LinearProgressIndicator(
+                          value: progress.isNaN ? 0 : progress,
+                          backgroundColor: Colors.grey[200],
+                          valueColor: AlwaysStoppedAnimation<Color>(color),
+                          minHeight: 6.h,
+                          borderRadius: BorderRadius.circular(3.r),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               );
@@ -241,30 +252,51 @@ class _BudgetListState extends ConsumerState<BudgetList> {
   }
 }
 
-IconData _iconFromName(String? iconName) {
+IconData _iconFromName(String? categoryName) {
   const fallback = Icons.category;
-  switch (iconName) {
-    case 'fastfood':
-      return Icons.fastfood;
-    case 'shopping_bag':
-      return Icons.shopping_bag;
-    case 'attach_money':
-      return Icons.attach_money;
-    case 'directions_car':
-      return Icons.directions_car;
-    case 'medical_services':
-      return Icons.medical_services;
-    case 'home':
-      return Icons.home;
-    case 'favorite':
-      return Icons.favorite;
-    case 'local_cafe':
-      return Icons.local_cafe;
-    case 'water_drop':
-      return Icons.water_drop;
-    case 'flash_on':
-      return Icons.flash_on;
-    default:
-      return fallback;
+  if (categoryName == null) return fallback;
+
+  final name = categoryName.toLowerCase();
+
+  if (name.contains('ăn') ||
+      name.contains('food') ||
+      name.contains('ăn uống') ||
+      name.contains('meal')) {
+    return Icons.fastfood;
   }
+  if (name.contains('mua sắm') || name.contains('shop') || name.contains('mua')) {
+    return Icons.shopping_bag;
+  }
+  if (name.contains('thu nhập') ||
+      name.contains('lương') ||
+      name.contains('salary') ||
+      name.contains('tiền')) {
+    return Icons.attach_money;
+  }
+  if (name.contains('xe') || name.contains('car') || name.contains('di chuyển')) {
+    return Icons.directions_car;
+  }
+  if (name.contains('sức khỏe') ||
+      name.contains('health') ||
+      name.contains('y tế') ||
+      name.contains('medical')) {
+    return Icons.medical_services;
+  }
+  if (name.contains('nhà') || name.contains('home')) {
+    return Icons.home;
+  }
+  if (name.contains('yêu') || name.contains('love') || name.contains('tình')) {
+    return Icons.favorite;
+  }
+  if (name.contains('cafe') || name.contains('coffee') || name.contains('trà')) {
+    return Icons.local_cafe;
+  }
+  if (name.contains('nước') || name.contains('water')) {
+    return Icons.water_drop;
+  }
+  if (name.contains('điện') || name.contains('electric') || name.contains('power')) {
+    return Icons.flash_on;
+  }
+
+  return fallback;
 }

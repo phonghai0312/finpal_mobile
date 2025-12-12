@@ -8,8 +8,6 @@ import 'package:fridge_to_fork_ai/features/home/data/models/stats_period_model.d
 import 'package:fridge_to_fork_ai/features/home/data/models/user_model.dart'
     show UserModel;
 
-import '../../../suggestions/data/models/insight_model.dart';
-
 class HomeRemoteDataSource {
   Future<UserModel> getUserInfo() async {
     await Future.delayed(const Duration(milliseconds: 250));

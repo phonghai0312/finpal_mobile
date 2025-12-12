@@ -12,7 +12,7 @@ class CreateTransactionState {
   final bool success;
 
   final double? amount;
-  final String? description;
+  final String? title;
   final String? note;
   final String? categoryId;
   final DateTime date;
@@ -24,7 +24,7 @@ class CreateTransactionState {
     this.error,
     this.success = false,
     this.amount,
-    this.description,
+    this.title,
     this.note,
     this.categoryId,
     this.type = "expense",
@@ -38,8 +38,8 @@ class CreateTransactionState {
     bool? success,
     double? amount,
     bool updateAmount = false,
-    String? description,
-    bool updateDescription = false,
+    String? title,
+    bool updateTitle = false,
     String? note,
     bool updateNote = false,
     String? categoryId,
@@ -53,7 +53,7 @@ class CreateTransactionState {
       error: error,
       success: success ?? this.success,
       amount: updateAmount ? amount : this.amount,
-      description: updateDescription ? description : this.description,
+      title: updateTitle ? title : this.title,
       note: updateNote ? note : this.note,
       categoryId: updateCategoryId ? categoryId : this.categoryId,
       type: type ?? this.type,
@@ -66,7 +66,7 @@ class CreateTransactionState {
 class CreateTransactionNotifier extends StateNotifier<CreateTransactionState> {
   final CreateTransaction _createTransaction;
   final TextEditingController amountController = TextEditingController();
-  final TextEditingController descriptionController = TextEditingController();
+  final TextEditingController titleController = TextEditingController();
   final TextEditingController noteController = TextEditingController();
 
   CreateTransactionNotifier(this._createTransaction)
@@ -78,14 +78,14 @@ class CreateTransactionNotifier extends StateNotifier<CreateTransactionState> {
 
   void _initControllers() {
     amountController.text = state.amount?.toString() ?? '';
-    descriptionController.text = state.description ?? '';
+    titleController.text = state.title ?? '';
     noteController.text = state.note ?? '';
 
     amountController.addListener(() {
       setAmount(amountController.text);
     });
-    descriptionController.addListener(() {
-      setDescription(descriptionController.text);
+    titleController.addListener(() {
+      setTitle(titleController.text);
     });
     noteController.addListener(() {
       setNote(noteController.text);
@@ -95,7 +95,7 @@ class CreateTransactionNotifier extends StateNotifier<CreateTransactionState> {
   @override
   void dispose() {
     amountController.dispose();
-    descriptionController.dispose();
+    titleController.dispose();
     noteController.dispose();
     super.dispose();
   }
@@ -111,10 +111,10 @@ class CreateTransactionNotifier extends StateNotifier<CreateTransactionState> {
     );
   }
 
-  void setDescription(String value) {
+  void setTitle(String value) {
     state = state.copyWith(
-      description: value,
-      updateDescription: true,
+      title: value,
+      updateTitle: true,
     );
   }
 
@@ -126,6 +126,7 @@ class CreateTransactionNotifier extends StateNotifier<CreateTransactionState> {
   }
 
   void setCategory(String id) {
+    if (id.isEmpty) return; // Ensure id is not empty
     state = state.copyWith(
       categoryId: id,
       updateCategoryId: true,
@@ -166,9 +167,9 @@ class CreateTransactionNotifier extends StateNotifier<CreateTransactionState> {
 
       await _createTransaction(
         amount: state.amount!,
-        categoryId: state.categoryId!,
+        categoryId: state.categoryId!, // categoryId is guaranteed to be non-null and non-empty from validation above
         type: state.type,
-        description: state.description ?? "",
+        title: state.title ?? "",
         note: state.note ?? "",
         occurredAt: occurredAt,
       );
