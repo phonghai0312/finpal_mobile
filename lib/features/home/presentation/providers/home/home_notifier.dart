@@ -4,7 +4,6 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fridge_to_fork_ai/core/presentation/theme/app_colors.dart';
-import 'package:fridge_to_fork_ai/features/home/domain/usecases/get_lastest_suggestion.dart';
 import 'package:fridge_to_fork_ai/features/home/domain/usecases/get_stats_by_category.dart';
 import 'package:fridge_to_fork_ai/features/home/domain/usecases/get_stats_overview.dart';
 import 'package:fridge_to_fork_ai/features/home/domain/usecases/get_user_info.dart';

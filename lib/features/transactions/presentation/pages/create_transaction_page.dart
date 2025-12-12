@@ -31,6 +31,7 @@ class CreateTransactionPageState extends ConsumerState<CreateTransactionPage> {
     final categoryNotifier = ref.read(categoryNotifierProvider.notifier);
 
     return Scaffold(
+      backgroundColor: Colors.grey.shade50,
       appBar: HeaderWithBack(
         title: 'Tạo giao dịch mới',
         onBack: () => notifier.onBack(context),
@@ -51,24 +52,25 @@ class CreateTransactionPageState extends ConsumerState<CreateTransactionPage> {
             SizedBox(height: 24.h),
 
             /// ========================
-            /// THÔNG TIN CHÍNH
+            /// THÔNG TIN CHÍNH (Số tiền, mô tả, ngày giờ)
             /// ========================
-            _sectionTitle("Thông tin chính"),
-            SizedBox(height: 12.h),
-
-            _inputField(
+            _labeledInputField(
               label: "Số tiền",
               controller: notifier.amountController,
               keyboardType: TextInputType.number,
+              hintText: "Nhập số tiền",
             ),
             SizedBox(height: 16.h),
 
-            _inputField(
-              label: "Tiêu đề",
+            _labeledInputField(
+              label: "Mô tả",
               controller: notifier.titleController,
+              hintText: "Nhập mô tả",
             ),
 
             SizedBox(height: 16.h),
+            _sectionTitle("Ngày giờ"),
+            SizedBox(height: 8.h),
             _dateTimeRow(context, state, notifier),
 
             SizedBox(height: 28.h),
@@ -90,13 +92,11 @@ class CreateTransactionPageState extends ConsumerState<CreateTransactionPage> {
             /// ========================
             /// GHI CHÚ
             /// ========================
-            _sectionTitle("Ghi chú"),
-            SizedBox(height: 12.h),
-
-            _inputField(
+            _labeledInputField(
               label: "Ghi chú (không bắt buộc)",
               controller: notifier.noteController,
               maxLines: 3,
+              hintText: "Nhập ghi chú",
             ),
 
             SizedBox(height: 28.h),
@@ -204,20 +204,48 @@ class CreateTransactionPageState extends ConsumerState<CreateTransactionPage> {
   // ============================================================
   // INPUT FIELD
   // ============================================================
-  Widget _inputField({
+  Widget _labeledInputField({
     required String label,
     required TextEditingController controller,
     int maxLines = 1,
     TextInputType? keyboardType,
+    String? hintText,
   }) {
-    return TextField(
-      controller: controller,
-      maxLines: maxLines,
-      keyboardType: keyboardType,
-      decoration: InputDecoration(
-        labelText: label,
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12.r)),
-      ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 13.sp,
+            fontWeight: FontWeight.w600,
+            color: AppColors.typoBlack,
+          ),
+        ),
+        SizedBox(height: 6.h),
+        TextField(
+          controller: controller,
+          maxLines: maxLines,
+          keyboardType: keyboardType,
+          decoration: InputDecoration(
+            hintText: hintText,
+            filled: true,
+            fillColor: Colors.white,
+            contentPadding:
+                EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
+            border:
+                OutlineInputBorder(borderRadius: BorderRadius.circular(12.r)),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12.r),
+              borderSide: BorderSide(color: Colors.grey.shade300),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12.r),
+              borderSide: BorderSide(color: AppColors.primaryGreen),
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -243,7 +271,6 @@ class CreateTransactionPageState extends ConsumerState<CreateTransactionPage> {
               if (picked != null) notifier.setDate(picked);
             },
             child: _readonlyBox(
-              "Ngày",
               DateFormat('dd/MM/yyyy').format(state.date),
             ),
           ),
@@ -258,30 +285,24 @@ class CreateTransactionPageState extends ConsumerState<CreateTransactionPage> {
               );
               if (picked != null) notifier.setTime(picked);
             },
-            child: _readonlyBox("Giờ", state.time.format(context)),
+            child: _readonlyBox(state.time.format(context)),
           ),
         ),
       ],
     );
   }
 
-  Widget _readonlyBox(String label, String value) {
+  Widget _readonlyBox(String value) {
     return Container(
-      padding: EdgeInsets.all(14.w),
+      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 14.h),
       decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey.shade400),
+        color: Colors.white,
+        border: Border.all(color: Colors.grey.shade300),
         borderRadius: BorderRadius.circular(12.r),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            label,
-            style: TextStyle(fontSize: 12.sp, color: Colors.grey.shade600),
-          ),
-          SizedBox(height: 4.h),
-          Text(value, style: TextStyle(fontSize: 14.sp)),
-        ],
+      child: Text(
+        value,
+        style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w500),
       ),
     );
   }
@@ -433,10 +454,32 @@ class CreateTransactionPageState extends ConsumerState<CreateTransactionPage> {
         color: Colors.yellow.shade100,
         borderRadius: BorderRadius.circular(12.r),
       ),
-      child: const Text(
-        "✨ Áp dụng quy tắc tự động\n"
-        "Tự động phân loại các giao dịch tương tự vào danh mục này trong tương lai.",
-        style: TextStyle(fontSize: 18),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Icon(Icons.auto_awesome, color: Colors.orange),
+          SizedBox(width: 8.w),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "Áp dụng quy tắc tự động",
+                  style: TextStyle(
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.typoBlack,
+                  ),
+                ),
+                SizedBox(height: 6.h),
+                Text(
+                  "Tự động phân loại các giao dịch tương tự vào danh mục này trong tương lai.",
+                  style: TextStyle(fontSize: 13.sp),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -449,9 +492,10 @@ class CreateTransactionPageState extends ConsumerState<CreateTransactionPage> {
     CreateTransactionNotifier notifier,
     CreateTransactionState state,
   ) {
-    return Row(
+    return Column(
       children: [
-        Expanded(
+        SizedBox(
+          width: double.infinity,
           child: Button(
             text: "Lưu thay đổi",
             onPressed: state.isLoading ? null : () => notifier.submit(context),
@@ -459,12 +503,27 @@ class CreateTransactionPageState extends ConsumerState<CreateTransactionPage> {
             textColor: AppColors.typoWhite,
           ),
         ),
-        SizedBox(width: 16.w),
-        Expanded(
-          child: Button(
-            text: "Hủy",
-            color: AppColors.bgDisable,
+        SizedBox(height: 12.h),
+        SizedBox(
+          width: double.infinity,
+          child: OutlinedButton(
             onPressed: () => context.go(AppRoutes.transactions),
+            style: OutlinedButton.styleFrom(
+              side: BorderSide(color: Colors.grey.shade400),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16.r),
+              ),
+              padding: EdgeInsets.symmetric(vertical: 14.h),
+              backgroundColor: Colors.white,
+            ),
+            child: Text(
+              "Hủy",
+              style: TextStyle(
+                fontSize: 16.sp,
+                fontWeight: FontWeight.w600,
+                color: AppColors.typoBlack,
+              ),
+            ),
           ),
         ),
       ],

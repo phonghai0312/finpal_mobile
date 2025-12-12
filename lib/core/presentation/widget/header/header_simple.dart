@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:heroicons/heroicons.dart';
 
 import '../../../../../core/presentation/theme/app_colors.dart';
 
@@ -16,33 +15,17 @@ class HeaderSimple extends StatelessWidget implements PreferredSizeWidget {
     return AppBar(
       elevation: 0,
       automaticallyImplyLeading: false,
+      centerTitle: true,
       backgroundColor: AppColors.typoWhite,
       // Title
       title: Text(
         title,
         style: GoogleFonts.poppins(
           fontSize: 18.sp,
-          fontWeight: FontWeight.w600,
+          fontWeight: FontWeight.bold,
           color: AppColors.typoBlack,
         ),
       ),
-
-      // More icon
-      actions: [
-        InkWell(
-          borderRadius: BorderRadius.circular(50.r),
-          onTap: onMore,
-          child: Padding(
-            padding: EdgeInsets.all(10.w),
-            child: const HeroIcon(
-              HeroIcons.ellipsisVertical,
-              style: HeroIconStyle.solid,
-              color: AppColors.typoBody,
-              size: 22,
-            ),
-          ),
-        ),
-      ],
     );
   }
 

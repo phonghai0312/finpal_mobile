@@ -28,7 +28,7 @@ class HeaderWithBack extends StatelessWidget implements PreferredSizeWidget {
         title,
         style: GoogleFonts.poppins(
           fontSize: 18.sp,
-          fontWeight: FontWeight.w600,
+          fontWeight: FontWeight.bold,
           color: AppColors.typoBlack,
         ),
       ),
@@ -47,23 +47,6 @@ class HeaderWithBack extends StatelessWidget implements PreferredSizeWidget {
           ),
         ),
       ),
-
-      // More icon
-      actions: [
-        InkWell(
-          borderRadius: BorderRadius.circular(50.r),
-          onTap: onMore,
-          child: Padding(
-            padding: EdgeInsets.all(10.w),
-            child: const HeroIcon(
-              HeroIcons.ellipsisVertical,
-              style: HeroIconStyle.solid,
-              color: AppColors.typoBody,
-              size: 22,
-            ),
-          ),
-        ),
-      ],
     );
   }
 
