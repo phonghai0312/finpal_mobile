@@ -12,12 +12,12 @@ import '../../../domain/usecase/register_account.dart';
 class RegisterState {
   final TextEditingController usernameController;
   final TextEditingController emailController;
-  final TextEditingController phoneController;
   final TextEditingController passwordController;
   final TextEditingController confirmPasswordController;
+  final TextEditingController bankNumberController;
+  final TextEditingController bankNameController;
 
   final bool hasEmailError;
-  final bool hasPhoneError;
   final bool hasPasswordError;
   final bool hasConfirmPasswordError;
   final bool isValid;
@@ -27,11 +27,11 @@ class RegisterState {
   const RegisterState({
     required this.usernameController,
     required this.emailController,
-    required this.phoneController,
     required this.passwordController,
     required this.confirmPasswordController,
+    required this.bankNumberController,
+    required this.bankNameController,
     this.hasEmailError = false,
-    this.hasPhoneError = false,
     this.hasPasswordError = false,
     this.hasConfirmPasswordError = false,
     this.isValid = false,
@@ -41,7 +41,6 @@ class RegisterState {
 
   RegisterState copyWith({
     bool? hasEmailError,
-    bool? hasPhoneError,
     bool? hasPasswordError,
     bool? hasConfirmPasswordError,
     bool? isValid,
@@ -51,11 +50,11 @@ class RegisterState {
     return RegisterState(
       usernameController: usernameController,
       emailController: emailController,
-      phoneController: phoneController,
       passwordController: passwordController,
       confirmPasswordController: confirmPasswordController,
+      bankNumberController: bankNumberController,
+      bankNameController: bankNameController,
       hasEmailError: hasEmailError ?? this.hasEmailError,
-      hasPhoneError: hasPhoneError ?? this.hasPhoneError,
       hasPasswordError: hasPasswordError ?? this.hasPasswordError,
       hasConfirmPasswordError:
           hasConfirmPasswordError ?? this.hasConfirmPasswordError,
@@ -75,9 +74,10 @@ class RegisterNotifier extends StateNotifier<RegisterState> {
         RegisterState(
           usernameController: TextEditingController(),
           emailController: TextEditingController(),
-          phoneController: TextEditingController(),
           passwordController: TextEditingController(),
           confirmPasswordController: TextEditingController(),
+          bankNumberController: TextEditingController(),
+          bankNameController: TextEditingController(),
         ),
       ) {
     _addListeners();
@@ -86,7 +86,6 @@ class RegisterNotifier extends StateNotifier<RegisterState> {
   // Add listeners
   void _addListeners() {
     state.emailController.addListener(_validateAll);
-    state.phoneController.addListener(_validateAll);
     state.passwordController.addListener(_validateAll);
     state.confirmPasswordController.addListener(_validateAll);
   }
@@ -119,14 +118,20 @@ class RegisterNotifier extends StateNotifier<RegisterState> {
     _setLoading(true);
 
     final email = state.emailController.text.trim();
-    final phone = state.phoneController.text.trim();
     final password = state.passwordController.text.trim();
+    final bankNumber = state.bankNumberController.text.trim();
+    final bankName = state.bankNameController.text.trim();
 
     try {
-      await _registerUseCase(email, phone, password);
+      await _registerUseCase(
+        email,
+        password,
+        bankNumber: bankNumber.isNotEmpty ? bankNumber : null,
+        bankName: bankName.isNotEmpty ? bankName : null,
+      );
       _setLoading(false);
       ref.read(previousPageProvider.notifier).state = 'register';
-      context.go(AppRoutes.verifyaccount);
+      context.go(AppRoutes.login);
     } catch (e) {
       _handleFailure(context, e);
     }
@@ -163,16 +168,7 @@ class RegisterNotifier extends StateNotifier<RegisterState> {
   // Translate error messages
   String _translateError(String errorMessage) {
     final error = errorMessage.replaceFirst('Exception: ', '').trim();
-    switch (error) {
-      case 'Email already exists':
-        return 'This email is already registered!';
-      case 'Phone number already exists':
-        return 'This phone is already registered!';
-      case 'email must be an email':
-        return 'Invalid email format. Please try again!';
-      default:
-        return 'An unexpected error occurred. Please try again!';
-    }
+    return error;
   }
 
   // Set loading state
@@ -199,9 +195,10 @@ class RegisterNotifier extends StateNotifier<RegisterState> {
   @override
   void dispose() {
     state.emailController.dispose();
-    state.phoneController.dispose();
     state.passwordController.dispose();
     state.confirmPasswordController.dispose();
+    state.bankNumberController.dispose();
+    state.bankNameController.dispose();
     super.dispose();
   }
 }

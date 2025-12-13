@@ -1,4 +1,5 @@
 import 'package:fridge_to_fork_ai/features/auth/data/datasouces/auth_remote_datasouces.dart';
+import 'package:fridge_to_fork_ai/features/auth/domain/entities/fcm_token.dart';
 import 'package:fridge_to_fork_ai/features/auth/domain/entities/register.dart';
 import 'package:fridge_to_fork_ai/features/auth/domain/repositories/auth_repository.dart';
 
@@ -14,8 +15,18 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<Register> register(String email, String phone, String password) async {
-    return remoteDataSource.register(email, phone, password);
+  Future<Register> register(
+    String email,
+    String password, {
+    String? bankNumber,
+    String? bankName,
+  }) async {
+    return remoteDataSource.register(
+      email,
+      password,
+      bankNumber: bankNumber,
+      bankName: bankName,
+    );
   }
 
   @override
@@ -36,5 +47,20 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<void> sendRequest(String username) {
     return remoteDataSource.sendRequest(username);
+  }
+
+  @override
+  Future<FcmToken> registerFcmToken({
+    required String userId,
+    required String deviceId,
+    required String fcmToken,
+    required String platform,
+  }) async {
+    return remoteDataSource.registerFcmToken(
+      userId: userId,
+      deviceId: deviceId,
+      fcmToken: fcmToken,
+      platform: platform,
+    );
   }
 }

@@ -12,7 +12,7 @@ part of 'stats_api.dart';
 
 class _StatsApi implements StatsApi {
   _StatsApi(this._dio, {this.baseUrl, this.errorLogger}) {
-    baseUrl ??= 'https://finpal.id.vn/';
+    baseUrl ??= 'http://localhost:3001/';
   }
 
   final Dio _dio;

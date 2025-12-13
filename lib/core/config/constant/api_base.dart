@@ -2,7 +2,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class ApiBaseDev {
   static const String baseUrlDevelopment =
-      'https://finpal.id.vn/';
+      'http:// 192.168.225.60:3001/';
 }
 
 class ApiBaseProd {

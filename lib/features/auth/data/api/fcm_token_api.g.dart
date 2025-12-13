@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'category_api.dart';
+part of 'fcm_token_api.dart';
 
 // dart format off
 
@@ -10,9 +10,9 @@ part of 'category_api.dart';
 
 // ignore_for_file: unnecessary_brace_in_string_interps,no_leading_underscores_for_local_identifiers,unused_element,unnecessary_string_interpolations,unused_element_parameter,avoid_unused_constructor_parameters,unreachable_from_main
 
-class _CategoryApi implements CategoryApi {
-  _CategoryApi(this._dio, {this.baseUrl, this.errorLogger}) {
-    baseUrl ??= 'http://localhost:3001/';
+class _FcmTokenApi implements FcmTokenApi {
+  _FcmTokenApi(this._dio, {this.baseUrl, this.errorLogger}) {
+    baseUrl ??= 'http://localhost:3002';
   }
 
   final Dio _dio;
@@ -22,31 +22,26 @@ class _CategoryApi implements CategoryApi {
   final ParseErrorLogger? errorLogger;
 
   @override
-  Future<CategoryListResponseModel> getCategories({
-    int page = 1,
-    int pageSize = 20,
-  }) async {
+  Future<FcmTokenModel> registerToken(Map<String, dynamic> body) async {
     final _extra = <String, dynamic>{};
-    final queryParameters = <String, dynamic>{
-      r'page': page,
-      r'pageSize': pageSize,
-    };
+    final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
-    const Map<String, dynamic>? _data = null;
-    final _options = _setStreamType<CategoryListResponseModel>(
-      Options(method: 'GET', headers: _headers, extra: _extra)
+    final _data = <String, dynamic>{};
+    _data.addAll(body);
+    final _options = _setStreamType<FcmTokenModel>(
+      Options(method: 'POST', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
-            '/categories',
+            '/token',
             queryParameters: queryParameters,
             data: _data,
           )
           .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
     );
     final _result = await _dio.fetch<Map<String, dynamic>>(_options);
-    late CategoryListResponseModel _value;
+    late FcmTokenModel _value;
     try {
-      _value = CategoryListResponseModel.fromJson(_result.data!);
+      _value = FcmTokenModel.fromJson(_result.data!);
     } on Object catch (e, s) {
       errorLogger?.logError(e, s, _options, _result);
       rethrow;

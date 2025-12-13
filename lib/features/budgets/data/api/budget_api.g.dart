@@ -12,7 +12,7 @@ part of 'budget_api.dart';
 
 class _BudgetApi implements BudgetApi {
   _BudgetApi(this._dio, {this.baseUrl, this.errorLogger}) {
-    baseUrl ??= 'https://finpal.id.vn/';
+    baseUrl ??= 'http://localhost:3001/';
   }
 
   final Dio _dio;
@@ -42,7 +42,7 @@ class _BudgetApi implements BudgetApi {
       Options(method: 'GET', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
-            '/budgets',
+            '/budgets/spend',
             queryParameters: queryParameters,
             data: _data,
           )

@@ -5,7 +5,17 @@ class RegisterAccount {
   final AuthRepository repository;
   RegisterAccount(this.repository);
 
-  Future<Register> call(String email, String phone, String password) {
-    return repository.register(email, phone, password);
+  Future<Register> call(
+    String email,
+    String password, {
+    String? bankNumber,
+    String? bankName,
+  }) {
+    return repository.register(
+      email,
+      password,
+      bankNumber: bankNumber,
+      bankName: bankName,
+    );
   }
 }

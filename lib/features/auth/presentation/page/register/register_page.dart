@@ -89,6 +89,24 @@ class RegisterPage extends ConsumerWidget {
                 isPassword: true,
                 hasError: state.hasConfirmPasswordError,
               ),
+              16.verticalSpace,
+
+              /// 🔹 Bank Number
+              InputTextField(
+                controller: state.bankNumberController,
+                label: "Số tài khoản ngân hàng",
+                hintText: "Nhập số tài khoản (tùy chọn)",
+                hasError: false,
+              ),
+              16.verticalSpace,
+
+              /// 🔹 Bank Name
+              InputTextField(
+                controller: state.bankNameController,
+                label: "Tên ngân hàng",
+                hintText: "Nhập tên ngân hàng (tùy chọn)",
+                hasError: false,
+              ),
 
               20.verticalSpace,
 
