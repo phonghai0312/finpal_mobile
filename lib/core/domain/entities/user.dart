@@ -6,6 +6,8 @@ class User {
   final String? phone;
   final String? name;
   final String? avatarUrl;
+  final int totalIncome;
+  final int totalExpense;
   final UserSettings? settings;
   final int createdAt;
   final int updatedAt;
@@ -16,6 +18,8 @@ class User {
     this.phone,
     this.name,
     this.avatarUrl,
+    this.totalIncome = 0,
+    this.totalExpense = 0,
     this.settings,
     required this.createdAt,
     required this.updatedAt,
@@ -27,6 +31,8 @@ class User {
     String? phone,
     String? name,
     String? avatarUrl,
+    int? totalIncome,
+    int? totalExpense,
     UserSettings? settings,
     int? createdAt,
     int? updatedAt,
@@ -37,6 +43,8 @@ class User {
       phone: phone ?? this.phone,
       name: name ?? this.name,
       avatarUrl: avatarUrl ?? this.avatarUrl,
+      totalIncome: totalIncome ?? this.totalIncome,
+      totalExpense: totalExpense ?? this.totalExpense,
       settings: settings ?? this.settings,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,

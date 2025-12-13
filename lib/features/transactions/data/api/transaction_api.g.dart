@@ -12,7 +12,7 @@ part of 'transaction_api.dart';
 
 class _TransactionApi implements TransactionApi {
   _TransactionApi(this._dio, {this.baseUrl, this.errorLogger}) {
-    baseUrl ??= 'http://localhost:3001/';
+    baseUrl ??= 'https://finpal.id.vn/';
   }
 
   final Dio _dio;

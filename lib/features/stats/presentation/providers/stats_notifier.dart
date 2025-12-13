@@ -28,8 +28,8 @@ class StatsState {
     this.isRefreshing = false,
     this.overview,
     this.byCategory,
-    this.month = 1,
-    this.year = 2025,
+    required this.month,
+    required this.year,
     this.errorMessage,
   });
 
@@ -64,7 +64,7 @@ class StatsNotifier extends StateNotifier<StatsState> {
     this._getStatsOverview,
     this._getStatsByCategory,
     this._getCategoryTx,
-  ) : super(const StatsState());
+  ) : super(StatsState(month: DateTime.now().month, year: DateTime.now().year));
 
   // ------------------------------
   // INIT

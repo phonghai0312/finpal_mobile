@@ -12,7 +12,7 @@ part of 'auth_api.dart';
 
 class _AuthApi implements AuthApi {
   _AuthApi(this._dio, {this.baseUrl, this.errorLogger}) {
-    baseUrl ??= 'http://localhost:3001/';
+    baseUrl ??= 'https://finpal.id.vn/';
   }
 
   final Dio _dio;

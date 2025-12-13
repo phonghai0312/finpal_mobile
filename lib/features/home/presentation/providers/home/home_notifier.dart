@@ -1,52 +1,70 @@
 // ignore_for_file: use_build_context_synchronously
 
+import 'dart:async';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fridge_to_fork_ai/core/config/routing/app_routes.dart';
+import 'package:fridge_to_fork_ai/core/domain/entities/user.dart';
 import 'package:fridge_to_fork_ai/core/presentation/theme/app_colors.dart';
-import 'package:fridge_to_fork_ai/features/home/domain/usecases/get_stats_by_category.dart';
-import 'package:fridge_to_fork_ai/features/home/domain/usecases/get_stats_overview.dart';
-import 'package:fridge_to_fork_ai/features/home/domain/usecases/get_user_info.dart';
+import 'package:fridge_to_fork_ai/features/budgets/domain/entities/budget.dart';
+import 'package:fridge_to_fork_ai/features/budgets/presentation/providers/budget_notifier.dart';
+import 'package:fridge_to_fork_ai/features/budgets/presentation/providers/budget_provider.dart';
+import 'package:fridge_to_fork_ai/features/profile/presentation/provider/profile/profile_notifier.dart';
+import 'package:fridge_to_fork_ai/features/profile/presentation/provider/profile/profile_provider.dart';
 import 'package:fridge_to_fork_ai/features/stats/domain/entities/stats_by_category.dart'
     show StatsByCategory;
 import 'package:fridge_to_fork_ai/features/stats/domain/entities/stats_overview.dart';
 import 'package:fridge_to_fork_ai/features/suggestions/domain/entities/insight.dart';
+import 'package:fridge_to_fork_ai/features/transactions/domain/entities/transaction.dart';
+import 'package:fridge_to_fork_ai/features/transactions/presentation/provider/transaction/transaction_notifier.dart';
+import 'package:fridge_to_fork_ai/features/transactions/presentation/provider/transaction/transaction_provider.dart';
+import 'package:go_router/go_router.dart';
 
 /// State
 class HomeState {
-  final String userName;
-  final StatsOverview? overview;
-  final StatsByCategory? statsByCategory;
-  final Insight? suggestion;
+  final User? user;
+
+  /// Derived values (UI dùng trực tiếp)
+  final int totalIncome;
+  final int totalExpense;
+
+  final List<Budget> budgets;
+  final List<Transaction> recentTransactions;
+
   final bool isLoading;
   final bool isRefreshing;
   final String? errorMessage;
 
   const HomeState({
-    this.userName = '',
-    this.overview,
-    this.statsByCategory,
-    this.suggestion,
+    this.user,
+    this.totalIncome = 0,
+    this.totalExpense = 0,
+    this.budgets = const [],
+    this.recentTransactions = const [],
     this.isLoading = false,
     this.isRefreshing = false,
     this.errorMessage,
   });
 
   HomeState copyWith({
-    String? userName,
-    StatsOverview? overview,
-    StatsByCategory? statsByCategory,
-    Insight? suggestion,
+    User? user,
+    int? totalIncome,
+    int? totalExpense,
+    List<Budget>? budgets,
+    List<Transaction>? recentTransactions,
     bool? isLoading,
     bool? isRefreshing,
     String? errorMessage,
-    bool clearSuggestion = false,
+    bool clearUser = false,
   }) {
     return HomeState(
-      userName: userName ?? this.userName,
-      overview: overview ?? this.overview,
-      statsByCategory: statsByCategory ?? this.statsByCategory,
-      suggestion: clearSuggestion ? null : (suggestion ?? this.suggestion),
+      user: clearUser ? null : (user ?? this.user),
+      totalIncome: totalIncome ?? this.totalIncome,
+      totalExpense: totalExpense ?? this.totalExpense,
+      budgets: budgets ?? this.budgets,
+      recentTransactions: recentTransactions ?? this.recentTransactions,
       isLoading: isLoading ?? this.isLoading,
       isRefreshing: isRefreshing ?? this.isRefreshing,
       errorMessage: errorMessage,
@@ -55,88 +73,90 @@ class HomeState {
 }
 
 class HomeNotifier extends StateNotifier<HomeState> {
-  final GetStatsOverviewUseCase _getStatsOverview;
-  final GetStatsByCategoryUseCase _getStatsByCategory;
-  //final GetLatestSuggestionUseCase _getLatestSuggestion;
-  final GetUserInfo _getUserInfo;
   final Ref ref;
+  Timer? _debounce;
 
-  HomeNotifier(
-    this.ref,
-    this._getStatsOverview,
-    this._getStatsByCategory,
-    //this._getLatestSuggestion,
-    this._getUserInfo,
-  ) : super(const HomeState());
+  HomeNotifier(this.ref) : super(const HomeState()) {
+    _bindListeners();
+  }
 
-  /// INIT
+  @override
+  void dispose() {
+    _debounce?.cancel();
+    super.dispose();
+  }
+
+  /// --------------------------------
+  /// INIT – gọi khi HomePage mở
+  /// --------------------------------
   Future<void> init(BuildContext context) async {
     if (state.isLoading) return;
-    await _loadData(context, showLoading: true);
+
+    state = state.copyWith(isLoading: true);
+
+    // đảm bảo các notifier khác đã có data
+    ref.read(profileNotifierProvider.notifier).init(context);
+    ref.read(budgetNotifierProvider.notifier).fetchBudgets();
+    ref.read(transactionNotifierProvider.notifier).init(context);
+
+    state = state.copyWith(isLoading: false);
   }
 
-  /// REFRESH
+  /// --------------------------------
+  /// PULL TO REFRESH
+  /// --------------------------------
   Future<void> onRefresh(BuildContext context) async {
-    await _loadData(context, showLoading: false);
+    state = state.copyWith(isRefreshing: true);
+
+    await Future.wait([
+      ref.read(profileNotifierProvider.notifier).fetchProfile(context),
+      ref.read(budgetNotifierProvider.notifier).fetchBudgets(),
+      ref.read(transactionNotifierProvider.notifier).refresh(context),
+    ]);
+
+    state = state.copyWith(isRefreshing: false);
   }
 
-  /// HANDLE LOAD ALL HOME DATA
-  Future<void> _loadData(
-    BuildContext context, {
-    bool showLoading = true,
-  }) async {
-    try {
-      state = state.copyWith(
-        isLoading: showLoading,
-        isRefreshing: !showLoading,
-        errorMessage: null,
-      );
-
-      final overview = await _getStatsOverview();
-      final stats = await _getStatsByCategory();
-      //final suggestion = await _getLatestSuggestion();
-      final user = await _getUserInfo();
+  /// --------------------------------
+  /// LISTENERS – SYNC DATA
+  /// --------------------------------
+  void _bindListeners() {
+    /// USER → income / expense
+    ref.listen<ProfileState>(profileNotifierProvider, (_, next) {
+      final user = next.user;
+      if (user == null) return;
 
       state = state.copyWith(
-        overview: overview,
-        statsByCategory: stats,
-        //suggestion: suggestion,
-        userName: user.name,
-        isLoading: false,
-        isRefreshing: false,
+        user: user,
+        totalIncome: user.totalIncome,
+        totalExpense: user.totalExpense,
       );
-    } catch (e) {
-      _handleError(context, e);
-    }
+    });
+
+    /// BUDGETS
+    ref.listen<BudgetState>(budgetNotifierProvider, (_, next) {
+      state = state.copyWith(budgets: next.budgets);
+    });
+
+    /// TRANSACTIONS → recent
+    ref.listen<TransactionState>(transactionNotifierProvider, (_, next) {
+      final recent = next.all.take(5).toList();
+      state = state.copyWith(recentTransactions: recent);
+    });
   }
 
-  /// HANDLE ERROR
-  void _handleError(BuildContext context, Object error) {
-    String message = 'Unknown error';
+  /// --------------------------------
+  /// NAVIGATION (UI actions)
 
-    if (error is DioException) {
-      final data = error.response?.data;
-      if (data is Map<String, dynamic>) {
-        message = data['message'] ?? message;
-      } else {
-        message = error.message ?? message;
-      }
-    } else {
-      message = error.toString();
-    }
+  void onPressViewAllTransactions(BuildContext context) {
+    context.go(AppRoutes.transactions);
+  }
 
-    state = state.copyWith(
-      isLoading: false,
-      isRefreshing: false,
-      errorMessage: message,
-    );
+  void onPressBudgets(BuildContext context) {
+    context.go(AppRoutes.budgetDetail);
+  }
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: AppColors.typoError,
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
+  void onButtonSeeAllBudgets(BuildContext context) {
+    context.go(AppRoutes.budgetForm);
   }
 }

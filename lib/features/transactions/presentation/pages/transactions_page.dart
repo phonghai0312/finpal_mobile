@@ -90,45 +90,60 @@ class TransactionsPageState extends ConsumerState<TransactionsPage> {
     required double amount,
     required bool isIncome,
   }) {
-    final color = isIncome ? AppColors.lightGreen : AppColors.lightRed;
-    final arrowColor = isIncome ? AppColors.darkGreen : AppColors.darkRed;
+    final bgColor = isIncome ? AppColors.lightGreen : AppColors.lightRed;
+    final textColor = isIncome ? AppColors.darkGreen : AppColors.darkRed;
+
+    final amountText = NumberFormat.currency(
+      locale: 'vi_VN',
+      symbol: '₫',
+    ).format(amount);
 
     return Expanded(
       child: Container(
-        padding: EdgeInsets.all(16.w),
+        padding: EdgeInsets.all(14.w),
         decoration: BoxDecoration(
-          color: color,
+          color: bgColor,
           borderRadius: BorderRadius.circular(16.r),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            /// LABEL
             Text(
               label,
               style: TextStyle(
                 fontSize: 13.sp,
-                color: arrowColor,
+                color: textColor,
                 fontWeight: FontWeight.w600,
               ),
             ),
-            SizedBox(height: 4.h),
+
+            SizedBox(height: 6.h),
+
+            /// ICON + AMOUNT (ANTI OVERFLOW)
             Row(
               children: [
                 Icon(
                   isIncome ? Icons.arrow_downward : Icons.arrow_upward,
                   size: 16.sp,
-                  color: arrowColor,
+                  color: textColor,
                 ),
-                SizedBox(width: 4.w),
-                Text(
-                  NumberFormat.currency(
-                    locale: 'vi_VN',
-                    symbol: '₫',
-                  ).format(amount),
-                  style: TextStyle(
-                    fontSize: 16.sp,
-                    fontWeight: FontWeight.bold,
-                    color: arrowColor,
+
+                SizedBox(width: 6.w),
+
+                /// 👇 FIX QUAN TRỌNG Ở ĐÂY
+                Expanded(
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      amountText,
+                      style: TextStyle(
+                        fontSize: 16.sp,
+                        fontWeight: FontWeight.bold,
+                        color: textColor,
+                      ),
+                    ),
                   ),
                 ),
               ],
@@ -398,70 +413,92 @@ class TransactionsPageState extends ConsumerState<TransactionsPage> {
       "dd/MM/yyyy, HH:mm",
     ).format(DateTime.fromMillisecondsSinceEpoch(tx.occurredAt));
 
-    return InkWell(
-      borderRadius: BorderRadius.circular(14.r),
-      onTap: () => notifier.onTransactionSelected(context, tx),
-      child: Container(
-        padding: EdgeInsets.all(14.w),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16.r),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black12,
-              blurRadius: 5.r,
-              offset: const Offset(0, 3),
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            CircleAvatar(
-              radius: 20.r,
-              backgroundColor: bgColor,
-              child: Icon(
-                isIncome ? Icons.arrow_downward : Icons.arrow_upward,
-                color: arrowColor,
-                size: 20.sp,
+    final amountText =
+        "${isIncome ? '+' : '-'}${NumberFormat.currency(locale: 'vi_VN', symbol: '₫').format(tx.amount)}";
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(14.r),
+        onTap: () => notifier.onTransactionSelected(context, tx),
+        child: Container(
+          padding: EdgeInsets.all(14.w),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16.r),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black12,
+                blurRadius: 5.r,
+                offset: const Offset(0, 3),
               ),
-            ),
+            ],
+          ),
+          child: Row(
+            children: [
+              /// ICON
+              CircleAvatar(
+                radius: 20.r,
+                backgroundColor: bgColor,
+                child: Icon(
+                  isIncome ? Icons.arrow_downward : Icons.arrow_upward,
+                  color: arrowColor,
+                  size: 20.sp,
+                ),
+              ),
 
-            SizedBox(width: 12.w),
+              SizedBox(width: 12.w),
 
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    tx.normalized.title ?? tx.userNote ?? "Không có tiêu đề",
+              /// TITLE + META
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      tx.normalized.title ?? tx.userNote ?? "Không có tiêu đề",
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 14.sp,
+                      ),
+                    ),
+                    SizedBox(height: 4.h),
+                    Text(
+                      "${tx.categoryName ?? 'Không xác định'} • $dateString",
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 12.sp,
+                        color: Colors.grey.shade600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              SizedBox(width: 8.w),
+
+              /// 💰 AMOUNT – KHÔNG BAO GIỜ TRÀN
+              ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxWidth: 110.w, // 👈 GIỚI HẠN RỘNG
+                ),
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerRight,
+                  child: Text(
+                    amountText,
                     style: TextStyle(
-                      fontWeight: FontWeight.w600,
                       fontSize: 14.sp,
+                      fontWeight: FontWeight.bold,
+                      color: arrowColor,
                     ),
                   ),
-                  SizedBox(height: 4.h),
-                  Text(
-                    "${tx.categoryName ?? 'Không xác định'} • $dateString",
-                    style: TextStyle(
-                      fontSize: 12.sp,
-                      color: Colors.grey.shade600,
-                    ),
-                  ),
-                ],
+                ),
               ),
-            ),
-
-            SizedBox(width: 8.w),
-
-            Text(
-              "${isIncome ? '+' : '-'}${NumberFormat.currency(locale: 'vi_VN', symbol: '₫').format(tx.amount)}",
-              style: TextStyle(
-                fontSize: 14.sp,
-                fontWeight: FontWeight.bold,
-                color: arrowColor,
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

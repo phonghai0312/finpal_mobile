@@ -12,7 +12,7 @@ part of 'category_api.dart';
 
 class _CategoryApi implements CategoryApi {
   _CategoryApi(this._dio, {this.baseUrl, this.errorLogger}) {
-    baseUrl ??= 'http://localhost:3001/';
+    baseUrl ??= 'https://finpal.id.vn/';
   }
 
   final Dio _dio;
