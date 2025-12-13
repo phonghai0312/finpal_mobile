@@ -3,20 +3,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:fridge_to_fork_ai/features/home/presentation/widgets/actions_button.dart';
-import 'package:fridge_to_fork_ai/features/budgets/presentation/providers/budget_provider.dart';
-import 'package:fridge_to_fork_ai/features/home/presentation/widgets/budget/budget_list.dart';
-import 'package:fridge_to_fork_ai/features/profile/presentation/provider/profile/profile_provider.dart';
-import 'package:fridge_to_fork_ai/features/stats/presentation/providers/stats_provider.dart';
-import 'package:fridge_to_fork_ai/features/stats/domain/entities/stats_overview.dart';
+import 'package:intl/intl.dart';
 import 'package:go_router/go_router.dart';
-import 'package:fridge_to_fork_ai/core/config/routing/app_routes.dart';
 
-import '../providers/home/home_provider.dart';
-import '../widgets/home_header.dart';
-import '../widgets/suggestion_card.dart';
-import 'package:fridge_to_fork_ai/features/budgets/presentation/providers/budget_form_notifier.dart';
-import 'package:fridge_to_fork_ai/features/budgets/presentation/providers/budget_detail_notifier.dart';
+import 'package:fridge_to_fork_ai/core/config/routing/app_routes.dart';
+import 'package:fridge_to_fork_ai/core/presentation/theme/app_colors.dart';
+import 'package:fridge_to_fork_ai/features/home/presentation/providers/home/home_provider.dart';
+import 'package:fridge_to_fork_ai/features/home/presentation/widgets/home_header.dart';
+import 'package:fridge_to_fork_ai/features/home/presentation/widgets/budget/budget_list.dart';
+import 'package:fridge_to_fork_ai/features/transactions/domain/entities/transaction.dart';
 
 class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
@@ -26,47 +21,29 @@ class HomePage extends ConsumerStatefulWidget {
 }
 
 class _HomePageState extends ConsumerState<HomePage> {
+  bool _initialized = false;
+
   @override
-  void initState() {
-    super.initState();
-    Future.microtask(() {
-      ref.read(homeNotifierProvider.notifier).init(context);
-      ref.read(budgetNotifierProvider.notifier).fetchBudgets();
-    });
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_initialized) {
+      _initialized = true;
+      Future.microtask(
+        () => ref.read(homeNotifierProvider.notifier).init(context),
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    // Lấy dữ liệu thực từ stats và profile
-    final StatsOverview? statsOverview =
-        ref.watch(statsNotifierProvider).overview;
-    final profileState = ref.watch(profileNotifierProvider);
     final state = ref.watch(homeNotifierProvider);
-
-    ref.listen<BudgetFormState>(budgetFormNotifierProvider, (previous, next) {
-      if (next.isSuccess && !previous!.isSuccess) {
-        ref.read(budgetNotifierProvider.notifier).fetchBudgets();
-      }
-    });
-
-    // Lắng nghe detail delete (budgetDetailNotifierProvider không phải family)
-    ref.listen<BudgetDetailState>(
-      budgetDetailNotifierProvider,
-      (previous, next) {
-        if (next.budget == null &&
-            previous?.budget != null &&
-            !next.isLoading) {
-          // A budget was deleted, refresh the list
-          ref.read(budgetNotifierProvider.notifier).fetchBudgets();
-        }
-      },
-    );
 
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
         top: false,
         child: RefreshIndicator(
+          color: AppColors.primaryGreen,
           onRefresh: () =>
               ref.read(homeNotifierProvider.notifier).onRefresh(context),
           child: SingleChildScrollView(
@@ -74,78 +51,98 @@ class _HomePageState extends ConsumerState<HomePage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                /// 🔥 HEADER FULL WIDTH — KHÔNG padding
+                /// ================= HEADER =================
                 HomeHeader(
-                  userName: profileState.user?.name ?? state.userName,
-                  totalIncomeText:
-                      "+${statsOverview?.totalIncome.toStringAsFixed(0) ?? '0'}đ",
-                  totalExpenseText:
-                      "-${statsOverview?.totalExpense.toStringAsFixed(0) ?? '0'}đ",
+                  userName: state.user?.name ?? '',
+                  totalIncomeText: "+${_formatMoney(state.totalIncome)}",
+                  totalExpenseText: "-${_formatMoney(state.totalExpense)}",
                   onNotificationTap: () {},
                 ),
 
-                /// 🔥 Padding chỉ áp dụng cho các phần bên dưới
                 Padding(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: 16.w,
-                    vertical: 8.h,
-                  ),
+                  padding: EdgeInsets.symmetric(horizontal: 16.w),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      8.verticalSpace,
+                      16.verticalSpace,
 
-                      /// 2 nút chức năng (thu gọn khoảng cách)
-                      Container(
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(14.r),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.04),
-                              blurRadius: 8,
-                              offset: const Offset(0, 4),
-                            ),
-                          ],
+                      /// ================= NGÂN SÁCH =================
+                      Text(
+                        "Ngân sách",
+                        style: TextStyle(
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.w700,
                         ),
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 12.w,
-                          vertical: 10.h,
-                        ),
-                        child: ActionButtons(
-                          onAddCategory: () =>
-                              context.push(AppRoutes.createTransaction),
-                        ),
-                      ),
-                      10.verticalSpace,
-
-                      /// Biểu đồ chi tiêu (đặt trong thẻ gọn hơn)
-                      Container(
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(14.r),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.04),
-                              blurRadius: 8,
-                              offset: const Offset(0, 4),
-                            ),
-                          ],
-                        ),
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 10.w,
-                          vertical: 10.h,
-                        ),
-                        child: const BudgetList(), // Fetches real data from API
                       ),
                       12.verticalSpace,
 
-                      /// Gợi ý thông minh
-                      SuggestionCard(
-                        title: state.suggestion?.title,
-                        message: state.suggestion?.message,
+                      const BudgetList(),
+
+                      16.verticalSpace,
+
+                      /// ================= HẠN MỨC =================
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.bgDarkGreen,
+                            padding: EdgeInsets.symmetric(vertical: 14.h),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14.r),
+                            ),
+                          ),
+                          onPressed: () => ref
+                              .read(homeNotifierProvider.notifier)
+                              .onButtonSeeAllBudgets(context),
+                          child: Text(
+                            "Hạn mức chi tiêu",
+                            style: TextStyle(
+                              fontSize: 14.sp,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
                       ),
-                      20.verticalSpace,
+
+                      24.verticalSpace,
+
+                      /// ================= CHI TIÊU GẦN ĐÂY =================
+                      Text(
+                        "Chi tiêu gần đây",
+                        style: TextStyle(
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      12.verticalSpace,
+
+                      if (state.recentTransactions.isEmpty)
+                        Padding(
+                          padding: EdgeInsets.symmetric(vertical: 24.h),
+                          child: Center(
+                            child: Text(
+                              "Chưa có giao dịch nào",
+                              style: TextStyle(
+                                fontSize: 13.sp,
+                                color: Colors.grey,
+                              ),
+                            ),
+                          ),
+                        )
+                      else
+                        ListView.separated(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: state.recentTransactions.length,
+                          separatorBuilder: (_, __) => SizedBox(height: 12.h),
+                          itemBuilder: (context, index) {
+                            final tx = state.recentTransactions[index];
+                            return _recentTransactionItem(context, tx);
+                          },
+                        ),
+
+                      24.verticalSpace,
                     ],
                   ),
                 ),
@@ -155,5 +152,90 @@ class _HomePageState extends ConsumerState<HomePage> {
         ),
       ),
     );
+  }
+
+  // ======================================================
+  // TRANSACTION ITEM – STYLE GIỐNG TransactionsPage
+  // ======================================================
+
+  Widget _recentTransactionItem(BuildContext context, Transaction tx) {
+    final isIncome = tx.type == "income";
+    final arrowColor = isIncome ? AppColors.darkGreen : AppColors.darkRed;
+    final bgColor = isIncome ? AppColors.lightGreen : AppColors.lightRed;
+
+    final dateString = DateFormat(
+      "dd/MM/yyyy, HH:mm",
+    ).format(DateTime.fromMillisecondsSinceEpoch(tx.occurredAt));
+
+    return InkWell(
+      borderRadius: BorderRadius.circular(16.r),
+      child: Container(
+        padding: EdgeInsets.all(14.w),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16.r),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black12,
+              blurRadius: 6.r,
+              offset: const Offset(0, 3),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            CircleAvatar(
+              radius: 20.r,
+              backgroundColor: bgColor,
+              child: Icon(
+                isIncome ? Icons.arrow_downward : Icons.arrow_upward,
+                color: arrowColor,
+                size: 20.sp,
+              ),
+            ),
+
+            SizedBox(width: 12.w),
+
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    tx.normalized.title ?? tx.userNote ?? "Không có tiêu đề",
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14.sp,
+                    ),
+                  ),
+                  SizedBox(height: 4.h),
+                  Text(
+                    "${tx.categoryName ?? 'Không xác định'} • $dateString",
+                    style: TextStyle(
+                      fontSize: 12.sp,
+                      color: Colors.grey.shade600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            SizedBox(width: 8.w),
+
+            Text(
+              "${isIncome ? '+' : '-'}${_formatMoney(tx.amount)}",
+              style: TextStyle(
+                fontSize: 14.sp,
+                fontWeight: FontWeight.bold,
+                color: arrowColor,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _formatMoney(num value) {
+    return NumberFormat.currency(locale: 'vi_VN', symbol: '₫').format(value);
   }
 }

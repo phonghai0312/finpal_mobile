@@ -3,16 +3,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:fridge_to_fork_ai/core/presentation/theme/app_colors.dart';
-import 'package:fridge_to_fork_ai/features/budgets/domain/entities/budget.dart';
-import 'package:fridge_to_fork_ai/features/budgets/presentation/providers/budget_provider.dart';
-import 'package:fridge_to_fork_ai/features/budgets/presentation/providers/budget_detail_notifier.dart';
+import 'package:fridge_to_fork_ai/core/config/routing/app_routes.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
+import '../../../../core/presentation/theme/app_colors.dart';
+import '../../../../core/presentation/widget/header/header_with_back.dart';
+import '../../domain/entities/budget.dart';
+import '../providers/budget_provider.dart';
+import '../providers/budget_detail_notifier.dart';
+
 class BudgetDetailPage extends ConsumerStatefulWidget {
   final String budgetId;
-
   const BudgetDetailPage({super.key, required this.budgetId});
 
   @override
@@ -23,7 +25,6 @@ class _BudgetDetailPageState extends ConsumerState<BudgetDetailPage> {
   @override
   void initState() {
     super.initState();
-    // Set selected budget ID vào provider khi page được khởi tạo
     Future.microtask(() {
       ref.read(selectedBudgetIdProvider.notifier).state = widget.budgetId;
     });
@@ -31,70 +32,60 @@ class _BudgetDetailPageState extends ConsumerState<BudgetDetailPage> {
 
   @override
   void dispose() {
-    // Clear selected budget ID khi page bị dispose
     ref.read(selectedBudgetIdProvider.notifier).state = null;
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final budgetDetailState = ref.watch(budgetDetailNotifierProvider);
+    final state = ref.watch(budgetDetailNotifierProvider);
     final notifier = ref.read(budgetDetailNotifierProvider.notifier);
 
     return Scaffold(
       backgroundColor: AppColors.bgSecondary,
-      appBar: AppBar(
-        title: const Text('Chi tiết ngân sách'),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios),
-          onPressed: () => context.pop(),
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.edit),
-            onPressed: budgetDetailState.budget == null
-                ? null
-                : () => notifier.goToEdit(context),
-          ),
-          IconButton(
-            icon: const Icon(Icons.delete),
-            onPressed: budgetDetailState.budget == null
-                ? null
-                : () => _confirmDelete(context, notifier),
-          ),
-        ],
-      ),
-      body: budgetDetailState.isLoading && budgetDetailState.budget == null
-          ? const Center(child: CircularProgressIndicator())
-          : budgetDetailState.errorMessage != null &&
-                budgetDetailState.budget == null
-          ? _ErrorView(
-              message: budgetDetailState.errorMessage!,
-              onRetry: () {
-                // Refresh bằng cách set lại selected budget ID
-                ref.read(selectedBudgetIdProvider.notifier).state =
-                    widget.budgetId;
-              },
-            )
-          : budgetDetailState.budget == null
-          ? const _EmptyView()
-          : SingleChildScrollView(
-              padding: EdgeInsets.all(16.w),
-              child: Column(
-                children: [
-                  _BudgetHeroCard(budget: budgetDetailState.budget!),
-                  SizedBox(height: 16.h),
-                  _BudgetInfoCard(budget: budgetDetailState.budget!),
-                  SizedBox(height: 16.h),
-                  _TimelineCard(budget: budgetDetailState.budget!),
-                  SizedBox(height: 24.h),
-                  _ActionButtons(
-                    onEdit: () => notifier.goToEdit(context),
-                    onDelete: () => _confirmDelete(context, notifier),
-                  ),
-                ],
-              ),
+      body: SafeArea(
+        child: Column(
+          children: [
+            /// HEADER
+            HeaderWithBack(
+              title: 'Chi tiết ngân sách',
+              onBack: () => context.go(AppRoutes.home),
             ),
+
+            Expanded(
+              child: state.isLoading && state.budget == null
+                  ? const Center(child: CircularProgressIndicator())
+                  : state.errorMessage != null && state.budget == null
+                  ? _ErrorView(
+                      message: state.errorMessage!,
+                      onRetry: () {
+                        ref.read(selectedBudgetIdProvider.notifier).state =
+                            widget.budgetId;
+                      },
+                    )
+                  : state.budget == null
+                  ? const _EmptyView()
+                  : SingleChildScrollView(
+                      padding: EdgeInsets.all(16.w),
+                      child: Column(
+                        children: [
+                          _HeroCard(budget: state.budget!),
+                          16.verticalSpace,
+                          _InfoCard(budget: state.budget!),
+                          16.verticalSpace,
+                          _TimelineCard(budget: state.budget!),
+                          24.verticalSpace,
+                          _ActionButtons(
+                            onEdit: () => notifier.goToEdit(context),
+                            onDelete: () => _confirmDelete(context, notifier),
+                          ),
+                        ],
+                      ),
+                    ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -102,9 +93,9 @@ class _BudgetDetailPageState extends ConsumerState<BudgetDetailPage> {
     BuildContext context,
     BudgetDetailNotifier notifier,
   ) async {
-    final shouldDelete = await showDialog<bool>(
+    final ok = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (_) => AlertDialog(
         title: const Text('Xóa ngân sách'),
         content: const Text(
           'Bạn có chắc chắn muốn xóa ngân sách này? Hành động không thể hoàn tác.',
@@ -115,22 +106,26 @@ class _BudgetDetailPageState extends ConsumerState<BudgetDetailPage> {
             child: const Text('Hủy'),
           ),
           FilledButton(
-            onPressed: () => context.pop(true),
             style: FilledButton.styleFrom(backgroundColor: AppColors.bgError),
+            onPressed: () => context.pop(true),
             child: const Text('Xóa'),
           ),
         ],
       ),
     );
 
-    if (shouldDelete ?? false) {
+    if (ok == true) {
       await notifier.deleteBudget(context);
     }
   }
 }
 
-class _BudgetHeroCard extends StatelessWidget {
-  const _BudgetHeroCard({required this.budget});
+/* -------------------------------------------------------------------------- */
+/*                                   HERO                                     */
+/* -------------------------------------------------------------------------- */
+
+class _HeroCard extends StatelessWidget {
+  const _HeroCard({required this.budget});
   final Budget budget;
 
   @override
@@ -139,17 +134,13 @@ class _BudgetHeroCard extends StatelessWidget {
       width: double.infinity,
       padding: EdgeInsets.all(20.w),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFF0BA360), Color(0xFF3CBA92)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(24.r),
+        color: AppColors.primaryGreen,
+        borderRadius: BorderRadius.circular(20.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 16,
-            offset: const Offset(0, 8),
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 12,
+            offset: const Offset(0, 6),
           ),
         ],
       ),
@@ -158,39 +149,32 @@ class _BudgetHeroCard extends StatelessWidget {
         children: [
           Text(
             budget.categoryName,
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+            style: TextStyle(
               color: Colors.white,
-              fontWeight: FontWeight.bold,
+              fontSize: 20.sp,
+              fontWeight: FontWeight.w700,
             ),
           ),
-          SizedBox(height: 6.h),
-          Text(
-            'ID: ${budget.id}',
-            style: TextStyle(color: Colors.white70, fontSize: 13.sp),
-          ),
-          SizedBox(height: 18.h),
+          12.verticalSpace,
           Text(
             NumberFormat.currency(
               locale: 'vi_VN',
               symbol: '₫',
             ).format(budget.amount),
-            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+            style: TextStyle(
               color: Colors.white,
+              fontSize: 26.sp,
               fontWeight: FontWeight.bold,
             ),
           ),
-          SizedBox(height: 8.h),
+          12.verticalSpace,
           Wrap(
             spacing: 8.w,
             children: [
-              _HeroChip(
-                icon: Icons.repeat,
+              _Chip(
                 label: budget.period == 'monthly' ? 'Hàng tháng' : 'Hàng tuần',
               ),
-              _HeroChip(
-                icon: Icons.warning_amber_outlined,
-                label: 'Ngưỡng ${budget.alertThreshold.toInt()}%',
-              ),
+              _Chip(label: 'Ngưỡng ${budget.alertThreshold.toInt()}%'),
             ],
           ),
         ],
@@ -199,89 +183,67 @@ class _BudgetHeroCard extends StatelessWidget {
   }
 }
 
-class _HeroChip extends StatelessWidget {
-  const _HeroChip({required this.icon, required this.label});
-  final IconData icon;
+class _Chip extends StatelessWidget {
+  const _Chip({required this.label});
   final String label;
 
   @override
   Widget build(BuildContext context) {
-    return Chip(
-      avatar: Icon(icon, color: AppColors.primaryGreen, size: 18.sp),
-      label: Text(label),
-      backgroundColor: Colors.white.withOpacity(0.9),
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.2),
+        borderRadius: BorderRadius.circular(20.r),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(color: Colors.white, fontSize: 12.sp),
+      ),
     );
   }
 }
 
-class _BudgetInfoCard extends StatelessWidget {
-  const _BudgetInfoCard({required this.budget});
+/* -------------------------------------------------------------------------- */
+/*                                   INFO                                     */
+/* -------------------------------------------------------------------------- */
+
+class _InfoCard extends StatelessWidget {
+  const _InfoCard({required this.budget});
   final Budget budget;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.all(18.w),
-      decoration: BoxDecoration(
-        color: AppColors.bgWhite,
-        borderRadius: BorderRadius.circular(18.r),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black12,
-            blurRadius: 12.r,
-            offset: const Offset(0, 6),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          _infoRow(
-            context,
-            'Hạn mức',
-            NumberFormat.currency(
-              locale: 'vi_VN',
-              symbol: '₫',
-            ).format(budget.amount),
-          ),
-          const Divider(),
-          _infoRow(
-            context,
-            'Kỳ hạn',
-            budget.period == 'monthly' ? 'Hàng tháng' : 'Hàng tuần',
-          ),
-          const Divider(),
-          _infoRow(
-            context,
-            'Ngưỡng cảnh báo',
-            '${budget.alertThreshold.toInt()}%',
-          ),
-        ],
-      ),
+    return _Card(
+      children: [
+        _row('Hạn mức', _money(budget.amount)),
+        const Divider(),
+        _row('Kỳ hạn', budget.period == 'monthly' ? 'Hàng tháng' : 'Hàng tuần'),
+        const Divider(),
+        _row('Ngưỡng cảnh báo', '${budget.alertThreshold.toInt()}%'),
+      ],
     );
   }
 
-  Widget _infoRow(BuildContext context, String label, String value) {
+  Widget _row(String label, String value) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
           label,
-          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-            fontWeight: FontWeight.w600,
-            color: AppColors.typoHeading,
-          ),
+          style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600),
         ),
-        Text(
-          value,
-          style: Theme.of(
-            context,
-          ).textTheme.bodyLarge?.copyWith(color: AppColors.typoBody),
-        ),
+        Text(value, style: TextStyle(fontSize: 14.sp)),
       ],
     );
   }
+
+  String _money(double v) =>
+      NumberFormat.currency(locale: 'vi_VN', symbol: '₫').format(v);
 }
+
+/* -------------------------------------------------------------------------- */
+/*                                  TIMELINE                                  */
+/* -------------------------------------------------------------------------- */
 
 class _TimelineCard extends StatelessWidget {
   const _TimelineCard({required this.budget});
@@ -289,47 +251,27 @@ class _TimelineCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final startDate = DateTime.fromMillisecondsSinceEpoch(
-      budget.startDate * 1000,
-    );
-    final endDate = DateTime.fromMillisecondsSinceEpoch(budget.endDate * 1000);
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.all(18.w),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(18.r),
-        border: Border.all(color: AppColors.bgGray.withOpacity(0.2)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text('Khoảng thời gian', style: TextStyle(fontSize: 16.sp)),
-          SizedBox(height: 12.h),
-          Row(
-            children: [
-              Expanded(
-                child: _timelineTile(
-                  label: 'Bắt đầu',
-                  date: DateFormat('dd/MM/yyyy').format(startDate),
-                ),
-              ),
-              SizedBox(width: 12.w),
-              Expanded(
-                child: _timelineTile(
-                  label: 'Kết thúc',
-                  date: DateFormat('dd/MM/yyyy').format(endDate),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
+    final start = DateTime.fromMillisecondsSinceEpoch(budget.startDate * 1000);
+    final end = DateTime.fromMillisecondsSinceEpoch(budget.endDate * 1000);
+
+    return _Card(
+      children: [
+        _sectionTitle('Khoảng thời gian'),
+        12.verticalSpace,
+        Row(
+          children: [
+            Expanded(child: _dateBox('Bắt đầu', start)),
+            12.horizontalSpace,
+            Expanded(child: _dateBox('Kết thúc', end)),
+          ],
+        ),
+      ],
     );
   }
 
-  Widget _timelineTile({required String label, required String date}) {
+  Widget _dateBox(String label, DateTime d) {
     return Container(
-      padding: EdgeInsets.all(14.w),
+      padding: EdgeInsets.all(12.w),
       decoration: BoxDecoration(
         color: AppColors.bgSecondary,
         borderRadius: BorderRadius.circular(12.r),
@@ -337,24 +279,21 @@ class _TimelineCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          Text(label, style: TextStyle(fontSize: 12.sp)),
+          4.verticalSpace,
           Text(
-            label,
-            style: TextStyle(color: AppColors.typoBody, fontSize: 13.sp),
-          ),
-          SizedBox(height: 4.h),
-          Text(
-            date,
-            style: TextStyle(
-              fontSize: 16.sp,
-              fontWeight: FontWeight.w600,
-              color: AppColors.typoHeading,
-            ),
+            DateFormat('dd/MM/yyyy').format(d),
+            style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w600),
           ),
         ],
       ),
     );
   }
 }
+
+/* -------------------------------------------------------------------------- */
+/*                                 ACTIONS                                    */
+/* -------------------------------------------------------------------------- */
 
 class _ActionButtons extends StatelessWidget {
   const _ActionButtons({required this.onEdit, required this.onDelete});
@@ -365,35 +304,64 @@ class _ActionButtons extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        SizedBox(
-          width: double.infinity,
-          child: FilledButton.icon(
-            onPressed: onEdit,
-            icon: const Icon(Icons.edit_outlined),
-            label: const Text('Chỉnh sửa ngân sách'),
-            style: FilledButton.styleFrom(
-              backgroundColor: AppColors.primaryGreen,
-              padding: EdgeInsets.symmetric(vertical: 14.h),
-            ),
+        FilledButton(
+          onPressed: onEdit,
+          style: FilledButton.styleFrom(
+            backgroundColor: AppColors.primaryGreen,
+            minimumSize: Size.fromHeight(48.h),
           ),
+          child: const Text('Chỉnh sửa ngân sách'),
         ),
-        SizedBox(height: 12.h),
-        SizedBox(
-          width: double.infinity,
-          child: OutlinedButton.icon(
-            onPressed: onDelete,
-            icon: const Icon(Icons.delete_outline, color: AppColors.bgError),
-            label: const Text(
-              'Xóa ngân sách',
-              style: TextStyle(color: AppColors.bgError),
-            ),
-            style: OutlinedButton.styleFrom(
-              side: const BorderSide(color: AppColors.bgError),
-              padding: EdgeInsets.symmetric(vertical: 14.h),
-            ),
+        12.verticalSpace,
+        OutlinedButton(
+          onPressed: onDelete,
+          style: OutlinedButton.styleFrom(
+            minimumSize: Size.fromHeight(48.h),
+            side: const BorderSide(color: AppColors.bgError),
+          ),
+          child: const Text(
+            'Xóa ngân sách',
+            style: TextStyle(color: AppColors.bgError),
           ),
         ),
       ],
+    );
+  }
+}
+
+/* -------------------------------------------------------------------------- */
+/*                                  SHARED                                    */
+/* -------------------------------------------------------------------------- */
+
+Widget _sectionTitle(String text) => Text(
+  text,
+  style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w700),
+);
+
+class _Card extends StatelessWidget {
+  const _Card({required this.children});
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.all(16.w),
+      decoration: BoxDecoration(
+        color: AppColors.bgWhite,
+        borderRadius: BorderRadius.circular(16.r),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: children,
+      ),
     );
   }
 }
@@ -409,12 +377,8 @@ class _ErrorView extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text(
-            'Có lỗi xảy ra:\n$message',
-            textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 14.sp),
-          ),
-          SizedBox(height: 12.h),
+          Text(message, textAlign: TextAlign.center),
+          12.verticalSpace,
           FilledButton(onPressed: onRetry, child: const Text('Thử lại')),
         ],
       ),
