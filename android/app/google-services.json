@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "734421261521",
+    "project_id": "connect-sport-eeb80",
+    "storage_bucket": "connect-sport-eeb80.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:734421261521:android:9b89325d4e82097ed7b9f0",
+        "android_client_info": {
+          "package_name": "com.example.fridge_to_fork_ai"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC08DjUIiQYUrj7rwIIrWicGwSIDoO5eSU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -22,3 +22,4 @@ class FcmTokenModel extends FcmToken {
 
 
 
+

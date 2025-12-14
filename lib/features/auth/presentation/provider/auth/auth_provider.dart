@@ -5,6 +5,7 @@ import '../../../data/api/auth_api.dart';
 import '../../../data/datasouces/auth_remote_datasouces.dart';
 import '../../../data/repositories/auth_repositoty_impl.dart';
 import '../../../domain/usecase/refresh_token_icon.dart';
+import '../../../domain/usecase/register_fcm_token.dart';
 import 'auth_notifier.dart';
 
 /// Retrofit Api With Dio
@@ -29,7 +30,16 @@ final refreshTokenUseCaseProvider = Provider<RefreshTokenAccount>(
   (ref) => RefreshTokenAccount(ref.read(authRepositoryProvider)),
 );
 
+/// UseCase register FCM token
+final registerFcmTokenUseCaseProvider = Provider<RegisterFcmToken>(
+  (ref) => RegisterFcmToken(ref.read(authRepositoryProvider)),
+);
+
 /// Notifier
 final authProvider = StateNotifierProvider<AuthNotifier, AuthState>(
-  (ref) => AuthNotifier(ref.read(refreshTokenUseCaseProvider), ref),
+  (ref) => AuthNotifier(
+    ref.read(refreshTokenUseCaseProvider),
+    ref.read(registerFcmTokenUseCaseProvider),
+    ref,
+  ),
 );
