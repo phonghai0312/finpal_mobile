@@ -5,3 +5,6 @@ class FcmToken {
 
   FcmToken({this.message, required this.success, this.statusCode});
 }
+
+
+
