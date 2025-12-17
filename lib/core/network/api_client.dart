@@ -53,6 +53,8 @@ class ApiClient {
           final token = prefs.getString('token');
 
           if (token != null && token.isNotEmpty) {
+            // Send auth token in both common header shapes to satisfy backend
+            options.headers['Authorization'] = 'Bearer $token';
             options.headers['x-access-token'] = token;
           }
 

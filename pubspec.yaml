@@ -60,6 +60,7 @@ dependencies:
   retrofit: ^4.1.0
   json_annotation: ^4.9.0
   pretty_dio_logger: ^1.0.0
+  flutter_local_notifications: ^19.0.0
 
 dev_dependencies:
   flutter_test:

@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fridge_to_fork_ai/features/auth/domain/entities/fcm_token.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -9,7 +10,9 @@ import '../../../../../core/config/routing/app_routes.dart';
 import '../../../../../core/presentation/theme/app_colors.dart';
 import '../../../../../core/utils/validation_auth.dart';
 import '../../../domain/usecase/login_account.dart';
+import '../../../domain/usecase/register_fcm_token.dart';
 import '../auth/auth_provider.dart';
+import '../../../../../core/notifications/fcm_service.dart';
 
 /// STATE
 class LoginState {
@@ -66,9 +69,10 @@ class LoginState {
 /// NOTIFIER
 class LoginNotifier extends StateNotifier<LoginState> {
   final LoginAccount _loginUseCase;
+  final RegisterFcmToken _registerFcmTokenUseCase;
   final Ref ref;
 
-  LoginNotifier(this._loginUseCase, this.ref)
+  LoginNotifier(this._loginUseCase, this._registerFcmTokenUseCase, this.ref)
     : super(
         LoginState(
           emailController: TextEditingController(),
@@ -123,14 +127,17 @@ class LoginNotifier extends StateNotifier<LoginState> {
     if (!state.isValid) return;
 
     _setLoading(true);
+    print('[DEBUG LOGIN] Bắt đầu đăng nhập...');
 
     final email = state.emailController.text.trim();
     final pass = state.passwordController.text.trim();
 
     try {
+      print('[DEBUG LOGIN] Gọi login API...');
       final auth = await _loginUseCase(email, pass);
 
       if (auth.token == null || auth.token.isEmpty) {
+        print('[DEBUG LOGIN] ❌ Token rỗng, đăng nhập thất bại');
         _setLoading(false);
         if (context.mounted) {
           _showError(context, 'Đăng nhập thất bại');
@@ -138,21 +145,43 @@ class LoginNotifier extends StateNotifier<LoginState> {
         return;
       }
 
+      print('[DEBUG LOGIN] ✅ Login thành công, lưu token...');
       // Lưu token vào provider
       await ref.read(authProvider.notifier).login(token: auth.token);
 
+      // Đăng ký / cập nhật FCM token sau khi đăng nhập (không block login nếu thất bại)
+      print('[DEBUG LOGIN] Đăng ký FCM token...');
+      try {
+        await _registerFcmTokenSafely(auth.id);
+        print('[DEBUG LOGIN] ✅ FCM token đã được xử lý');
+      } catch (e) {
+        // Log lỗi nhưng không block login flow
+        print('[DEBUG LOGIN] ⚠️ Không thể đăng ký FCM token, nhưng vẫn tiếp tục login: $e');
+      }
+
       // Lưu remember me nếu cần
+      print('[DEBUG LOGIN] Lưu remember me...');
       await _saveRemember(email, pass);
 
+      print('[DEBUG LOGIN] Tắt loading và chuyển trang...');
       _setLoading(false);
 
       // Chuyển sang màn hình welcome
-      if (context.mounted) context.go(AppRoutes.welcome);
-    } catch (e) {
+      if (context.mounted) {
+        print('[DEBUG LOGIN] Điều hướng đến welcome page...');
+        context.go(AppRoutes.welcome);
+      } else {
+        print('[DEBUG LOGIN] ⚠️ Context không còn mounted, không thể điều hướng');
+      }
+    } catch (e, stackTrace) {
+      print('[DEBUG LOGIN] ❌ Lỗi khi đăng nhập: $e');
+      print('[DEBUG LOGIN] Stack trace: $stackTrace');
       _setLoading(false);
 
       // Đây chỉ còn bắt các lỗi network, timeout, server 500...
-      if (context.mounted) _showError(context, _translateError(e.toString()));
+      if (context.mounted) {
+        _showError(context, _translateError(e.toString()));
+      }
     }
   }
 
@@ -189,6 +218,47 @@ class LoginNotifier extends StateNotifier<LoginState> {
 
   void _setLoading(bool value) {
     state = state.copyWith(isLoading: value);
+  }
+
+  /// Đăng ký / update FCM token với backend
+  Future<FcmToken?> _registerFcmTokenSafely(String userId) async {
+    try {
+      print('[DEBUG FCM] Bắt đầu đăng ký FCM token cho userId: $userId');
+
+      final fcmToken = await FcmService.getToken();
+      print('[DEBUG FCM] FCM token từ Firebase: ${fcmToken ?? "NULL"}');
+
+      if (fcmToken == null || fcmToken.isEmpty) {
+        print('[DEBUG FCM] FCM token rỗng hoặc null, bỏ qua đăng ký');
+        return FcmToken(success: false);
+      }
+
+      // TODO: thay thế deviceId / platform bằng giá trị thực tế nếu cần
+      const deviceId = 'unknown-device';
+      const platform = 'android';
+
+      print('[DEBUG FCM] Gửi request với:');
+      print('  - userId: $userId');
+      print('  - deviceId: $deviceId');
+      print('  - platform: $platform');
+      print(
+        '  - fcmToken: ${fcmToken.substring(0, fcmToken.length > 50 ? 50 : fcmToken.length)}...',
+      );
+
+      final result = await _registerFcmTokenUseCase(
+        userId: userId,
+        deviceId: deviceId,
+        fcmToken: fcmToken,
+        platform: platform,
+      );
+
+      print('[DEBUG FCM] Đăng ký FCM token thành công: $result');
+      return result;
+    } catch (error, stackTrace) {
+      print('[DEBUG FCM] ❌ Lỗi khi đăng ký FCM token: $error');
+      print('[DEBUG FCM] Stack trace: $stackTrace');
+      return null;
+    }
   }
 
   void onPressRegister(BuildContext context) {

@@ -19,7 +19,7 @@ class HomePage extends ConsumerStatefulWidget {
   @override
   ConsumerState<HomePage> createState() => _HomePageState();
 }
-
+//dung consumerStatefulWidget bi can dung statefulWidget va sonsumer
 class _HomePageState extends ConsumerState<HomePage> {
   bool _initialized = false;
 
