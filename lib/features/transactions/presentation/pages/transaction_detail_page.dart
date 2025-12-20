@@ -1,4 +1,4 @@
-// ignore_for_file: use_build_context_synchronously
+// ignore_for_file: use_build_context_synchronously, deprecated_member_use
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -135,8 +135,7 @@ class _TransactionDetailPageState extends ConsumerState<TransactionDetailPage> {
         children: [
           CircleAvatar(
             radius: 26.r,
-            backgroundColor:
-                isIncome ? AppColors.darkGreen : AppColors.darkRed,
+            backgroundColor: isIncome ? AppColors.darkGreen : AppColors.darkRed,
             child: Icon(Icons.receipt_long, color: Colors.white, size: 22.sp),
           ),
           SizedBox(height: 12.h),
@@ -189,7 +188,10 @@ class _TransactionDetailPageState extends ConsumerState<TransactionDetailPage> {
                 SizedBox(height: 4.h),
                 Text(
                   "Giao dịch này được AI phân loại vào danh mục: “${tx.categoryName}” với độ chính xác ${(tx.ai.confidence! * 100).toInt()}%",
-                  style: TextStyle(fontSize: 12.5.sp, color: Colors.orange[900]),
+                  style: TextStyle(
+                    fontSize: 12.5.sp,
+                    color: Colors.orange[900],
+                  ),
                 ),
               ],
             ),
@@ -484,8 +486,10 @@ class _TransactionDetailPageState extends ConsumerState<TransactionDetailPage> {
                 SizedBox(height: 12.h),
                 Text(
                   "Bạn chắc chắn muốn xóa ?",
-                  style:
-                      TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w600),
+                  style: TextStyle(
+                    fontSize: 15.sp,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
                 SizedBox(height: 14.h),
                 Row(

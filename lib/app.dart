@@ -18,17 +18,14 @@ class _MyAppState extends ConsumerState<MyApp> {
   @override
   void initState() {
     super.initState();
-    
+
     // ✅ Initialize FCM AFTER UI is ready
     // Firebase is guaranteed to be initialized at this point (from main.dart)
     // Use Future.microtask to ensure UI builds first, then initialize FCM
     Future.microtask(() async {
       try {
         await FcmService.initialize();
-        print('[MyApp] ✅ FCM service initialized');
-      } catch (e, stackTrace) {
-        print('[MyApp] ❌ FCM initialization failed: $e');
-        print('[MyApp] Stack trace: $stackTrace');
+      } catch (e) {
         // Don't crash the app if FCM fails
       }
     });

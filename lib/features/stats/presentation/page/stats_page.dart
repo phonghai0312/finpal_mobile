@@ -7,7 +7,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fridge_to_fork_ai/core/presentation/theme/app_colors.dart';
 import 'package:fridge_to_fork_ai/core/presentation/widget/header/header_simple.dart';
 
-import 'package:fridge_to_fork_ai/features/stats/presentation/providers/stats_notifier.dart';
 import 'package:fridge_to_fork_ai/features/stats/presentation/providers/stats_provider.dart';
 
 import 'package:fridge_to_fork_ai/features/stats/presentation/widgets/stats_header.dart';

@@ -4,9 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
-import 'package:go_router/go_router.dart';
 
-import 'package:fridge_to_fork_ai/core/config/routing/app_routes.dart';
 import 'package:fridge_to_fork_ai/core/presentation/theme/app_colors.dart';
 import 'package:fridge_to_fork_ai/features/home/presentation/providers/home/home_provider.dart';
 import 'package:fridge_to_fork_ai/features/home/presentation/widgets/home_header.dart';
@@ -19,6 +17,7 @@ class HomePage extends ConsumerStatefulWidget {
   @override
   ConsumerState<HomePage> createState() => _HomePageState();
 }
+
 //dung consumerStatefulWidget bi can dung statefulWidget va sonsumer
 class _HomePageState extends ConsumerState<HomePage> {
   bool _initialized = false;
@@ -54,9 +53,12 @@ class _HomePageState extends ConsumerState<HomePage> {
                 /// ================= HEADER =================
                 HomeHeader(
                   userName: state.user?.name ?? '',
-                  totalIncomeText: "+${_formatMoney(state.totalIncome)}",
-                  totalExpenseText: "-${_formatMoney(state.totalExpense)}",
-                  onNotificationTap: () {},
+                  totalIncomeText: state.user == null
+                      ? '—'
+                      : "+${_formatMoney(state.user!.totalIncome)}",
+                  totalExpenseText: state.user == null
+                      ? '—'
+                      : "-${_formatMoney(state.user!.totalExpense)}",
                 ),
 
                 Padding(
@@ -93,7 +95,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                           ),
                           onPressed: () => ref
                               .read(homeNotifierProvider.notifier)
-                              .onButtonSeeAllBudgets(context),
+                              .onButtonCreateBudgets(context),
                           child: Text(
                             "Hạn mức chi tiêu",
                             style: TextStyle(

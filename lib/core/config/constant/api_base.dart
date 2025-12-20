@@ -1,12 +1,11 @@
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class ApiBaseDev {
-  static const  String baseUrlDevelopment = 'http://10.0.2.2:3001/api/';
-
+  static const String baseUrlDevelopment = 'https://finpal.id.vn/api/';
 }
-class ApiBaseNotiDev {
-  static const  String baseUrlNotification = 'http://10.0.2.2:3002';
 
+class ApiBaseNotiDev {
+  static const String baseUrlNotification = 'http://10.0.2.2:3002';
 }
 
 class ApiBaseProd {

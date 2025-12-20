@@ -1,16 +1,24 @@
-import 'package:equatable/equatable.dart';
-
-class Budget extends Equatable {
+class Budget {
   final String id;
   final String userId;
+
   final String categoryId;
   final String categoryName;
+
   final double amount;
   final double spentAmount;
-  final String period; // monthly, weekly
+
+  /// enum string: [monthly, weekly]
+  final String period;
+
+  /// Unix timestamp (ms)
   final int startDate;
   final int endDate;
+
+  /// 0.8 = cảnh báo khi dùng 80%
   final double alertThreshold;
+
+  /// Unix timestamp (ms)
   final int createdAt;
   final int updatedAt;
 
@@ -29,72 +37,30 @@ class Budget extends Equatable {
     required this.updatedAt,
   });
 
-  @override
-  List<Object?> get props => [
-    id,
-    userId,
-    categoryId,
-    categoryName,
-    amount,
-    spentAmount,
-    period,
-    startDate,
-    endDate,
-    alertThreshold,
-    createdAt,
-    updatedAt,
-  ];
-
-  factory Budget.fromJson(Map<String, dynamic> json) {
-    return Budget(
-      id: json['id'] as String,
-      userId: json['userId'] as String,
-      categoryId: json['categoryId'] as String,
-      categoryName: json['categoryName'] as String,
-      amount: (json['amount'] as num).toDouble(),
-      spentAmount: (json['spentAmount'] as num?)?.toDouble() ?? 0,
-      period: json['period'] as String,
-      startDate: json['startDate'] as int,
-      endDate: json['endDate'] as int,
-      alertThreshold: (json['alertThreshold'] as num).toDouble(),
-      createdAt: json['createdAt'] as int,
-      updatedAt: json['updatedAt'] as int,
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'userId': userId,
-      'categoryId': categoryId,
-      'categoryName': categoryName,
-      'amount': amount,
-      'spentAmount': spentAmount,
-      'period': period,
-      'startDate': startDate,
-      'endDate': endDate,
-      'alertThreshold': alertThreshold,
-      'createdAt': createdAt,
-      'updatedAt': updatedAt,
-    };
-  }
-
   Budget copyWith({
+    double? amount,
     double? spentAmount,
+    String? categoryId,
+    String? categoryName,
+    String? period,
+    int? startDate,
+    int? endDate,
+    double? alertThreshold,
+    int? updatedAt,
   }) {
     return Budget(
       id: id,
       userId: userId,
-      categoryId: categoryId,
-      categoryName: categoryName,
-      amount: amount,
+      categoryId: categoryId ?? this.categoryId,
+      categoryName: categoryName ?? this.categoryName,
+      amount: amount ?? this.amount,
       spentAmount: spentAmount ?? this.spentAmount,
-      period: period,
-      startDate: startDate,
-      endDate: endDate,
-      alertThreshold: alertThreshold,
+      period: period ?? this.period,
+      startDate: startDate ?? this.startDate,
+      endDate: endDate ?? this.endDate,
+      alertThreshold: alertThreshold ?? this.alertThreshold,
       createdAt: createdAt,
-      updatedAt: updatedAt,
+      updatedAt: updatedAt ?? this.updatedAt,
     );
   }
 }
