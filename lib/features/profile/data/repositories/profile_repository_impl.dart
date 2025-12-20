@@ -16,6 +16,8 @@ class ProfileRepositoryImpl implements ProfileRepository {
       id: model.id,
       email: model.email,
       phone: model.phone,
+      totalIncome: model.totalIncome,
+      totalExpense: model.totalExpense,
       name: model.name,
       avatarUrl: model.avatarUrl,
       settings: model.settings, // settings là object model? để mình hỏi tiếp
@@ -33,6 +35,8 @@ class ProfileRepositoryImpl implements ProfileRepository {
       id: model.id,
       email: model.email,
       phone: model.phone,
+      totalIncome: model.totalIncome,
+      totalExpense: model.totalExpense,
       name: model.name,
       avatarUrl: model.avatarUrl,
       settings: model.settings,

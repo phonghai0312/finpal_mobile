@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fridge_to_fork_ai/features/auth/domain/entities/fcm_token.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -9,7 +10,9 @@ import '../../../../../core/config/routing/app_routes.dart';
 import '../../../../../core/presentation/theme/app_colors.dart';
 import '../../../../../core/utils/validation_auth.dart';
 import '../../../domain/usecase/login_account.dart';
+import '../../../domain/usecase/register_fcm_token.dart';
 import '../auth/auth_provider.dart';
+import '../../../../../core/notifications/fcm_service.dart';
 
 /// STATE
 class LoginState {
@@ -66,9 +69,10 @@ class LoginState {
 /// NOTIFIER
 class LoginNotifier extends StateNotifier<LoginState> {
   final LoginAccount _loginUseCase;
+  final RegisterFcmToken _registerFcmTokenUseCase;
   final Ref ref;
 
-  LoginNotifier(this._loginUseCase, this.ref)
+  LoginNotifier(this._loginUseCase, this._registerFcmTokenUseCase, this.ref)
     : super(
         LoginState(
           emailController: TextEditingController(),
@@ -141,18 +145,29 @@ class LoginNotifier extends StateNotifier<LoginState> {
       // Lưu token vào provider
       await ref.read(authProvider.notifier).login(token: auth.token);
 
+      // Đăng ký / cập nhật FCM token sau khi đăng nhập (không block login nếu thất bại)
+      try {
+        await _registerFcmTokenSafely(auth.id);
+      } catch (e) {
+        // Log lỗi nhưng không block login flow
+      }
+
       // Lưu remember me nếu cần
       await _saveRemember(email, pass);
 
       _setLoading(false);
 
       // Chuyển sang màn hình welcome
-      if (context.mounted) context.go(AppRoutes.welcome);
+      if (context.mounted) {
+        context.go(AppRoutes.welcome);
+      } else {}
     } catch (e) {
       _setLoading(false);
 
       // Đây chỉ còn bắt các lỗi network, timeout, server 500...
-      if (context.mounted) _showError(context, _translateError(e.toString()));
+      if (context.mounted) {
+        _showError(context, _translateError(e.toString()));
+      }
     }
   }
 
@@ -189,6 +204,31 @@ class LoginNotifier extends StateNotifier<LoginState> {
 
   void _setLoading(bool value) {
     state = state.copyWith(isLoading: value);
+  }
+
+  /// Đăng ký / update FCM token với backend
+  Future<FcmToken?> _registerFcmTokenSafely(String userId) async {
+    try {
+      final fcmToken = await FcmService.getToken();
+
+      if (fcmToken == null || fcmToken.isEmpty) {
+        return FcmToken(success: false);
+      }
+
+      const deviceId = 'unknown-device';
+      const platform = 'android';
+
+      final result = await _registerFcmTokenUseCase(
+        userId: userId,
+        deviceId: deviceId,
+        fcmToken: fcmToken,
+        platform: platform,
+      );
+
+      return result;
+    } catch (error) {
+      return null;
+    }
   }
 
   void onPressRegister(BuildContext context) {

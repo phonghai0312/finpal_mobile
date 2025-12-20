@@ -3,19 +3,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:fridge_to_fork_ai/core/config/routing/app_routes.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../core/presentation/theme/app_colors.dart';
+import '../../../../core/presentation/widget/button/button.dart';
 import '../../../../core/presentation/widget/header/header_with_back.dart';
 import '../../domain/entities/budget.dart';
-import '../providers/budget_provider.dart';
-import '../providers/budget_detail_notifier.dart';
+import '../providers/budget_detail/budget_detail_provider.dart';
+import '../providers/budget_detail/budget_detail_notifier.dart';
 
 class BudgetDetailPage extends ConsumerStatefulWidget {
-  final String budgetId;
-  const BudgetDetailPage({super.key, required this.budgetId});
+  const BudgetDetailPage({super.key});
 
   @override
   ConsumerState<BudgetDetailPage> createState() => _BudgetDetailPageState();
@@ -25,15 +25,11 @@ class _BudgetDetailPageState extends ConsumerState<BudgetDetailPage> {
   @override
   void initState() {
     super.initState();
-    Future.microtask(() {
-      ref.read(selectedBudgetIdProvider.notifier).state = widget.budgetId;
-    });
-  }
 
-  @override
-  void dispose() {
-    ref.read(selectedBudgetIdProvider.notifier).state = null;
-    super.dispose();
+    /// 🔥 Luồng mới: init notifier
+    Future.microtask(() {
+      ref.read(budgetDetailNotifierProvider.notifier).init();
+    });
   }
 
   @override
@@ -42,41 +38,37 @@ class _BudgetDetailPageState extends ConsumerState<BudgetDetailPage> {
     final notifier = ref.read(budgetDetailNotifierProvider.notifier);
 
     return Scaffold(
-      backgroundColor: AppColors.bgSecondary,
+      backgroundColor: AppColors.typoWhite,
       body: SafeArea(
         child: Column(
           children: [
-            /// HEADER
             HeaderWithBack(
               title: 'Chi tiết ngân sách',
-              onBack: () => context.go(AppRoutes.home),
+              onBack: () => notifier.onBack(context),
             ),
 
             Expanded(
-              child: state.isLoading && state.budget == null
+              child: state.isLoading && state.data == null
                   ? const Center(child: CircularProgressIndicator())
-                  : state.errorMessage != null && state.budget == null
+                  : state.error != null && state.data == null
                   ? _ErrorView(
-                      message: state.errorMessage!,
-                      onRetry: () {
-                        ref.read(selectedBudgetIdProvider.notifier).state =
-                            widget.budgetId;
-                      },
+                      message: state.error!,
+                      onRetry: () => notifier.init(),
                     )
-                  : state.budget == null
+                  : state.data == null
                   ? const _EmptyView()
                   : SingleChildScrollView(
                       padding: EdgeInsets.all(16.w),
                       child: Column(
                         children: [
-                          _HeroCard(budget: state.budget!),
+                          _HeroCard(budget: state.data!),
                           16.verticalSpace,
-                          _InfoCard(budget: state.budget!),
+                          _InfoCard(budget: state.data!),
                           16.verticalSpace,
-                          _TimelineCard(budget: state.budget!),
+                          _TimelineCard(budget: state.data!),
                           24.verticalSpace,
                           _ActionButtons(
-                            onEdit: () => notifier.goToEdit(context),
+                            onEdit: () => notifier.onEdit(context),
                             onDelete: () => _confirmDelete(context, notifier),
                           ),
                         ],
@@ -96,26 +88,30 @@ class _BudgetDetailPageState extends ConsumerState<BudgetDetailPage> {
     final ok = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text('Xóa ngân sách'),
-        content: const Text(
+        title: Text(
+          'Xóa ngân sách',
+          style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
+        ),
+        content: Text(
           'Bạn có chắc chắn muốn xóa ngân sách này? Hành động không thể hoàn tác.',
+          style: GoogleFonts.poppins(),
         ),
         actions: [
           TextButton(
             onPressed: () => context.pop(false),
-            child: const Text('Hủy'),
+            child: Text('Hủy', style: GoogleFonts.poppins()),
           ),
           FilledButton(
             style: FilledButton.styleFrom(backgroundColor: AppColors.bgError),
             onPressed: () => context.pop(true),
-            child: const Text('Xóa'),
+            child: Text('Xóa', style: GoogleFonts.poppins()),
           ),
         ],
       ),
     );
 
     if (ok == true) {
-      await notifier.deleteBudget(context);
+      await notifier.onDelete(context);
     }
   }
 }
@@ -134,22 +130,15 @@ class _HeroCard extends StatelessWidget {
       width: double.infinity,
       padding: EdgeInsets.all(20.w),
       decoration: BoxDecoration(
-        color: AppColors.primaryGreen,
+        color: AppColors.bgDarkGreen,
         borderRadius: BorderRadius.circular(20.r),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.08),
-            blurRadius: 12,
-            offset: const Offset(0, 6),
-          ),
-        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             budget.categoryName,
-            style: TextStyle(
+            style: GoogleFonts.poppins(
               color: Colors.white,
               fontSize: 20.sp,
               fontWeight: FontWeight.w700,
@@ -161,10 +150,10 @@ class _HeroCard extends StatelessWidget {
               locale: 'vi_VN',
               symbol: '₫',
             ).format(budget.amount),
-            style: TextStyle(
+            style: GoogleFonts.poppins(
               color: Colors.white,
               fontSize: 26.sp,
-              fontWeight: FontWeight.bold,
+              fontWeight: FontWeight.w700,
             ),
           ),
           12.verticalSpace,
@@ -197,7 +186,11 @@ class _Chip extends StatelessWidget {
       ),
       child: Text(
         label,
-        style: TextStyle(color: Colors.white, fontSize: 12.sp),
+        style: GoogleFonts.poppins(
+          color: Colors.white,
+          fontSize: 12.sp,
+          fontWeight: FontWeight.w500,
+        ),
       ),
     );
   }
@@ -230,9 +223,18 @@ class _InfoCard extends StatelessWidget {
       children: [
         Text(
           label,
-          style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600),
+          style: GoogleFonts.poppins(
+            fontSize: 14.sp,
+            fontWeight: FontWeight.w500,
+          ),
         ),
-        Text(value, style: TextStyle(fontSize: 14.sp)),
+        Text(
+          value,
+          style: GoogleFonts.poppins(
+            fontSize: 14.sp,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
       ],
     );
   }
@@ -279,11 +281,20 @@ class _TimelineCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label, style: TextStyle(fontSize: 12.sp)),
+          Text(
+            label,
+            style: GoogleFonts.poppins(
+              fontSize: 12.sp,
+              fontWeight: FontWeight.w400,
+            ),
+          ),
           4.verticalSpace,
           Text(
             DateFormat('dd/MM/yyyy').format(d),
-            style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w600),
+            style: GoogleFonts.poppins(
+              fontSize: 15.sp,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ],
       ),
@@ -304,25 +315,12 @@ class _ActionButtons extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        FilledButton(
-          onPressed: onEdit,
-          style: FilledButton.styleFrom(
-            backgroundColor: AppColors.primaryGreen,
-            minimumSize: Size.fromHeight(48.h),
-          ),
-          child: const Text('Chỉnh sửa ngân sách'),
-        ),
+        Button(text: 'Chỉnh sửa ngân sách', onPressed: onEdit),
         12.verticalSpace,
-        OutlinedButton(
+        Button(
+          text: 'Xóa ngân sách',
+          color: AppColors.bgError,
           onPressed: onDelete,
-          style: OutlinedButton.styleFrom(
-            minimumSize: Size.fromHeight(48.h),
-            side: const BorderSide(color: AppColors.bgError),
-          ),
-          child: const Text(
-            'Xóa ngân sách',
-            style: TextStyle(color: AppColors.bgError),
-          ),
         ),
       ],
     );
@@ -335,7 +333,7 @@ class _ActionButtons extends StatelessWidget {
 
 Widget _sectionTitle(String text) => Text(
   text,
-  style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w700),
+  style: GoogleFonts.poppins(fontSize: 16.sp, fontWeight: FontWeight.w700),
 );
 
 class _Card extends StatelessWidget {
@@ -350,13 +348,6 @@ class _Card extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.bgWhite,
         borderRadius: BorderRadius.circular(16.r),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
-          ),
-        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -377,9 +368,13 @@ class _ErrorView extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text(message, textAlign: TextAlign.center),
+          Text(
+            message,
+            textAlign: TextAlign.center,
+            style: GoogleFonts.poppins(fontSize: 14.sp),
+          ),
           12.verticalSpace,
-          FilledButton(onPressed: onRetry, child: const Text('Thử lại')),
+          Button(text: 'Thử lại', onPressed: onRetry),
         ],
       ),
     );
@@ -391,6 +386,11 @@ class _EmptyView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Center(child: Text('Không tìm thấy ngân sách'));
+    return Center(
+      child: Text(
+        'Không tìm thấy ngân sách',
+        style: GoogleFonts.poppins(fontSize: 14.sp),
+      ),
+    );
   }
 }

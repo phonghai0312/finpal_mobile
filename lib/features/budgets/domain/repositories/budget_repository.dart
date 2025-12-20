@@ -1,6 +1,6 @@
 import 'package:fridge_to_fork_ai/features/budgets/domain/entities/budget.dart';
-import 'package:fridge_to_fork_ai/features/budgets/data/models/create_budget_request.dart';
-import 'package:fridge_to_fork_ai/features/budgets/data/models/update_budget_request.dart';
+import 'package:fridge_to_fork_ai/features/budgets/domain/entities/create_budget_request.dart';
+import 'package:fridge_to_fork_ai/features/budgets/domain/entities/update_budget_request.dart';
 
 abstract class BudgetRepository {
   Future<List<Budget>> getBudgets({
