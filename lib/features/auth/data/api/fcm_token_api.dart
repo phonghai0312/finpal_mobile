@@ -12,6 +12,9 @@ abstract class FcmTokenApi {
 
   @POST('/token')
   Future<FcmTokenModel> registerToken(@Body() Map<String, dynamic> body);
+
+  @POST('/token/deactive')
+  Future<void> deactiveToken(@Body() Map<String, dynamic> body);
 }
 
 

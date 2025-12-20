@@ -9,6 +9,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../../core/config/routing/app_routes.dart';
 import '../../../../../core/presentation/theme/app_colors.dart';
 import '../../../../../core/utils/validation_auth.dart';
+import '../../../../../core/utils/device_utils.dart';
 import '../../../domain/usecase/login_account.dart';
 import '../../../domain/usecase/register_fcm_token.dart';
 import '../auth/auth_provider.dart';
@@ -72,7 +73,11 @@ class LoginNotifier extends StateNotifier<LoginState> {
   final RegisterFcmToken _registerFcmTokenUseCase;
   final Ref ref;
 
-  LoginNotifier(this._loginUseCase, this._registerFcmTokenUseCase, this.ref)
+  LoginNotifier(
+    this._loginUseCase,
+    this._registerFcmTokenUseCase,
+    this.ref,
+  )
     : super(
         LoginState(
           emailController: TextEditingController(),
@@ -149,11 +154,15 @@ class LoginNotifier extends StateNotifier<LoginState> {
       // Lưu token vào provider
       await ref.read(authProvider.notifier).login(token: auth.token);
 
-      // Đăng ký / cập nhật FCM token sau khi đăng nhập (không block login nếu thất bại)
+      // ✅ Đăng ký / cập nhật FCM token sau khi đăng nhập (không block login nếu thất bại)
+      // CHỈ đăng ký token khi user đã login thành công
       print('[DEBUG LOGIN] Đăng ký FCM token...');
       try {
         await _registerFcmTokenSafely(auth.id);
         print('[DEBUG LOGIN] ✅ FCM token đã được xử lý');
+        
+        // ✅ Set callback để tự động gửi token refresh lên backend
+        await _setupTokenRefreshCallback(auth.id);
       } catch (e) {
         // Log lỗi nhưng không block login flow
         print('[DEBUG LOGIN] ⚠️ Không thể đăng ký FCM token, nhưng vẫn tiếp tục login: $e');
@@ -233,9 +242,9 @@ class LoginNotifier extends StateNotifier<LoginState> {
         return FcmToken(success: false);
       }
 
-      // TODO: thay thế deviceId / platform bằng giá trị thực tế nếu cần
-      const deviceId = 'unknown-device';
-      const platform = 'android';
+      // Lấy deviceId thực tế (persistent UUID)
+      final deviceId = await DeviceUtils.getDeviceId();
+      final platform = DeviceUtils.getPlatform();
 
       print('[DEBUG FCM] Gửi request với:');
       print('  - userId: $userId');
@@ -258,6 +267,38 @@ class LoginNotifier extends StateNotifier<LoginState> {
       print('[DEBUG FCM] ❌ Lỗi khi đăng ký FCM token: $error');
       print('[DEBUG FCM] Stack trace: $stackTrace');
       return null;
+    }
+  }
+
+  /// Setup callback để tự động gửi token refresh lên backend
+  Future<void> _setupTokenRefreshCallback(String userId) async {
+    try {
+      final deviceId = await DeviceUtils.getDeviceId();
+      
+      // Set callback để FcmService gọi khi token refresh
+      FcmService.setTokenRefreshCallback((String newToken, String _, String __) async {
+        print('[FCM Token Refresh] 🔄 Gửi token refresh lên backend...');
+        print('[FCM Token Refresh]   - userId: $userId');
+        print('[FCM Token Refresh]   - deviceId: $deviceId');
+        print('[FCM Token Refresh]   - newToken: ${newToken.substring(0, newToken.length > 50 ? 50 : newToken.length)}...');
+        
+        try {
+          await _registerFcmTokenUseCase(
+            userId: userId,
+            deviceId: deviceId,
+            fcmToken: newToken,
+            platform: DeviceUtils.getPlatform(),
+          );
+          print('[FCM Token Refresh] ✅ Token refresh đã được gửi lên backend thành công');
+        } catch (e, stackTrace) {
+          print('[FCM Token Refresh] ❌ Lỗi khi gửi token refresh: $e');
+          print('[FCM Token Refresh] Stack trace: $stackTrace');
+        }
+      });
+      
+      print('[DEBUG LOGIN] ✅ Token refresh callback đã được setup');
+    } catch (e) {
+      print('[DEBUG LOGIN] ⚠️ Không thể setup token refresh callback: $e');
     }
   }
 

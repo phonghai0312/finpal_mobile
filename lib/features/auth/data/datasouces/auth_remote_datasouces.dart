@@ -119,6 +119,19 @@ class AuthRemoteDataSource {
     return _guardRequest(() => _fcmTokenApi.registerToken(requestBody));
   }
 
+  /// DEACTIVE FCM TOKEN (khi user logout hoặc đổi thiết bị)
+  Future<void> deactiveFcmToken({
+    required String userId,
+    required String deviceId,
+  }) async {
+    final requestBody = {
+      "userId": userId,
+      "deviceId": deviceId,
+    };
+
+    return _guardRequest(() => _fcmTokenApi.deactiveToken(requestBody));
+  }
+
   Future<T> _guardRequest<T>(Future<T> Function() request) async {
     try {
       return await request();

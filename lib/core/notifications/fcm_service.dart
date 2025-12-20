@@ -2,11 +2,20 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'local_notification_service.dart';
 
+/// Callback function type for token refresh
+/// Parameters: (newToken: String, userId: String, deviceId: String)
+typedef TokenRefreshCallback = Future<void> Function(
+  String newToken,
+  String userId,
+  String deviceId,
+);
+
 class FcmService {
   FcmService._();
 
   static bool _initialized = false;
   static FirebaseMessaging? _messaging;
+  static TokenRefreshCallback? _tokenRefreshCallback;
 
   /// Check if Firebase is initialized
   static bool _isFirebaseReady() {
@@ -53,26 +62,42 @@ class FcmService {
       );
 
       print('[FCM] 📱 Permission status: ${settings.authorizationStatus}');
+      print('[FCM] 📱 Alert: ${settings.alert}');
+      print('[FCM] 📱 Badge: ${settings.badge}');
+      print('[FCM] 📱 Sound: ${settings.sound}');
 
       if (settings.authorizationStatus != AuthorizationStatus.authorized &&
           settings.authorizationStatus != AuthorizationStatus.provisional) {
-        print('[FCM] ⚠️ Notification permission denied');
-        return;
+        print('[FCM] ⚠️ Notification permission denied - Status: ${settings.authorizationStatus}');
+        print('[FCM] 💡 Hãy kiểm tra Settings > Apps > Notifications');
+        // KHÔNG return ở đây - vẫn tiếp tục để có thể nhận data-only messages
       }
 
       // ✅ STEP 3: Set up foreground message handler
       // This will display notifications when app is in foreground
       FirebaseMessaging.onMessage.listen((RemoteMessage message) {
         print('[FCM] 📨 Foreground message received:');
+        print('[FCM]   - Message ID: ${message.messageId}');
+        print('[FCM]   - From: ${message.from}');
         print('[FCM]   - Title: ${message.notification?.title}');
         print('[FCM]   - Body: ${message.notification?.body}');
         print('[FCM]   - Data: ${message.data}');
+        print('[FCM]   - Has notification payload: ${message.notification != null}');
+        print('[FCM]   - Has data payload: ${message.data.isNotEmpty}');
 
         // Display local notification for foreground messages
+        // Hiển thị cả khi có notification payload hoặc chỉ có data payload
         if (message.notification != null) {
           LocalNotificationService.show(
             title: message.notification!.title ?? 'Notification',
             body: message.notification!.body ?? '',
+            payload: message.data,
+          );
+        } else if (message.data.isNotEmpty) {
+          // Nếu chỉ có data payload, vẫn hiển thị notification
+          LocalNotificationService.show(
+            title: message.data['title'] ?? 'Notification',
+            body: message.data['body'] ?? message.data.toString(),
             payload: message.data,
           );
         }
@@ -106,9 +131,21 @@ class FcmService {
       }
 
       // ✅ STEP 7: Listen for token refresh
-      _messaging!.onTokenRefresh.listen((String newToken) {
+      _messaging!.onTokenRefresh.listen((String newToken) async {
         print('[FCM] 🔄 Token refreshed: ${newToken.substring(0, newToken.length > 50 ? 50 : newToken.length)}...');
-        // TODO: Send updated token to backend
+        
+        // Gửi token refresh lên backend nếu có callback
+        if (_tokenRefreshCallback != null) {
+          try {
+            await _tokenRefreshCallback!(newToken, '', '');
+            print('[FCM] ✅ Token refresh đã được gửi lên backend');
+          } catch (e, stackTrace) {
+            print('[FCM] ❌ Lỗi khi gửi token refresh lên backend: $e');
+            print('[FCM] Stack trace: $stackTrace');
+          }
+        } else {
+          print('[FCM] ⚠️ Token refresh callback chưa được set, không thể gửi lên backend');
+        }
       });
 
       print('[FCM] ✅ FCM service initialized successfully');
@@ -133,6 +170,18 @@ class FcmService {
     } catch (e) {
       print('[FCM] ❌ Error getting token: $e');
       return null;
+    }
+  }
+
+  /// Set callback for token refresh
+  /// This callback will be called when FCM token is refreshed
+  /// Call this after user login to enable automatic token refresh updates
+  static void setTokenRefreshCallback(TokenRefreshCallback? callback) {
+    _tokenRefreshCallback = callback;
+    if (callback != null) {
+      print('[FCM] ✅ Token refresh callback đã được set');
+    } else {
+      print('[FCM] ⚠️ Token refresh callback đã được xóa');
     }
   }
 }

@@ -8,6 +8,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../../core/config/routing/app_routes.dart';
 import '../../../../../core/domain/entities/user.dart';
+import '../../../../auth/presentation/provider/auth/auth_provider.dart';
 import '../../../domain/usecases/get_user_profile.dart';
 import '../../../domain/usecases/logout.dart';
 
@@ -59,7 +60,13 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
   Future<void> logout(BuildContext context) async {
     state = state.copyWith(isLoading: true, error: null);
     try {
+      // ✅ Gọi API logout backend trước
       await logoutUseCase.call();
+      
+      // ✅ Deactive FCM token và clear auth state
+      // AuthNotifier.logout() sẽ tự động deactive FCM token
+      await ref.read(authProvider.notifier).logout();
+      
       state = const ProfileState(user: null);
       context.go(AppRoutes.login);
     } catch (e) {

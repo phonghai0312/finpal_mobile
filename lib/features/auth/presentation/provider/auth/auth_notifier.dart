@@ -4,7 +4,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../../../core/utils/device_utils.dart';
+import '../../../../../core/utils/jwt_utils.dart';
 import '../../../domain/usecase/refresh_token_icon.dart';
+import '../../../domain/usecase/deactive_fcm_token.dart';
 
 /// STATE
 class AuthState {
@@ -34,11 +37,16 @@ class AuthState {
 /// NOTIFIER
 class AuthNotifier extends StateNotifier<AuthState> {
   final RefreshTokenAccount refreshTokenUseCase;
+  final DeactiveFcmToken deactiveFcmTokenUseCase;
   final Ref ref;
 
   Timer? _refreshTimer;
 
-  AuthNotifier(this.refreshTokenUseCase, this.ref) : super(const AuthState()) {
+  AuthNotifier(
+    this.refreshTokenUseCase,
+    this.deactiveFcmTokenUseCase,
+    this.ref,
+  ) : super(const AuthState()) {
     _loadAuth();
   }
 
@@ -84,6 +92,31 @@ class AuthNotifier extends StateNotifier<AuthState> {
   /// Logout
   Future<void> logout() async {
     _refreshTimer?.cancel();
+
+    // ✅ Deactive FCM token trước khi logout (vô hiệu hóa token khi user logout)
+    try {
+      final token = state.token;
+      if (token != null) {
+        final userId = JwtUtils.getUserIdFromToken(token);
+        if (userId != null) {
+          final deviceId = await DeviceUtils.getDeviceId();
+          print('[AuthNotifier] 🔔 Deactivating FCM token for userId: $userId, deviceId: $deviceId');
+          await deactiveFcmTokenUseCase(
+            userId: userId,
+            deviceId: deviceId,
+          );
+          print('[AuthNotifier] ✅ FCM token deactivated successfully');
+        } else {
+          print('[AuthNotifier] ⚠️ Cannot get userId from token, skipping FCM deactive');
+        }
+      } else {
+        print('[AuthNotifier] ⚠️ No token found, skipping FCM deactive');
+      }
+    } catch (e, stackTrace) {
+      // Log lỗi nhưng không block logout flow
+      print('[AuthNotifier] ❌ Lỗi khi deactive FCM token: $e');
+      print('[AuthNotifier] Stack trace: $stackTrace');
+    }
 
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('token');

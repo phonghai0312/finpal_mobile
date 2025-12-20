@@ -21,4 +21,8 @@ abstract class AuthRepository {
     required String fcmToken,
     required String platform,
   });
+  Future<void> deactiveFcmToken({
+    required String userId,
+    required String deviceId,
+  });
 }

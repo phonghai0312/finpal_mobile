@@ -52,7 +52,7 @@ class LocalNotificationService {
         },
       );
 
-      if (initialized == null ) {
+      if (initialized == false) {
         debugPrint('[LOCAL NOTI] ❌ Initialization failed');
         return;
       }

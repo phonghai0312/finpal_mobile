@@ -63,4 +63,15 @@ class AuthRepositoryImpl implements AuthRepository {
       platform: platform,
     );
   }
+
+  @override
+  Future<void> deactiveFcmToken({
+    required String userId,
+    required String deviceId,
+  }) async {
+    return remoteDataSource.deactiveFcmToken(
+      userId: userId,
+      deviceId: deviceId,
+    );
+  }
 }

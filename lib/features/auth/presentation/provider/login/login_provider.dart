@@ -5,6 +5,7 @@ import 'package:fridge_to_fork_ai/features/auth/data/repositories/auth_repositot
 import '../../../data/datasouces/auth_remote_datasouces.dart';
 import '../../../domain/usecase/login_account.dart';
 import '../../../domain/usecase/register_fcm_token.dart';
+import '../../../domain/usecase/deactive_fcm_token.dart';
 import 'login_notifier.dart';
 
 /// DataSource
@@ -27,6 +28,11 @@ final loginUseCaseProvider = Provider<LoginAccount>(
 /// UseCase register / update FCM token
 final registerFcmTokenUseCaseProvider = Provider<RegisterFcmToken>(
   (ref) => RegisterFcmToken(ref.read(authRepositoryProvider)),
+);
+
+/// UseCase deactive FCM token
+final deactiveFcmTokenUseCaseProvider = Provider<DeactiveFcmToken>(
+  (ref) => DeactiveFcmToken(ref.read(authRepositoryProvider)),
 );
 
 /// Notifier
