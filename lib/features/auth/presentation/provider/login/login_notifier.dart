@@ -132,17 +132,14 @@ class LoginNotifier extends StateNotifier<LoginState> {
     if (!state.isValid) return;
 
     _setLoading(true);
-    print('[DEBUG LOGIN] Bắt đầu đăng nhập...');
 
     final email = state.emailController.text.trim();
     final pass = state.passwordController.text.trim();
 
     try {
-      print('[DEBUG LOGIN] Gọi login API...');
       final auth = await _loginUseCase(email, pass);
 
       if (auth.token == null || auth.token.isEmpty) {
-        print('[DEBUG LOGIN] ❌ Token rỗng, đăng nhập thất bại');
         _setLoading(false);
         if (context.mounted) {
           _showError(context, 'Đăng nhập thất bại');
@@ -150,7 +147,6 @@ class LoginNotifier extends StateNotifier<LoginState> {
         return;
       }
 
-      print('[DEBUG LOGIN] ✅ Login thành công, lưu token...');
       // Lưu token vào provider
       await ref.read(authProvider.notifier).login(token: auth.token);
 
@@ -163,28 +159,21 @@ class LoginNotifier extends StateNotifier<LoginState> {
         
         // ✅ Set callback để tự động gửi token refresh lên backend
         await _setupTokenRefreshCallback(auth.id);
+
       } catch (e) {
         // Log lỗi nhưng không block login flow
-        print('[DEBUG LOGIN] ⚠️ Không thể đăng ký FCM token, nhưng vẫn tiếp tục login: $e');
       }
 
       // Lưu remember me nếu cần
-      print('[DEBUG LOGIN] Lưu remember me...');
       await _saveRemember(email, pass);
 
-      print('[DEBUG LOGIN] Tắt loading và chuyển trang...');
       _setLoading(false);
 
       // Chuyển sang màn hình welcome
       if (context.mounted) {
-        print('[DEBUG LOGIN] Điều hướng đến welcome page...');
         context.go(AppRoutes.welcome);
-      } else {
-        print('[DEBUG LOGIN] ⚠️ Context không còn mounted, không thể điều hướng');
-      }
-    } catch (e, stackTrace) {
-      print('[DEBUG LOGIN] ❌ Lỗi khi đăng nhập: $e');
-      print('[DEBUG LOGIN] Stack trace: $stackTrace');
+      } else {}
+    } catch (e) {
       _setLoading(false);
 
       // Đây chỉ còn bắt các lỗi network, timeout, server 500...
@@ -232,27 +221,16 @@ class LoginNotifier extends StateNotifier<LoginState> {
   /// Đăng ký / update FCM token với backend
   Future<FcmToken?> _registerFcmTokenSafely(String userId) async {
     try {
-      print('[DEBUG FCM] Bắt đầu đăng ký FCM token cho userId: $userId');
-
       final fcmToken = await FcmService.getToken();
-      print('[DEBUG FCM] FCM token từ Firebase: ${fcmToken ?? "NULL"}');
 
       if (fcmToken == null || fcmToken.isEmpty) {
-        print('[DEBUG FCM] FCM token rỗng hoặc null, bỏ qua đăng ký');
         return FcmToken(success: false);
       }
 
-      // Lấy deviceId thực tế (persistent UUID)
+   // Lấy deviceId thực tế (persistent UUID)
       final deviceId = await DeviceUtils.getDeviceId();
       final platform = DeviceUtils.getPlatform();
 
-      print('[DEBUG FCM] Gửi request với:');
-      print('  - userId: $userId');
-      print('  - deviceId: $deviceId');
-      print('  - platform: $platform');
-      print(
-        '  - fcmToken: ${fcmToken.substring(0, fcmToken.length > 50 ? 50 : fcmToken.length)}...',
-      );
 
       final result = await _registerFcmTokenUseCase(
         userId: userId,
@@ -261,11 +239,8 @@ class LoginNotifier extends StateNotifier<LoginState> {
         platform: platform,
       );
 
-      print('[DEBUG FCM] Đăng ký FCM token thành công: $result');
       return result;
-    } catch (error, stackTrace) {
-      print('[DEBUG FCM] ❌ Lỗi khi đăng ký FCM token: $error');
-      print('[DEBUG FCM] Stack trace: $stackTrace');
+    } catch (error) {
       return null;
     }
   }

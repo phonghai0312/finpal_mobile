@@ -1,6 +1,4 @@
-import 'package:equatable/equatable.dart';
-
-class UpdateBudgetRequest extends Equatable {
+class UpdateBudgetRequest {
   final String? categoryId;
   final double? amount;
   final String? period;
@@ -27,14 +25,4 @@ class UpdateBudgetRequest extends Equatable {
       'alertThreshold': alertThreshold,
     };
   }
-
-  @override
-  List<Object?> get props => [
-    categoryId,
-    amount,
-    period,
-    startDate,
-    endDate,
-    alertThreshold,
-  ];
 }

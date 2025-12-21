@@ -12,7 +12,7 @@ part of 'budget_api.dart';
 
 class _BudgetApi implements BudgetApi {
   _BudgetApi(this._dio, {this.baseUrl, this.errorLogger}) {
-    baseUrl ??= 'http://10.0.2.2:3001/api/';
+    baseUrl ??= 'https://finpal.id.vn/api/';
   }
 
   final Dio _dio;
@@ -60,12 +60,12 @@ class _BudgetApi implements BudgetApi {
   }
 
   @override
-  Future<BudgetModel> getBudgetById(String id) async {
+  Future<BudgetDetailResponse> getBudgetById(String id) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
-    final _options = _setStreamType<BudgetModel>(
+    final _options = _setStreamType<BudgetDetailResponse>(
       Options(method: 'GET', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
@@ -76,9 +76,9 @@ class _BudgetApi implements BudgetApi {
           .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
     );
     final _result = await _dio.fetch<Map<String, dynamic>>(_options);
-    late BudgetModel _value;
+    late BudgetDetailResponse _value;
     try {
-      _value = BudgetModel.fromJson(_result.data!);
+      _value = BudgetDetailResponse.fromJson(_result.data!);
     } on Object catch (e, s) {
       errorLogger?.logError(e, s, _options, _result);
       rethrow;

@@ -9,6 +9,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'app.dart';
+
 // Background message handler (phải là top-level function)
 // LƯU Ý: Handler này chạy trong isolate riêng, cần init Firebase riêng
 @pragma('vm:entry-point')
@@ -96,6 +97,7 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
     print('[FCM Background] ❌ Lỗi khi hiển thị notification: $e');
     print('[FCM Background] Stack trace: $stackTrace');
   }
+
 }
 
 Future<void> main() async {
@@ -111,26 +113,17 @@ Future<void> main() async {
     // Check if Firebase is already initialized (e.g., hot reload)
     if (Firebase.apps.isEmpty) {
       await Firebase.initializeApp();
-      print('[MAIN] ✅ Firebase initialized successfully');
-    } else {
-      print('[MAIN] ⚠️ Firebase already initialized (${Firebase.apps.length} apps)');
-    }
-  } catch (e, stackTrace) {
-    print('[MAIN] ❌ Firebase initialization failed: $e');
-    print('[MAIN] Stack trace: $stackTrace');
+    } else {}
+  } catch (e) {
     // Continue anyway - app will work but FCM won't function
   }
 
   // ✅ STEP 4: Register background message handler
   // Must be registered BEFORE runApp() and only once
   try {
-    FirebaseMessaging.onBackgroundMessage(
-      firebaseMessagingBackgroundHandler,
-    );
-    print('[MAIN] ✅ Background message handler registered');
-  } catch (e) {
-    print('[MAIN] ⚠️ Failed to register background handler: $e');
-  }
+    FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+    // ignore: empty_catches
+  } catch (e) {}
 
   // ✅ STEP 5: Run the app
   // Firebase is now guaranteed to be initialized
@@ -145,5 +138,3 @@ Future<void> main() async {
     ),
   );
 }
-
-

@@ -8,6 +8,8 @@ class UserModel extends User {
     required super.email,
     required super.phone,
     required super.name,
+    required super.totalIncome,
+    required super.totalExpense,
     required super.avatarUrl,
     required super.settings,
     required super.createdAt,
@@ -25,11 +27,11 @@ class UserModel extends User {
       email: json['email']?.toString(),
       phone: json['phone']?.toString(),
       name: json['name']?.toString(),
+      totalIncome: (json['totalIncome'] as num?)?.toInt() ?? 0,
+      totalExpense: (json['totalExpense'] as num?)?.toInt() ?? 0,
       avatarUrl: json['avatarUrl']?.toString(),
       settings: json['settings'] != null
-          ? UserSettingsModel.fromJson(
-              json['settings'] as Map<String, dynamic>,
-            )
+          ? UserSettingsModel.fromJson(json['settings'] as Map<String, dynamic>)
           : null,
       createdAt: (json['createdAt'] as num?)?.toInt() ?? 0,
       updatedAt: (json['updatedAt'] as num?)?.toInt() ?? 0,
@@ -42,6 +44,8 @@ class UserModel extends User {
       'email': email,
       'phone': phone,
       'name': name,
+      'totalIncome': totalIncome,
+      'totalExpense': totalExpense,
       'avatarUrl': avatarUrl,
       'settings': settings is UserSettingsModel
           ? (settings! as UserSettingsModel).toJson()

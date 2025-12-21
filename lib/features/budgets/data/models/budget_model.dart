@@ -19,11 +19,23 @@ class BudgetModel extends Budget {
   factory BudgetModel.fromJson(Map<String, dynamic> json) {
     final rawId = json['_id'] ?? json['id'] ?? json['budgetId'];
     final rawUser = json['user'] ?? json['userId'];
+
+    final category = json['categoryId'];
+
     return BudgetModel(
       id: rawId?.toString() ?? '',
       userId: rawUser?.toString() ?? '',
-      categoryId: json['categoryId']?.toString() ?? '',
-      categoryName: json['categoryName']?.toString() ?? '',
+
+      /// ✅ FIX CHUẨN CATEGORY
+      categoryId: category is Map
+          ? category['_id']?.toString() ?? ''
+          : category?.toString() ?? '',
+
+      categoryName: category is Map
+          ? category['displayName']?.toString() ?? ''
+          : '',
+
+      /// ✅ AMOUNT / DATE ĐÃ ĐÚNG
       amount: (json['amount'] as num?)?.toDouble() ?? 0,
       spentAmount: (json['spentAmount'] as num?)?.toDouble() ?? 0,
       period: json['period']?.toString() ?? 'monthly',
@@ -35,7 +47,6 @@ class BudgetModel extends Budget {
     );
   }
 
-  @override
   Map<String, dynamic> toJson() {
     return {
       '_id': id,
@@ -87,9 +98,11 @@ class BudgetListResponseModel {
   factory BudgetListResponseModel.fromJson(Map<String, dynamic> json) {
     final rawItems = (json['items'] as List<dynamic>?) ?? const <dynamic>[];
     return BudgetListResponseModel(
-      items: rawItems
-          .map((item) => BudgetModel.fromJson(item as Map<String, dynamic>))
-          .toList(),
+      items: rawItems.map((item) {
+        final map = item as Map<String, dynamic>;
+        return BudgetModel.fromJson(map['budget'] ?? map);
+      }).toList(),
+
       page: (json['page'] as num?)?.toInt() ?? 1,
       pageSize: (json['pageSize'] as num?)?.toInt() ?? rawItems.length,
       total: (json['total'] as num?)?.toInt() ?? rawItems.length,

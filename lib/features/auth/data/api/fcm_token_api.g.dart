@@ -12,7 +12,7 @@ part of 'fcm_token_api.dart';
 
 class _FcmTokenApi implements FcmTokenApi {
   _FcmTokenApi(this._dio, {this.baseUrl, this.errorLogger}) {
-    baseUrl ??= 'http://10.0.2.2:3002/notification';
+    baseUrl ??= 'https://finpal.id.vn/notification';
   }
 
   final Dio _dio;

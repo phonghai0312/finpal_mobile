@@ -1,3 +1,5 @@
+// ignore_for_file: unused_result, use_build_context_synchronously
+
 import 'dart:async';
 
 import 'package:flutter/material.dart';
