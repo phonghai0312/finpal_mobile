@@ -1,4 +1,4 @@
-// ignore_for_file: deprecated_member_use, depend_on_referenced_packages
+// ignore_for_file: deprecated_member_use, depend_on_referenced_packages, use_build_context_synchronously
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -41,29 +41,26 @@ class _SuggestionsPageState extends ConsumerState<SuggestionsPage> {
           children: [
             /// Nếu loading + chưa có data
             if (state.isLoading && state.insights.isEmpty)
-              const Expanded(
-                child: Center(child: CircularProgressIndicator()),
-              )
-
+              const Expanded(child: Center(child: CircularProgressIndicator()))
             /// Nếu lỗi + chưa có data
             else if (state.errorMessage != null && state.insights.isEmpty)
               Expanded(
                 child: Center(
                   child: Text(
                     "Error: ${state.errorMessage}",
-                    style:
-                        TextStyle(color: AppColors.bgError, fontSize: 16.sp),
+                    style: TextStyle(color: AppColors.bgError, fontSize: 16.sp),
                   ),
                 ),
               )
-
             /// DANH SÁCH GỢI Ý
             else
               Expanded(
                 child: ListView.builder(
                   physics: const BouncingScrollPhysics(),
-                  padding:
-                      EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 16.w,
+                    vertical: 12.h,
+                  ),
                   itemCount: state.insights.length,
                   itemBuilder: (_, i) {
                     final insight = state.insights[i];
@@ -111,7 +108,6 @@ class _SuggestionsPageState extends ConsumerState<SuggestionsPage> {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-
             // ICON
             Container(
               padding: EdgeInsets.all(10.w),
@@ -119,11 +115,7 @@ class _SuggestionsPageState extends ConsumerState<SuggestionsPage> {
                 color: style.bgColor.withOpacity(.15),
                 shape: BoxShape.circle,
               ),
-              child: Icon(
-                style.icon,
-                color: style.bgColor,
-                size: 26.sp,
-              ),
+              child: Icon(style.icon, color: style.bgColor, size: 26.sp),
             ),
 
             SizedBox(width: 14.w),
@@ -201,10 +193,7 @@ class _SuggestionsPageState extends ConsumerState<SuggestionsPage> {
         );
 
       case "daily_report":
-        return _InsightStyle(
-          icon: Icons.show_chart,
-          bgColor: Colors.cyan,
-        );
+        return _InsightStyle(icon: Icons.show_chart, bgColor: Colors.cyan);
 
       case "monthly_report":
         return _InsightStyle(

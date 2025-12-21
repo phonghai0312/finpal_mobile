@@ -1,23 +1,22 @@
-// ignore_for_file: deprecated_member_use, use_build_context_synchronously
+// ignore_for_file: deprecated_member_use
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:fridge_to_fork_ai/core/config/routing/app_routes.dart';
-import 'package:fridge_to_fork_ai/features/budgets/presentation/providers/budget_provider.dart';
 import 'package:fridge_to_fork_ai/features/categories/presentation/provider/category.notifier.dart';
-import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
 import 'package:fridge_to_fork_ai/core/presentation/theme/app_colors.dart';
+import 'package:fridge_to_fork_ai/core/presentation/widget/button/button.dart';
 import 'package:fridge_to_fork_ai/core/presentation/widget/header/header_with_back.dart';
-import 'package:fridge_to_fork_ai/features/budgets/domain/entities/budget.dart';
-import 'package:fridge_to_fork_ai/features/budgets/presentation/providers/budget_form_notifier.dart';
+
+import 'package:fridge_to_fork_ai/features/budgets/presentation/providers/budget_form/budget_form_notifier.dart';
+import 'package:fridge_to_fork_ai/features/budgets/presentation/providers/budget_form/budget_form_provider.dart';
 import 'package:fridge_to_fork_ai/features/categories/presentation/provider/category_provider.dart';
 
 class BudgetFormPage extends ConsumerStatefulWidget {
-  final String? budgetId;
-  const BudgetFormPage({super.key, this.budgetId});
+  const BudgetFormPage({super.key});
 
   @override
   ConsumerState<BudgetFormPage> createState() => _BudgetFormPageState();
@@ -27,77 +26,72 @@ class _BudgetFormPageState extends ConsumerState<BudgetFormPage> {
   final _formKey = GlobalKey<FormState>();
 
   late final TextEditingController _amountController;
+  late final TextEditingController _alertController;
   late final TextEditingController _startDateController;
   late final TextEditingController _endDateController;
-  late final TextEditingController _alertThresholdController;
 
   @override
   void initState() {
     super.initState();
+
     _amountController = TextEditingController();
+    _alertController = TextEditingController();
     _startDateController = TextEditingController();
     _endDateController = TextEditingController();
-    _alertThresholdController = TextEditingController();
-
-    Future.microtask(() {
-      if (widget.budgetId != null) {
-        ref
-            .read(budgetFormNotifierProvider.notifier)
-            .loadBudget(widget.budgetId!);
-      }
-    });
   }
 
   @override
   void dispose() {
     _amountController.dispose();
+    _alertController.dispose();
     _startDateController.dispose();
     _endDateController.dispose();
-    _alertThresholdController.dispose();
     super.dispose();
-  }
-
-  void _syncControllers(Budget? budget) {
-    if (budget == null) return;
-
-    _amountController.text = budget.amount.toString();
-    _alertThresholdController.text = budget.alertThreshold.toString();
-    _startDateController.text = DateFormat(
-      'dd/MM/yyyy',
-    ).format(DateTime.fromMillisecondsSinceEpoch(budget.startDate * 1000));
-    _endDateController.text = DateFormat(
-      'dd/MM/yyyy',
-    ).format(DateTime.fromMillisecondsSinceEpoch(budget.endDate * 1000));
   }
 
   @override
   Widget build(BuildContext context) {
-    final state = ref.watch(budgetFormNotifierProvider);
-    final categoryState = ref.watch(categoryNotifierProvider);
-
     ref.listen<BudgetFormState>(budgetFormNotifierProvider, (prev, next) {
-      if (next.budget != prev?.budget) {
-        _syncControllers(next.budget);
-      }
+      // 🛑 tránh set lặp vô hạn
+      if (prev?.budget?.id == next.budget?.id) return;
 
-      if (next.isSuccess && (prev == null || !prev.isSuccess)) {
-        context.pop();
-      }
+      final budget = next.budget;
+      if (budget == null) return;
+
+      _amountController.text = NumberFormat.decimalPattern().format(
+        budget.amount,
+      );
+
+      _alertController.text = budget.alertThreshold.toString();
+
+      _startDateController.text = DateFormat(
+        'dd/MM/yyyy',
+      ).format(DateTime.fromMillisecondsSinceEpoch(budget.startDate * 1000));
+
+      _endDateController.text = DateFormat(
+        'dd/MM/yyyy',
+      ).format(DateTime.fromMillisecondsSinceEpoch(budget.endDate * 1000));
     });
 
-    final isEditing = widget.budgetId != null;
+    final state = ref.watch(budgetFormNotifierProvider);
+
+    if (state.isLoading) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+
+    final notifier = ref.read(budgetFormNotifierProvider.notifier);
+    final categoryState = ref.watch(categoryNotifierProvider);
+    final isEditing = state.isEditMode;
 
     return Scaffold(
-      backgroundColor: AppColors.bgSecondary,
+      backgroundColor: AppColors.typoWhite,
       body: SafeArea(
         child: Column(
           children: [
-            /// HEADER
             HeaderWithBack(
               title: isEditing ? 'Chỉnh sửa ngân sách' : 'Tạo ngân sách',
-              onBack: () => context.go(AppRoutes.home),
+              onBack: () => notifier.onBack(context),
             ),
-
             Expanded(
               child: SingleChildScrollView(
                 padding: EdgeInsets.all(16.w),
@@ -107,9 +101,26 @@ class _BudgetFormPageState extends ConsumerState<BudgetFormPage> {
                     children: [
                       _summaryCard(state),
                       16.verticalSpace,
-                      _formCard(state, categoryState),
+                      _formCard(state, notifier, categoryState),
                       24.verticalSpace,
-                      _actionButtons(isEditing, state),
+                      Button(
+                        text: isEditing ? 'Lưu thay đổi' : 'Tạo ngân sách',
+                        onPressed: state.isLoading
+                            ? null
+                            : () {
+                                if (!_formKey.currentState!.validate()) return;
+
+                                notifier.submit(
+                                  context,
+                                  amount: double.parse(
+                                    _amountController.text.replaceAll('.', ''),
+                                  ),
+                                  alertThreshold: double.parse(
+                                    _alertController.text.replaceAll('.', ''),
+                                  ),
+                                );
+                              },
+                      ),
                     ],
                   ),
                 ),
@@ -121,100 +132,41 @@ class _BudgetFormPageState extends ConsumerState<BudgetFormPage> {
     );
   }
 
-  // ---------------------------------------------------------------------------
-  // SUMMARY
-  // ---------------------------------------------------------------------------
-
   Widget _summaryCard(BudgetFormState state) {
     return Container(
       width: double.infinity,
       padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
-        color: AppColors.primaryGreen,
+        color: AppColors.bgDarkGreen,
         borderRadius: BorderRadius.circular(16.r),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            state.categoryName ?? 'Chưa chọn danh mục',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 18.sp,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          6.verticalSpace,
-          Row(
-            children: [
-              _chip(
-                Icons.repeat,
-                state.period == BudgetPeriod.monthly
-                    ? 'Hàng tháng'
-                    : 'Hàng tuần',
-              ),
-              12.horizontalSpace,
-              _chip(
-                Icons.warning_amber_rounded,
-                '${_alertThresholdController.text.isEmpty ? '--' : _alertThresholdController.text}%',
-              ),
-            ],
-          ),
-        ],
+      child: Text(
+        state.categoryName ?? 'Chưa chọn danh mục',
+        style: GoogleFonts.poppins(
+          color: Colors.white,
+          fontSize: 18.sp,
+          fontWeight: FontWeight.w700,
+        ),
       ),
     );
   }
 
-  Widget _chip(IconData icon, String text) {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.15),
-        borderRadius: BorderRadius.circular(20.r),
-      ),
-      child: Row(
-        children: [
-          Icon(icon, size: 14.sp, color: Colors.white),
-          6.horizontalSpace,
-          Text(
-            text,
-            style: TextStyle(color: Colors.white, fontSize: 13.sp),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // ---------------------------------------------------------------------------
-  // FORM CARD
-  // ---------------------------------------------------------------------------
-
-  Widget _formCard(BudgetFormState state, CategoryState categoryState) {
-    final notifier = ref.read(budgetFormNotifierProvider.notifier);
-
+  Widget _formCard(
+    BudgetFormState state,
+    BudgetFormNotifier notifier,
+    CategoryState categoryState,
+  ) {
     return Container(
       padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16.r),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
-          ),
-        ],
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _sectionTitle('Thông tin ngân sách'),
-          16.verticalSpace,
-
-          /// CATEGORY
           DropdownButtonFormField<String>(
             value: state.categoryId,
-            decoration: _inputDecoration('Danh mục'),
+            decoration: const InputDecoration(labelText: 'Danh mục'),
             items: categoryState.categories
                 .map(
                   (c) =>
@@ -225,192 +177,59 @@ class _BudgetFormPageState extends ConsumerState<BudgetFormPage> {
               final c = categoryState.categories.firstWhere((e) => e.id == id);
               notifier.setCategory(id: c.id, name: c.displayName);
             },
-            validator: (v) => v == null ? 'Vui lòng chọn danh mục' : null,
+            validator: (v) => v == null ? 'Chọn danh mục' : null,
           ),
-
           16.verticalSpace,
-
-          _textField(
+          TextFormField(
             controller: _amountController,
-            label: 'Hạn mức chi tiêu',
+            decoration: const InputDecoration(labelText: 'Hạn mức'),
             keyboardType: TextInputType.number,
+            validator: (v) => v == null || v.isEmpty ? 'Không để trống' : null,
           ),
-
           16.verticalSpace,
-
-          DropdownButtonFormField<String>(
-            value: state.period.name,
-            decoration: _inputDecoration('Kỳ hạn'),
-            items: const [
-              DropdownMenuItem(value: 'monthly', child: Text('Hàng tháng')),
-              DropdownMenuItem(value: 'weekly', child: Text('Hàng tuần')),
-            ],
-            onChanged: (v) {
-              notifier.setPeriod(BudgetPeriod.values.byName(v!));
-            },
-          ),
-
-          16.verticalSpace,
-
-          Row(
-            children: [
-              Expanded(
-                child: _dateField(
-                  label: 'Ngày bắt đầu',
-                  controller: _startDateController,
-                  onTap: () => _pickDate(context, true),
-                ),
-              ),
-              12.horizontalSpace,
-              Expanded(
-                child: _dateField(
-                  label: 'Ngày kết thúc',
-                  controller: _endDateController,
-                  onTap: () => _pickDate(context, false),
-                ),
-              ),
-            ],
-          ),
-
-          16.verticalSpace,
-
-          _textField(
-            controller: _alertThresholdController,
-            label: 'Ngưỡng cảnh báo (%)',
+          TextFormField(
+            controller: _alertController,
+            decoration: const InputDecoration(labelText: 'Cảnh báo (%)'),
             keyboardType: TextInputType.number,
+            validator: (v) => v == null || v.isEmpty ? 'Không để trống' : null,
           ),
+          16.verticalSpace,
+          _dateField('Ngày bắt đầu', _startDateController, (d) {
+            notifier.setStartDate(d);
+          }),
+          16.verticalSpace,
+          _dateField('Ngày kết thúc', _endDateController, (d) {
+            notifier.setEndDate(d);
+          }),
         ],
       ),
     );
   }
 
-  // ---------------------------------------------------------------------------
-  // ACTION BUTTONS
-  // ---------------------------------------------------------------------------
-
-  Widget _actionButtons(bool isEditing, BudgetFormState state) {
-    final notifier = ref.read(budgetFormNotifierProvider.notifier);
-
-    return Column(
-      children: [
-        SizedBox(
-          width: double.infinity,
-          child: FilledButton(
-            style: FilledButton.styleFrom(
-              backgroundColor: AppColors.primaryGreen,
-              padding: EdgeInsets.symmetric(vertical: 14.h),
-            ),
-            onPressed: state.isLoading
-                ? null
-                : () {
-                    if (_formKey.currentState!.validate()) {
-                      final amount = double.parse(_amountController.text);
-                      final threshold = double.parse(
-                        _alertThresholdController.text,
-                      );
-
-                      isEditing
-                          ? notifier.updateBudget(
-                              budgetId: widget.budgetId!,
-                              amount: amount,
-                              alertThreshold: threshold,
-                            )
-                          : notifier.createBudget(
-                              amount: amount,
-                              alertThreshold: threshold,
-                            );
-                    }
-                  },
-            child: Text(
-              isEditing ? 'Lưu thay đổi' : 'Tạo ngân sách',
-              style: TextStyle(fontSize: 15.sp),
-            ),
-          ),
-        ),
-        12.verticalSpace,
-        SizedBox(
-          width: double.infinity,
-          child: OutlinedButton(
-            onPressed: () => context.pop(),
-            child: const Text('Hủy'),
-          ),
-        ),
-      ],
-    );
-  }
-
-  // ---------------------------------------------------------------------------
-  // HELPERS
-  // ---------------------------------------------------------------------------
-
-  InputDecoration _inputDecoration(String label) {
-    return InputDecoration(
-      labelText: label,
-      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12.r)),
-      filled: true,
-      fillColor: Colors.white,
-    );
-  }
-
-  Widget _textField({
-    required TextEditingController controller,
-    required String label,
-    TextInputType keyboardType = TextInputType.text,
-  }) {
-    return TextFormField(
-      controller: controller,
-      keyboardType: keyboardType,
-      decoration: _inputDecoration(label),
-      validator: (v) => v == null || v.isEmpty ? 'Không được để trống' : null,
-    );
-  }
-
-  Widget _dateField({
-    required String label,
-    required TextEditingController controller,
-    required VoidCallback onTap,
-  }) {
+  Widget _dateField(
+    String label,
+    TextEditingController controller,
+    void Function(int) onPicked,
+  ) {
     return TextFormField(
       controller: controller,
       readOnly: true,
-      decoration: _inputDecoration(
-        label,
-      ).copyWith(suffixIcon: const Icon(Icons.calendar_today)),
-      onTap: onTap,
-    );
-  }
-
-  Future<void> _pickDate(BuildContext context, bool isStart) async {
-    final picked = await showDatePicker(
-      context: context,
-      firstDate: DateTime(2000),
-      lastDate: DateTime(2100),
-      initialDate: DateTime.now(),
-    );
-    if (picked == null) return;
-
-    final text = DateFormat('dd/MM/yyyy').format(picked);
-    if (isStart) {
-      _startDateController.text = text;
-      ref
-          .read(budgetFormNotifierProvider.notifier)
-          .setStartDate(picked.millisecondsSinceEpoch ~/ 1000);
-    } else {
-      _endDateController.text = text;
-      ref
-          .read(budgetFormNotifierProvider.notifier)
-          .setEndDate(picked.millisecondsSinceEpoch ~/ 1000);
-    }
-  }
-
-  Widget _sectionTitle(String text) {
-    return Text(
-      text,
-      style: TextStyle(
-        fontSize: 16.sp,
-        fontWeight: FontWeight.w700,
-        color: AppColors.typoHeading,
+      decoration: InputDecoration(
+        labelText: label,
+        suffixIcon: const Icon(Icons.calendar_today),
       ),
+      onTap: () async {
+        final picked = await showDatePicker(
+          context: context,
+          firstDate: DateTime(2000),
+          lastDate: DateTime(2100),
+          initialDate: DateTime.now(),
+        );
+        if (picked == null) return;
+
+        controller.text = DateFormat('dd/MM/yyyy').format(picked);
+        onPicked(picked.millisecondsSinceEpoch ~/ 1000);
+      },
     );
   }
 }

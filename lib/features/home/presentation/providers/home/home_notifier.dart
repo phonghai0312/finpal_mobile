@@ -1,22 +1,16 @@
 // ignore_for_file: use_build_context_synchronously
 
 import 'dart:async';
-
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fridge_to_fork_ai/core/config/routing/app_routes.dart';
 import 'package:fridge_to_fork_ai/core/domain/entities/user.dart';
-import 'package:fridge_to_fork_ai/core/presentation/theme/app_colors.dart';
 import 'package:fridge_to_fork_ai/features/budgets/domain/entities/budget.dart';
-import 'package:fridge_to_fork_ai/features/budgets/presentation/providers/budget_notifier.dart';
-import 'package:fridge_to_fork_ai/features/budgets/presentation/providers/budget_provider.dart';
+import 'package:fridge_to_fork_ai/features/budgets/presentation/providers/budget/budget_notifier.dart';
+import 'package:fridge_to_fork_ai/features/budgets/presentation/providers/budget/budget_provider.dart';
+import 'package:fridge_to_fork_ai/features/budgets/presentation/providers/budget_form/budget_form_provider.dart';
 import 'package:fridge_to_fork_ai/features/profile/presentation/provider/profile/profile_notifier.dart';
 import 'package:fridge_to_fork_ai/features/profile/presentation/provider/profile/profile_provider.dart';
-import 'package:fridge_to_fork_ai/features/stats/domain/entities/stats_by_category.dart'
-    show StatsByCategory;
-import 'package:fridge_to_fork_ai/features/stats/domain/entities/stats_overview.dart';
-import 'package:fridge_to_fork_ai/features/suggestions/domain/entities/insight.dart';
 import 'package:fridge_to_fork_ai/features/transactions/domain/entities/transaction.dart';
 import 'package:fridge_to_fork_ai/features/transactions/presentation/provider/transaction/transaction_notifier.dart';
 import 'package:fridge_to_fork_ai/features/transactions/presentation/provider/transaction/transaction_provider.dart';
@@ -25,10 +19,6 @@ import 'package:go_router/go_router.dart';
 /// State
 class HomeState {
   final User? user;
-
-  /// Derived values (UI dùng trực tiếp)
-  final int totalIncome;
-  final int totalExpense;
 
   final List<Budget> budgets;
   final List<Transaction> recentTransactions;
@@ -39,8 +29,6 @@ class HomeState {
 
   const HomeState({
     this.user,
-    this.totalIncome = 0,
-    this.totalExpense = 0,
     this.budgets = const [],
     this.recentTransactions = const [],
     this.isLoading = false,
@@ -50,8 +38,6 @@ class HomeState {
 
   HomeState copyWith({
     User? user,
-    int? totalIncome,
-    int? totalExpense,
     List<Budget>? budgets,
     List<Transaction>? recentTransactions,
     bool? isLoading,
@@ -61,8 +47,6 @@ class HomeState {
   }) {
     return HomeState(
       user: clearUser ? null : (user ?? this.user),
-      totalIncome: totalIncome ?? this.totalIncome,
-      totalExpense: totalExpense ?? this.totalExpense,
       budgets: budgets ?? this.budgets,
       recentTransactions: recentTransactions ?? this.recentTransactions,
       isLoading: isLoading ?? this.isLoading,
@@ -94,10 +78,11 @@ class HomeNotifier extends StateNotifier<HomeState> {
 
     state = state.copyWith(isLoading: true);
 
-    // đảm bảo các notifier khác đã có data
-    ref.read(profileNotifierProvider.notifier).init(context);
-    ref.read(budgetNotifierProvider.notifier).fetchBudgets();
-    ref.read(transactionNotifierProvider.notifier).init(context);
+    await Future.wait([
+      ref.read(profileNotifierProvider.notifier).init(context),
+      ref.read(budgetNotifierProvider.notifier).init(context),
+      ref.read(transactionNotifierProvider.notifier).init(context),
+    ]);
 
     state = state.copyWith(isLoading: false);
   }
@@ -110,7 +95,7 @@ class HomeNotifier extends StateNotifier<HomeState> {
 
     await Future.wait([
       ref.read(profileNotifierProvider.notifier).fetchProfile(context),
-      ref.read(budgetNotifierProvider.notifier).fetchBudgets(),
+      ref.read(budgetNotifierProvider.notifier).init(context),
       ref.read(transactionNotifierProvider.notifier).refresh(context),
     ]);
 
@@ -126,11 +111,7 @@ class HomeNotifier extends StateNotifier<HomeState> {
       final user = next.user;
       if (user == null) return;
 
-      state = state.copyWith(
-        user: user,
-        totalIncome: user.totalIncome,
-        totalExpense: user.totalExpense,
-      );
+      state = state.copyWith(user: user);
     });
 
     /// BUDGETS
@@ -156,7 +137,8 @@ class HomeNotifier extends StateNotifier<HomeState> {
     context.go(AppRoutes.budgetDetail);
   }
 
-  void onButtonSeeAllBudgets(BuildContext context) {
+  void onButtonCreateBudgets(BuildContext context) {
+    ref.read(budgetFormNotifierProvider.notifier).enterCreateMode();
     context.go(AppRoutes.budgetForm);
   }
 }

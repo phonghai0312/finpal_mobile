@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:fridge_to_fork_ai/features/budgets/data/models/budget_detail_response_model.dart';
 import 'package:retrofit/retrofit.dart';
 
 import 'package:fridge_to_fork_ai/core/config/constant/api_base.dart';
@@ -19,7 +20,7 @@ abstract class BudgetApi {
   });
 
   @GET('/budgets/{id}')
-  Future<BudgetModel> getBudgetById(@Path('id') String id);
+  Future<BudgetDetailResponse> getBudgetById(@Path('id') String id);
 
   @POST('/budgets')
   Future<BudgetModel> createBudget(@Body() Map<String, dynamic> body);
@@ -33,4 +34,3 @@ abstract class BudgetApi {
   @DELETE('/budgets/{id}')
   Future<void> deleteBudget(@Path('id') String id);
 }
-

@@ -1,12 +1,10 @@
-import 'package:equatable/equatable.dart';
-
-class CreateBudgetRequest extends Equatable {
+class CreateBudgetRequest {
   final String categoryId;
   final double amount;
   final String period;
   final int startDate;
   final int endDate;
-  final double? alertThreshold;
+  final double alertThreshold;
 
   const CreateBudgetRequest({
     required this.categoryId,
@@ -14,7 +12,7 @@ class CreateBudgetRequest extends Equatable {
     required this.period,
     required this.startDate,
     required this.endDate,
-    this.alertThreshold,
+    required this.alertThreshold,
   });
 
   Map<String, dynamic> toJson() {
@@ -27,14 +25,4 @@ class CreateBudgetRequest extends Equatable {
       'alertThreshold': alertThreshold,
     };
   }
-
-  @override
-  List<Object?> get props => [
-    categoryId,
-    amount,
-    period,
-    startDate,
-    endDate,
-    alertThreshold,
-  ];
 }
