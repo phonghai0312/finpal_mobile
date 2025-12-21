@@ -12,7 +12,7 @@ part of 'insight_api.dart';
 
 class _InsightApi implements InsightApi {
   _InsightApi(this._dio, {this.baseUrl, this.errorLogger}) {
-    baseUrl ??= 'http://10.0.2.2:3001/api/';
+    baseUrl ??= 'https://finpal.id.vn/api/';
   }
 
   final Dio _dio;
