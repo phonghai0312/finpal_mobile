@@ -74,7 +74,6 @@ import UserNotifications
     withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
     let userInfo = notification.request.content.userInfo
     
-    // Print notification data
     print("[AppDelegate] 📨 Foreground notification received:")
     print("[AppDelegate]   - Title: \(notification.request.content.title)")
     print("[AppDelegate]   - Body: \(notification.request.content.body)")
@@ -108,8 +107,5 @@ extension AppDelegate: MessagingDelegate {
   // Handle FCM token refresh
   func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
     print("[AppDelegate] 🔑 FCM token: \(fcmToken ?? "nil")")
-    
-    // Send token to your server if needed
-    // TODO: Implement token upload to your backend
   }
 }

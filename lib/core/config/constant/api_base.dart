@@ -5,7 +5,7 @@ class ApiBaseDev {
 }
 
 class ApiBaseNotiDev {
-  static const String baseUrlNotification = 'http://10.0.2.2:3002';
+  static const String baseUrlNotification = 'https://finpal.id.vn/notification';
 }
 
 class ApiBaseProd {
