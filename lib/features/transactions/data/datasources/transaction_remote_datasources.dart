@@ -11,8 +11,28 @@ class TransactionRemoteDataSource {
 
   final TransactionApi _api;
 
-  Future<List<TransactionModel>> getTransactions() async {
-    final response = await _guardRequest(() => _api.getTransactions());
+  Future<List<TransactionModel>> getTransactions({
+    int? from,
+    int? to,
+    String? type,
+    String? direction,
+    String? categoryId,
+    String? accountId,
+    int? page,
+    int? pageSize,
+  }) async {
+    final response = await _guardRequest(
+      () => _api.getTransactions(
+        from: from,
+        to: to,
+        type: type,
+        direction: direction,
+        categoryId: categoryId,
+        accountId: accountId,
+        page: page,
+        pageSize: pageSize,
+      ),
+    );
     return response.items;
   }
 
@@ -35,7 +55,7 @@ class TransactionRemoteDataSource {
   }
 
   Future<void> deleteTransaction(String id) async {
-     await _guardRequest(() => _api.deleteTransaction(id));
+    await _guardRequest(() => _api.deleteTransaction(id));
   }
 
   Future<TransactionModel> createTransaction({
@@ -48,20 +68,23 @@ class TransactionRemoteDataSource {
   }) async {
     // Calculate direction from type: expense -> 'out', income -> 'in'
     final direction = type == 'expense' ? 'out' : 'in';
-    
+
     final body = <String, dynamic>{
       'amount': amount,
       'type': type,
       'direction': direction,
       'currency': 'VND', // Default currency
-      'category': categoryId,
-      'userNote': note ?? '',
+      'categoryId': categoryId,
       'occurredAt': occurredAt,
       'source': 'manual', // Manual transaction creation
-      'normalized': {
-        'title': title.isNotEmpty ? title : null,
-      },
     };
+
+    if (note != null && note.isNotEmpty) {
+      body['userNote'] = note;
+    }
+    if (title.isNotEmpty) {
+      body['normalized'] = {'title': title};
+    }
 
     // Note: user and account are handled by backend from auth token
 

@@ -15,46 +15,60 @@ import '../../../domain/usecase/get_transactions.dart';
 class TransactionState {
   final bool isLoading;
   final bool isRefreshing;
+  final DateTime selectedMonth; // month start (local)
   final String currentFilter;
   final String? currentCategoryId;
   final String searchQuery;
   final String? errorMessage;
+  final bool isMonthFilterFallback;
 
   final List<Transaction> all;
+  final List<Transaction>? monthly;
   final List<Transaction> filtered;
 
-  const TransactionState({
+  TransactionState({
     this.isLoading = false,
     this.isRefreshing = false,
+    DateTime? selectedMonth,
     this.currentFilter = "all",
     this.currentCategoryId,
     this.searchQuery = "",
     this.errorMessage,
+    this.isMonthFilterFallback = false,
     this.all = const [],
+    this.monthly = const [],
     this.filtered = const [],
-  });
+  }) : selectedMonth =
+           selectedMonth ?? DateTime(DateTime.now().year, DateTime.now().month);
 
   TransactionState copyWith({
     bool? isLoading,
     bool? isRefreshing,
+    DateTime? selectedMonth,
     String? currentFilter,
     String? currentCategoryId,
     bool clearCategoryId = false,
     String? searchQuery,
     String? errorMessage,
+    bool? isMonthFilterFallback,
     List<Transaction>? all,
+    List<Transaction>? monthly,
     List<Transaction>? filtered,
   }) {
     return TransactionState(
       isLoading: isLoading ?? this.isLoading,
       isRefreshing: isRefreshing ?? this.isRefreshing,
+      selectedMonth: selectedMonth ?? this.selectedMonth,
       currentFilter: currentFilter ?? this.currentFilter,
       currentCategoryId: clearCategoryId
           ? null
           : (currentCategoryId ?? this.currentCategoryId),
       searchQuery: searchQuery ?? this.searchQuery,
       errorMessage: errorMessage,
+      isMonthFilterFallback:
+          isMonthFilterFallback ?? this.isMonthFilterFallback,
       all: all ?? this.all,
+      monthly: monthly ?? this.monthly ?? const [],
       filtered: filtered ?? this.filtered,
     );
   }
@@ -70,7 +84,16 @@ class TransactionNotifier extends StateNotifier<TransactionState> {
   String? get selectedTransactionId => _selectedId;
 
   TransactionNotifier(this._getTransactions, this.ref)
-    : super(const TransactionState());
+    : super(TransactionState());
+
+  List<DateTime> monthOptions({int count = 12}) {
+    final now = DateTime.now();
+    final current = DateTime(now.year, now.month);
+    return List.generate(
+      count,
+      (i) => DateTime(current.year, current.month - i),
+    );
+  }
 
   /// ============================================
   /// INIT PAGE
@@ -80,11 +103,15 @@ class TransactionNotifier extends StateNotifier<TransactionState> {
     state = state.copyWith(isLoading: true, searchQuery: "");
 
     try {
-      final list = await _getTransactions();
-      state = state.copyWith(isLoading: false, all: list);
+      final list = await _fetchAll();
+      state = state.copyWith(
+        isLoading: false,
+        all: list,
+        isMonthFilterFallback: false,
+      );
       _applyFilters();
     } catch (e) {
-      _showError(context, e.toString());
+      await _fallbackToAll(context, e);
     }
   }
 
@@ -114,15 +141,58 @@ class TransactionNotifier extends StateNotifier<TransactionState> {
     state = state.copyWith(isRefreshing: true);
 
     try {
-      final list = await _getTransactions();
+      final list = await _fetchAll();
 
-      state = state.copyWith(all: list, isRefreshing: false);
+      state = state.copyWith(
+        all: list,
+        isRefreshing: false,
+        isMonthFilterFallback: false,
+      );
 
       /// giữ nguyên filter hiện tại
       _applyFilters();
     } catch (e) {
       state = state.copyWith(isRefreshing: false);
-      _showError(context, e.toString());
+      await _fallbackToAll(context, e);
+    }
+  }
+
+  /// ============================================
+  /// MONTH SELECTOR
+  /// ============================================
+  Future<void> setMonth(BuildContext context, DateTime month) async {
+    final normalized = DateTime(month.year, month.month);
+    if (normalized == state.selectedMonth) return;
+
+    // Lọc client-side để tránh backend lỗi khi dùng from/to.
+    state = state.copyWith(selectedMonth: normalized);
+    _applyFilters();
+  }
+
+  Future<List<Transaction>> _fetchAll() async {
+    final list = await _getTransactions(page: 1, pageSize: 100);
+    final sorted = [...list]
+      ..sort((a, b) => b.occurredAt.compareTo(a.occurredAt));
+    return sorted;
+  }
+
+  Future<void> _fallbackToAll(BuildContext context, Object error) async {
+    try {
+      final list = await _fetchAll();
+      state = state.copyWith(
+        isLoading: false,
+        isRefreshing: false,
+        all: list,
+        isMonthFilterFallback: true,
+        errorMessage: null,
+      );
+      _applyFilters();
+      _showError(
+        context,
+        "Backend đang lỗi khi lọc theo tháng; app sẽ tự lọc theo tháng ở client.",
+      );
+    } catch (_) {
+      _showError(context, error.toString());
     }
   }
 
@@ -178,7 +248,23 @@ class TransactionNotifier extends StateNotifier<TransactionState> {
   }
 
   void _applyFilters() {
-    Iterable<Transaction> result = state.all;
+    final monthStart = DateTime(
+      state.selectedMonth.year,
+      state.selectedMonth.month,
+      1,
+    );
+    final monthEndExclusive = DateTime(
+      state.selectedMonth.year,
+      state.selectedMonth.month + 1,
+      1,
+    );
+
+    final monthly = state.all.where((tx) {
+      final t = DateTime.fromMillisecondsSinceEpoch(tx.occurredAt);
+      return !t.isBefore(monthStart) && t.isBefore(monthEndExclusive);
+    }).toList();
+
+    Iterable<Transaction> result = monthly;
 
     // type filter
     if (state.currentFilter == "income") {
@@ -211,7 +297,7 @@ class TransactionNotifier extends StateNotifier<TransactionState> {
       });
     }
 
-    state = state.copyWith(filtered: result.toList());
+    state = state.copyWith(monthly: monthly, filtered: result.toList());
   }
 
   String _normalizeForSearch(String input) {
