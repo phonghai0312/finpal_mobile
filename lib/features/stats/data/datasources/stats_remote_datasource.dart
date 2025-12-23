@@ -52,7 +52,11 @@ class StatsRemoteDataSource {
     required int to,
     required String categoryKey,
   }) async {
-    final all = await _transactionRemote.getTransactions();
+    final all = await _transactionRemote.getTransactions(
+      from: from ~/ 1000,
+      to: to ~/ 1000,
+      pageSize: 100,
+    );
 
     return all
         .where(

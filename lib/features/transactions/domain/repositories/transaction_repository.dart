@@ -2,7 +2,12 @@ import '../../domain/entities/transaction.dart';
 import '../entities/spend_amount.dart';
 
 abstract class TransactionRepository {
-  Future<List<Transaction>> getTransactions();
+  Future<List<Transaction>> getTransactions({
+    int? from,
+    int? to,
+    int? page,
+    int? pageSize,
+  });
 
   Future<Transaction> getTransactionDetail(String id);
 

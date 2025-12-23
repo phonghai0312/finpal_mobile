@@ -68,7 +68,8 @@ class TransactionsPageState extends ConsumerState<TransactionsPage> {
     double income = 0;
     double expense = 0;
 
-    for (var t in state.all) {
+    // Summary theo tháng đang chọn (không phụ thuộc search/category/type chip).
+    for (var t in (state.monthly ?? const <Transaction>[])) {
       if (t.type == "income") income += t.amount;
       if (t.type == "expense") expense += t.amount;
     }
@@ -191,25 +192,35 @@ class TransactionsPageState extends ConsumerState<TransactionsPage> {
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
       child: Row(
         children: [
-          _chip(
-            "Tất cả",
-            state.currentFilter == "all",
-            () => notifier.filter("all"),
+          Expanded(
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              physics: const BouncingScrollPhysics(),
+              child: Row(
+                children: [
+                  _chip(
+                    "Tất cả",
+                    state.currentFilter == "all",
+                    () => notifier.filter("all"),
+                  ),
+                  SizedBox(width: 8.w),
+                  _chip(
+                    "Thu nhập",
+                    state.currentFilter == "income",
+                    () => notifier.filter("income"),
+                  ),
+                  SizedBox(width: 8.w),
+                  _chip(
+                    "Chi tiêu",
+                    state.currentFilter == "expense",
+                    () => notifier.filter("expense"),
+                  ),
+                ],
+              ),
+            ),
           ),
-          SizedBox(width: 8.w),
-          _chip(
-            "Thu nhập",
-            state.currentFilter == "income",
-            () => notifier.filter("income"),
-          ),
-          SizedBox(width: 8.w),
-          _chip(
-            "Chi tiêu",
-            state.currentFilter == "expense",
-            () => notifier.filter("expense"),
-          ),
-          const Spacer(),
-          _iconButton(Icons.calendar_today),
+          SizedBox(width: 12.w),
+          _monthDropdown(context, state, notifier),
           SizedBox(width: 8.w),
           _iconButton(
             Icons.filter_list,
@@ -219,6 +230,62 @@ class TransactionsPageState extends ConsumerState<TransactionsPage> {
             },
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _monthDropdown(
+    BuildContext context,
+    TransactionState state,
+    TransactionNotifier notifier,
+  ) {
+    final options = notifier.monthOptions(count: 24);
+    final selected = state.selectedMonth;
+
+    return Container(
+      height: 38.w,
+      constraints: BoxConstraints(minWidth: 110.w, maxWidth: 140.w),
+      padding: EdgeInsets.symmetric(horizontal: 10.w),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20.r),
+        border: Border.all(color: Colors.grey.shade400),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<DateTime>(
+          isExpanded: true,
+          value: options.contains(selected) ? selected : options.first,
+          icon: Icon(Icons.keyboard_arrow_down, size: 18.sp),
+          selectedItemBuilder: (ctx) => options
+              .map(
+                (m) => Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    DateFormat('MM/yyyy').format(m),
+                    style: TextStyle(
+                      fontSize: 12.sp,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              )
+              .toList(),
+          items: options
+              .map(
+                (m) => DropdownMenuItem<DateTime>(
+                  value: m,
+                  child: Text(
+                    DateFormat('MM/yyyy').format(m),
+                    style: TextStyle(fontSize: 12.sp),
+                  ),
+                ),
+              )
+              .toList(),
+          onChanged: (value) {
+            if (value == null) return;
+            notifier.setMonth(context, value);
+          },
+        ),
       ),
     );
   }
