@@ -6,7 +6,17 @@ class GetTransactions {
 
   GetTransactions(this.repository);
 
-  Future<List<Transaction>> call() {
-    return repository.getTransactions();
+  Future<List<Transaction>> call({
+    int? from,
+    int? to,
+    int? page,
+    int? pageSize,
+  }) {
+    return repository.getTransactions(
+      from: from,
+      to: to,
+      page: page,
+      pageSize: pageSize,
+    );
   }
 }

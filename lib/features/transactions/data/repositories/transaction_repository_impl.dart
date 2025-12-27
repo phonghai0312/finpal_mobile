@@ -10,8 +10,18 @@ class TransactionRepositoryImpl implements TransactionRepository {
   TransactionRepositoryImpl(this.remote);
 
   @override
-  Future<List<Transaction>> getTransactions() async {
-    final list = await remote.getTransactions();
+  Future<List<Transaction>> getTransactions({
+    int? from,
+    int? to,
+    int? page,
+    int? pageSize,
+  }) async {
+    final list = await remote.getTransactions(
+      from: from,
+      to: to,
+      page: page,
+      pageSize: pageSize,
+    );
     return list.map((m) => m.toEntity()).toList();
   }
 
