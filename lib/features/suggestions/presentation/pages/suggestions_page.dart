@@ -85,79 +85,105 @@ class _SuggestionsPageState extends ConsumerState<SuggestionsPage> {
     final notifier = ref.read(insightsNotifierProvider.notifier);
     final style = _mapInsightType(insight.type);
 
-    return GestureDetector(
-      onTap: () => notifier.onTapDetail(context, insight),
-
-      child: Container(
-        width: double.infinity,
-        margin: EdgeInsets.only(bottom: 16.h),
-        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 18.h),
-        decoration: BoxDecoration(
-          color: AppColors.bgWhite,
-          borderRadius: BorderRadius.circular(16.r),
-          border: Border.all(color: AppColors.bgGray.withOpacity(0.4)),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.04),
-              offset: const Offset(0, 3),
-              blurRadius: 6,
-            ),
-          ],
-        ),
-
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // ICON
-            Container(
-              padding: EdgeInsets.all(10.w),
-              decoration: BoxDecoration(
-                color: style.bgColor.withOpacity(.15),
-                shape: BoxShape.circle,
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(18.r),
+        onTap: () => notifier.onTapDetail(context, insight),
+        child: Container(
+          width: double.infinity,
+          margin: EdgeInsets.only(bottom: 14.h),
+          padding: EdgeInsets.all(14.w),
+          decoration: BoxDecoration(
+            color: AppColors.bgWhite,
+            borderRadius: BorderRadius.circular(18.r),
+            border: Border.all(color: style.bgColor.withOpacity(0.22)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                offset: const Offset(0, 6),
+                blurRadius: 12,
               ),
-              child: Icon(style.icon, color: style.bgColor, size: 26.sp),
-            ),
-
-            SizedBox(width: 14.w),
-
-            // TEXT
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    insight.title,
-                    style: TextStyle(
-                      fontSize: 15.5.sp,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.typoHeading,
-                    ),
+            ],
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // ICON
+              Container(
+                width: 44.w,
+                height: 44.w,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      style.bgColor.withOpacity(0.18),
+                      style.bgColor.withOpacity(0.32),
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
                   ),
-
-                  SizedBox(height: 6.h),
-
-                  Text(
-                    insight.message,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 13.5.sp,
-                      color: AppColors.typoBody,
-                      height: 1.3,
-                    ),
-                  ),
-                ],
+                  borderRadius: BorderRadius.circular(12.r),
+                ),
+                child: Icon(style.icon, color: style.bgColor, size: 22.sp),
               ),
-            ),
 
-            SizedBox(width: 8.w),
+              SizedBox(width: 12.w),
 
-            Icon(
-              Icons.arrow_forward_ios,
-              size: 16.sp,
-              color: AppColors.typoBody,
-            ),
-          ],
+              // TEXT
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      insight.title,
+                      style: TextStyle(
+                        fontSize: 15.5.sp,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.typoHeading,
+                      ),
+                    ),
+                    SizedBox(height: 8.h),
+                    Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 10.w,
+                        vertical: 8.h,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.bgSecondary,
+                        borderRadius: BorderRadius.circular(10.r),
+                      ),
+                      child: Text(
+                        insight.message,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 13.5.sp,
+                          color: AppColors.typoBody,
+                          height: 1.35,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              SizedBox(width: 10.w),
+
+              Container(
+                width: 28.w,
+                height: 28.w,
+                decoration: BoxDecoration(
+                  color: style.bgColor.withOpacity(0.12),
+                  borderRadius: BorderRadius.circular(8.r),
+                ),
+                child: Icon(
+                  Icons.arrow_forward_ios,
+                  size: 14.sp,
+                  color: style.bgColor,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
