@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fridge_to_fork_ai/features/suggestions/presentation/provider/insight_detail/insight_detail_provider.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
 
 import '../../../../../core/presentation/theme/app_colors.dart';
 import '../../../../../core/presentation/widget/header/header_with_back.dart';
@@ -19,6 +19,8 @@ class SuggestionDetailPage extends ConsumerStatefulWidget {
 
 class _SuggestionDetailPageState extends ConsumerState<SuggestionDetailPage> {
   bool _init = false;
+  NumberFormat get _moneyFormat =>
+      NumberFormat.currency(locale: 'vi_VN', symbol: '₫');
 
   @override
   void didChangeDependencies() {
@@ -48,14 +50,14 @@ class _SuggestionDetailPageState extends ConsumerState<SuggestionDetailPage> {
     final IconData typeIcon = typeUI["icon"];
 
     return Scaffold(
-      backgroundColor: AppColors.bgWhite,
+      backgroundColor: AppColors.bgSecondary,
       appBar: HeaderWithBack(
-        title: "Insight Detail",
+        title: "Chi tiết gợi ý",
         onBack: () => notifier.onBack(context),
       ),
 
       body: SingleChildScrollView(
-        padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 12.h),
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -65,19 +67,34 @@ class _SuggestionDetailPageState extends ConsumerState<SuggestionDetailPage> {
             Container(
               padding: EdgeInsets.all(16.w),
               decoration: BoxDecoration(
-                color: typeColor.withOpacity(.12),
+                color: Colors.white,
                 borderRadius: BorderRadius.circular(16.r),
-                border: Border.all(color: typeColor.withOpacity(.4)),
+                border: Border.all(color: Colors.grey.shade200),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.04),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
               ),
               child: Row(
                 children: [
-                  Icon(typeIcon, color: typeColor, size: 30.sp),
+                  Container(
+                    width: 40.w,
+                    height: 40.w,
+                    decoration: BoxDecoration(
+                      color: typeColor.withOpacity(0.12),
+                      borderRadius: BorderRadius.circular(12.r),
+                    ),
+                    child: Icon(typeIcon, color: typeColor, size: 22.sp),
+                  ),
                   SizedBox(width: 12.w),
 
                   Expanded(
                     child: Text(
                       insight.type.toUpperCase(),
-                      style: GoogleFonts.poppins(
+                      style: TextStyle(
                         fontSize: 15.sp,
                         fontWeight: FontWeight.w600,
                         color: AppColors.typoHeading,
@@ -95,8 +112,8 @@ class _SuggestionDetailPageState extends ConsumerState<SuggestionDetailPage> {
             /// ===============================
             Text(
               insight.title,
-              style: GoogleFonts.poppins(
-                fontSize: 20.sp,
+              style: TextStyle(
+                fontSize: 19.sp,
                 fontWeight: FontWeight.w700,
                 color: AppColors.typoHeading,
               ),
@@ -110,13 +127,20 @@ class _SuggestionDetailPageState extends ConsumerState<SuggestionDetailPage> {
             Container(
               padding: EdgeInsets.all(16.w),
               decoration: BoxDecoration(
-                color: AppColors.bgHover,
+                color: Colors.white,
                 borderRadius: BorderRadius.circular(16.r),
-                border: Border.all(color: AppColors.bgGray.withOpacity(.3)),
+                border: Border.all(color: Colors.grey.shade200),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.04),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
               ),
               child: Text(
                 insight.message,
-                style: GoogleFonts.poppins(
+                style: TextStyle(
                   fontSize: 14.sp,
                   height: 1.4,
                   color: AppColors.typoBody,
@@ -130,8 +154,8 @@ class _SuggestionDetailPageState extends ConsumerState<SuggestionDetailPage> {
             /// PERIOD
             /// ===============================
             Text(
-              "Period",
-              style: GoogleFonts.poppins(
+              "Thời gian",
+              style: TextStyle(
                 fontSize: 16.sp,
                 fontWeight: FontWeight.w600,
                 color: AppColors.typoHeading,
@@ -143,16 +167,23 @@ class _SuggestionDetailPageState extends ConsumerState<SuggestionDetailPage> {
             Container(
               padding: EdgeInsets.all(14.w),
               decoration: BoxDecoration(
-                color: AppColors.bgWhite,
+                color: Colors.white,
                 borderRadius: BorderRadius.circular(16.r),
-                border: Border.all(color: AppColors.bgGray.withOpacity(.4)),
+                border: Border.all(color: Colors.grey.shade200),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.04),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
               ),
               child: Row(
                 children: [
                   Expanded(
                     child: Text(
-                      "From: ${insight.period.from}",
-                      style: GoogleFonts.poppins(
+                      "From: ${_formatEpoch(insight.period.from)}",
+                      style: TextStyle(
                         fontSize: 14.sp,
                         color: AppColors.typoBody,
                       ),
@@ -160,9 +191,9 @@ class _SuggestionDetailPageState extends ConsumerState<SuggestionDetailPage> {
                   ),
                   Expanded(
                     child: Text(
-                      "To: ${insight.period.to}",
+                      "To: ${_formatEpoch(insight.period.to)}",
                       textAlign: TextAlign.right,
-                      style: GoogleFonts.poppins(
+                      style: TextStyle(
                         fontSize: 14.sp,
                         color: AppColors.typoBody,
                       ),
@@ -182,38 +213,18 @@ class _SuggestionDetailPageState extends ConsumerState<SuggestionDetailPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    "Details",
-                    style: GoogleFonts.poppins(
+                    "Chi tiết",
+                    style: TextStyle(
                       fontSize: 16.sp,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
                   SizedBox(height: 12.h),
 
-                  Container(
-                    padding: EdgeInsets.all(16.w),
-                    decoration: BoxDecoration(
-                      color: AppColors.bgWhite,
-                      borderRadius: BorderRadius.circular(16.r),
-                      border: Border.all(
-                        color: AppColors.bgGray.withOpacity(.35),
-                      ),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: insight.data.map((e) {
-                        return Padding(
-                          padding: EdgeInsets.only(bottom: 10.h),
-                          child: Text(
-                            "- $e",
-                            style: GoogleFonts.poppins(
-                              fontSize: 14.sp,
-                              color: AppColors.typoBody,
-                            ),
-                          ),
-                        );
-                      }).toList(),
-                    ),
+                  Column(
+                    children: insight.data
+                        .map((e) => _buildDetailItem(e))
+                        .toList(),
                   ),
                 ],
               ),
@@ -221,6 +232,239 @@ class _SuggestionDetailPageState extends ConsumerState<SuggestionDetailPage> {
             SizedBox(height: 40.h),
           ],
         ),
+      ),
+    );
+  }
+
+  String _formatEpoch(int value) {
+    final ms = value < 1000000000000 ? value * 1000 : value;
+    return DateFormat('dd/MM/yyyy').format(
+      DateTime.fromMillisecondsSinceEpoch(ms),
+    );
+  }
+
+  Map<String, String> _parseDetailMap(String raw) {
+    final trimmed = raw.trim();
+    if (!trimmed.startsWith('{') || !trimmed.endsWith('}')) {
+      return {};
+    }
+    final body = trimmed.substring(1, trimmed.length - 1);
+    final parts = body.split(RegExp(r',\s*'));
+    final map = <String, String>{};
+    for (final part in parts) {
+      final idx = part.indexOf(':');
+      if (idx == -1) continue;
+      final key = part.substring(0, idx).trim();
+      final value = part.substring(idx + 1).trim();
+      if (key.isNotEmpty) {
+        map[key] = value;
+      }
+    }
+    return map;
+  }
+
+  MapEntry<String, String>? _parseKeyValueLine(String raw) {
+    final trimmed = raw.trim();
+    final idx = trimmed.indexOf(':');
+    if (idx == -1) return null;
+    final key = trimmed.substring(0, idx).trim();
+    final value = trimmed.substring(idx + 1).trim();
+    if (key.isEmpty) return null;
+    return MapEntry(key, value);
+  }
+
+  String _prettyKey(String key) {
+    switch (key) {
+      case 'totalAmount':
+        return 'Tổng tiền';
+      case 'spentAmount':
+        return 'Đã chi';
+      case 'budgetAmount':
+      case 'limitAmount':
+        return 'Ngân sách';
+      case 'count':
+        return 'Số giao dịch';
+      case 'categoryName':
+        return 'Danh mục';
+      case 'categoryId':
+        return 'Mã danh mục';
+      default:
+        final withSpace = key.replaceAll('_', ' ');
+        return withSpace.isEmpty
+            ? key
+            : withSpace[0].toUpperCase() + withSpace.substring(1);
+    }
+  }
+
+  String _formatValue(String key, String value) {
+    if (key.endsWith('Amount')) {
+      final amount = num.tryParse(value);
+      if (amount != null) {
+        return _moneyFormat.format(amount);
+      }
+    }
+    if (key == 'count') {
+      final count = int.tryParse(value);
+      if (count != null) {
+        return count.toString();
+      }
+    }
+    return value;
+  }
+
+  Widget _buildDetailItem(String raw) {
+    final cleanRaw = raw.replaceFirst(RegExp(r'^-\s*'), '').trim();
+    final map = _parseDetailMap(cleanRaw);
+    final title = map['categoryName'] ?? map['title'] ?? map['name'];
+    final detailEntries = Map<String, String>.from(map)
+      ..remove('categoryName')
+      ..remove('title')
+      ..remove('name');
+
+    if (map.isEmpty) {
+      final kv = _parseKeyValueLine(cleanRaw);
+      if (kv != null) {
+        if (kv.key == 'categoryId') {
+          return const SizedBox.shrink();
+        }
+        return _buildKeyValueTile(kv.key, kv.value);
+      }
+      return Container(
+        width: double.infinity,
+        margin: EdgeInsets.only(bottom: 12.h),
+        padding: EdgeInsets.all(14.w),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(14.r),
+          border: Border.all(color: Colors.grey.shade200),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.04),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Text(
+          cleanRaw,
+          style: TextStyle(
+            fontSize: 14.sp,
+            color: AppColors.typoBody,
+          ),
+        ),
+      );
+    }
+
+    return Container(
+      width: double.infinity,
+      margin: EdgeInsets.only(bottom: 12.h),
+      padding: EdgeInsets.all(14.w),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14.r),
+        border: Border.all(color: Colors.grey.shade200),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (title != null && title.trim().isNotEmpty)
+            Text(
+              title,
+              style: TextStyle(
+                fontSize: 14.5.sp,
+                fontWeight: FontWeight.w600,
+                color: AppColors.typoHeading,
+              ),
+            ),
+          if (title != null) SizedBox(height: 10.h),
+          ...detailEntries.entries.map((entry) {
+            return Padding(
+              padding: EdgeInsets.only(bottom: 8.h),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    flex: 2,
+                    child: Text(
+                      _prettyKey(entry.key),
+                      style: TextStyle(
+                        fontSize: 13.5.sp,
+                        color: AppColors.typoBody,
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 12.w),
+                  Expanded(
+                    flex: 3,
+                    child: Text(
+                      _formatValue(entry.key, entry.value),
+                      textAlign: TextAlign.right,
+                      style: TextStyle(
+                        fontSize: 13.5.sp,
+                        color: AppColors.typoHeading,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }).toList(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildKeyValueTile(String key, String value) {
+    return Container(
+      width: double.infinity,
+      margin: EdgeInsets.only(bottom: 12.h),
+      padding: EdgeInsets.all(14.w),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14.r),
+        border: Border.all(color: Colors.grey.shade200),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            flex: 2,
+            child: Text(
+              _prettyKey(key),
+              style: TextStyle(
+                fontSize: 13.5.sp,
+                color: AppColors.typoBody,
+              ),
+            ),
+          ),
+          SizedBox(width: 12.w),
+          Expanded(
+            flex: 3,
+            child: Text(
+              _formatValue(key, value),
+              textAlign: TextAlign.right,
+              style: TextStyle(
+                fontSize: 13.5.sp,
+                color: AppColors.typoHeading,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
