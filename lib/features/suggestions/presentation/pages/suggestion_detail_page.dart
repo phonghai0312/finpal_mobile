@@ -93,7 +93,7 @@ class _SuggestionDetailPageState extends ConsumerState<SuggestionDetailPage> {
 
                   Expanded(
                     child: Text(
-                      insight.type.toUpperCase(),
+                      _formatInsightType(insight.type),
                       style: TextStyle(
                         fontSize: 15.sp,
                         fontWeight: FontWeight.w600,
@@ -182,7 +182,7 @@ class _SuggestionDetailPageState extends ConsumerState<SuggestionDetailPage> {
                 children: [
                   Expanded(
                     child: Text(
-                      "From: ${_formatEpoch(insight.period.from)}",
+                      "Từ: ${_formatEpoch(insight.period.from)}",
                       style: TextStyle(
                         fontSize: 14.sp,
                         color: AppColors.typoBody,
@@ -191,7 +191,7 @@ class _SuggestionDetailPageState extends ConsumerState<SuggestionDetailPage> {
                   ),
                   Expanded(
                     child: Text(
-                      "To: ${_formatEpoch(insight.period.to)}",
+                      "Đến: ${_formatEpoch(insight.period.to)}",
                       textAlign: TextAlign.right,
                       style: TextStyle(
                         fontSize: 14.sp,
@@ -288,10 +288,34 @@ class _SuggestionDetailPageState extends ConsumerState<SuggestionDetailPage> {
         return 'Danh mục';
       case 'categoryId':
         return 'Mã danh mục';
+      case 'type':
+        return 'Loại';
       default:
         final withSpace = key.replaceAll('_', ' ');
         return withSpace.isEmpty
             ? key
+            : withSpace[0].toUpperCase() + withSpace.substring(1);
+    }
+  }
+
+  String _formatInsightType(String type) {
+    switch (type) {
+      case 'daily_report':
+        return 'Báo cáo ngày';
+      case 'monthly_report':
+        return 'Báo cáo tháng';
+      case 'monthly_summary':
+        return 'Tổng kết tháng';
+      case 'budget_alert':
+        return 'Cảnh báo ngân sách';
+      case 'alert':
+        return 'Cảnh báo';
+      case 'tip':
+        return 'Mẹo';
+      default:
+        final withSpace = type.replaceAll('_', ' ');
+        return withSpace.isEmpty
+            ? type
             : withSpace[0].toUpperCase() + withSpace.substring(1);
     }
   }
