@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:heroicons/heroicons.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../core/presentation/theme/app_colors.dart';
@@ -406,7 +407,10 @@ class TransactionsPageState extends ConsumerState<TransactionsPage> {
                       shrinkWrap: true,
                       children: [
                         ListTile(
-                          leading: const Icon(Icons.clear_all),
+                          leading: _categoryLeadingIcon(
+                            icon: HeroIcons.squares2x2,
+                            color: Colors.grey.shade600,
+                          ),
                           title: const Text('Tất cả danh mục'),
                           selected: currentCategoryId == null,
                           onTap: () {
@@ -414,15 +418,32 @@ class TransactionsPageState extends ConsumerState<TransactionsPage> {
                             Navigator.pop(sheetContext);
                           },
                         ),
-                        for (final category in categories)
+                        for (var i = 0; i < categories.length; i++) ...[
                           ListTile(
-                            title: Text(category.displayName),
-                            selected: category.id == currentCategoryId,
+                            leading: _categoryLeadingIcon(
+                              icon: _categoryHeroIcon(categories[i].icon),
+                              color: _categoryColor(i),
+                              size: _isFoodCategory(
+                                    displayName: categories[i].displayName,
+                                    iconName: categories[i].icon,
+                                  )
+                                  ? 18
+                                  : 16,
+                              backgroundOpacity: _isFoodCategory(
+                                    displayName: categories[i].displayName,
+                                    iconName: categories[i].icon,
+                                  )
+                                  ? 0.2
+                                  : 0.12,
+                            ),
+                            title: Text(categories[i].displayName),
+                            selected: categories[i].id == currentCategoryId,
                             onTap: () {
-                              notifier.setCategoryFilter(category.id);
+                              notifier.setCategoryFilter(categories[i].id);
                               Navigator.pop(sheetContext);
                             },
                           ),
+                        ],
                       ],
                     ),
                   ),
@@ -437,6 +458,79 @@ class TransactionsPageState extends ConsumerState<TransactionsPage> {
   // ---------------------------------------------------------------------------
   // TRANSACTION LIST
   // ---------------------------------------------------------------------------
+
+  Widget _categoryLeadingIcon({
+    required HeroIcons icon,
+    required Color color,
+    double size = 16,
+    double backgroundOpacity = 0.12,
+  }) {
+    return Container(
+      width: 32.w,
+      height: 32.w,
+      decoration: BoxDecoration(
+        color: color.withOpacity(backgroundOpacity),
+        shape: BoxShape.circle,
+      ),
+      child: HeroIcon(
+        icon,
+        style: HeroIconStyle.solid,
+        color: color,
+        size: size.sp,
+      ),
+    );
+  }
+
+  bool _isFoodCategory({required String displayName, String? iconName}) {
+    final name = displayName.toLowerCase();
+    return iconName == 'fastfood' ||
+        iconName == 'local_cafe' ||
+        name.contains('an uong') ||
+        name.contains('an_uong') ||
+        name.contains('ăn uống') ||
+        name.contains('ăn');
+  }
+
+  HeroIcons _categoryHeroIcon(String? iconName) {
+    if (iconName == null) return HeroIcons.squares2x2;
+    switch (iconName) {
+      case 'fastfood':
+        return HeroIcons.cake;
+      case 'shopping_bag':
+        return HeroIcons.shoppingBag;
+      case 'attach_money':
+        return HeroIcons.currencyDollar;
+      case 'directions_car':
+        return HeroIcons.truck;
+      case 'medical_services':
+        return HeroIcons.heart;
+      case 'home':
+        return HeroIcons.home;
+      case 'favorite':
+        return HeroIcons.heart;
+      case 'local_cafe':
+        return HeroIcons.beaker;
+      case 'water_drop':
+        return HeroIcons.beaker;
+      case 'flash_on':
+        return HeroIcons.bolt;
+      default:
+        return HeroIcons.squares2x2;
+    }
+  }
+
+  Color _categoryColor(int index) {
+    const palette = [
+      AppColors.primaryGreen,
+      AppColors.bgWarning,
+      AppColors.bgDarkGreen,
+      AppColors.darkRed,
+      AppColors.lightGreen,
+      AppColors.bgInfo,
+      AppColors.bgError,
+    ];
+    return palette[index % palette.length];
+  }
 
   Widget _buildTransactionList(
     BuildContext context,

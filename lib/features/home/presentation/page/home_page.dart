@@ -38,7 +38,7 @@ class _HomePageState extends ConsumerState<HomePage> {
     final state = ref.watch(homeNotifierProvider);
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.bgSecondary,
       body: SafeArea(
         top: false,
         child: RefreshIndicator(
@@ -176,13 +176,22 @@ class _HomePageState extends ConsumerState<HomePage> {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16.r),
+          border: Border.all(color: Colors.grey.shade200),
           boxShadow: [
             BoxShadow(
-              color: Colors.black12,
-              blurRadius: 6.r,
-              offset: const Offset(0, 3),
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 10.r,
+              offset: const Offset(0, 6),
             ),
           ],
+          gradient: LinearGradient(
+            colors: [
+              Colors.white,
+              bgColor.withOpacity(0.08),
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
         ),
         child: Row(
           children: [

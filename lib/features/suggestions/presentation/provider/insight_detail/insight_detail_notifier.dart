@@ -51,23 +51,50 @@ class InsightDetailNotifier extends StateNotifier<InsightDetailState> {
       case "alert":
         return {
           'icon': Icons.warning_amber_outlined,
-          'color': AppColors.bgWarning,
+          'color': Colors.amber.shade400,
         };
 
       case "tip":
         return {
           'icon': Icons.lightbulb_outline,
-          'color': AppColors.primaryGreen,
+          'color': Colors.lightGreen.shade400,
         };
 
       case "summary":
         return {
           'icon': Icons.analytics_outlined,
-          'color': AppColors.bgDarkGreen,
+          'color': Colors.lightBlue.shade400,
         };
 
       case "anomaly":
-        return {'icon': Icons.error_outline, 'color': AppColors.typoPrimary};
+        return {
+          'icon': Icons.error_outline,
+          'color': Colors.red.shade400,
+        };
+
+      case "budget_alert":
+        return {
+          'icon': Icons.account_balance_wallet_outlined,
+          'color': Colors.orange.shade400,
+        };
+
+      case "monthly_summary":
+        return {
+          'icon': Icons.stacked_line_chart,
+          'color': Colors.lightBlue.shade400,
+        };
+
+      case "daily_report":
+        return {
+          'icon': Icons.show_chart,
+          'color': Colors.lightBlue.shade400,
+        };
+
+      case "monthly_report":
+        return {
+          'icon': Icons.monitor_heart_outlined,
+          'color': Colors.lightBlue.shade400,
+        };
 
       default:
         return {'icon': Icons.info_outline, 'color': AppColors.typoBody};
