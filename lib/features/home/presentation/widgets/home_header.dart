@@ -28,14 +28,7 @@ class HomeHeader extends ConsumerWidget {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            AppColors.bgDarkGreen,
-            AppColors.primaryGreen,
-          ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
+        color: AppColors.bgDarkGreen,
         borderRadius: BorderRadius.only(
           bottomLeft: Radius.circular(28.r),
           bottomRight: Radius.circular(28.r),

@@ -312,7 +312,7 @@ class _SuggestionDetailPageState extends ConsumerState<SuggestionDetailPage> {
       final key = part.substring(0, idx).trim();
       final value = part.substring(idx + 1).trim();
       if (key.isNotEmpty) {
-        map[key] = value;
+        map[key] = value == 'null' ? '' : value;
       }
     }
     return map;
@@ -328,6 +328,38 @@ class _SuggestionDetailPageState extends ConsumerState<SuggestionDetailPage> {
     return MapEntry(key, value);
   }
 
+  List<Map<String, String>> _parseListOfMaps(String raw) {
+    final trimmed = raw.trim();
+    if (!trimmed.startsWith('[') || !trimmed.endsWith(']')) {
+      return [];
+    }
+    final body = trimmed.substring(1, trimmed.length - 1).trim();
+    if (body.isEmpty) return [];
+    final segments = <String>[];
+    final buffer = StringBuffer();
+    var depth = 0;
+    for (var i = 0; i < body.length; i++) {
+      final char = body[i];
+      if (char == '{') {
+        depth++;
+      }
+      if (depth > 0) {
+        buffer.write(char);
+      }
+      if (char == '}') {
+        depth--;
+        if (depth == 0) {
+          segments.add(buffer.toString().trim());
+          buffer.clear();
+        }
+      }
+    }
+    return segments
+        .map(_parseDetailMap)
+        .where((map) => map.isNotEmpty)
+        .toList();
+  }
+
   String _prettyKey(String key) {
     switch (key) {
       case 'totalAmount':
@@ -336,11 +368,35 @@ class _SuggestionDetailPageState extends ConsumerState<SuggestionDetailPage> {
         return 'Đã chi';
       case 'budgetLimit':
         return 'Ngân sách';
+      case 'expenseCur':
+        return 'Chi tiêu tháng này';
+      case 'incomeCur':
+        return 'Thu nhập tháng này';
+      case 'saving':
+        return 'Tiết kiệm tháng này';
+      case 'savingRate':
+        return 'Tỷ lệ tiết kiệm';
+      case 'expensePrev':
+        return 'Chi tiêu tháng trước';
+      case 'incomePrev':
+        return 'Thu nhập tháng trước';
+      case 'diffExpense':
+        return 'Chênh lệch chi tiêu';
+      case 'diffIncome':
+        return 'Chênh lệch thu nhập';
       case 'usagePercentage':
         return 'Tỷ lệ sử dụng';
+      case 'percentage':
+        return 'Tỷ lệ';
       case 'budgetAmount':
       case 'limitAmount':
         return 'Ngân sách';
+      case 'totalExpense':
+        return 'Tổng chi';
+      case 'totalIncome':
+        return 'Tổng thu';
+      case 'totalTransactions':
+        return 'Số giao dịch';
       case 'count':
         return 'Số giao dịch';
       case 'categoryName':
@@ -349,12 +405,23 @@ class _SuggestionDetailPageState extends ConsumerState<SuggestionDetailPage> {
         return 'Mã danh mục';
       case 'type':
         return 'Loại';
+      case 'expenses':
+        return 'Chi tiêu';
+      case 'incomes':
+        return 'Thu nhập';
+      case 'summary':
+        return 'Tổng kết';
       default:
         final withSpace = key.replaceAll('_', ' ');
         return withSpace.isEmpty
             ? key
             : withSpace[0].toUpperCase() + withSpace.substring(1);
     }
+  }
+
+  num? _tryParseNumber(String value) {
+    final cleaned = value.replaceAll(RegExp(r'[₫\s,]'), '');
+    return num.tryParse(cleaned);
   }
 
   String _formatInsightType(String type) {
@@ -381,17 +448,46 @@ class _SuggestionDetailPageState extends ConsumerState<SuggestionDetailPage> {
 
   String _formatValue(String key, String value) {
     final lowerKey = key.toLowerCase();
-    if (lowerKey.contains('amount') || lowerKey.contains('limit')) {
-      final amount = num.tryParse(value);
+    final moneyKeys = <String>{
+      'totalamount',
+      'spentamount',
+      'budgetlimit',
+      'budgetamount',
+      'limitamount',
+      'expensecur',
+      'incomecur',
+      'saving',
+      'expenseprev',
+      'incomeprev',
+      'diffexpense',
+      'diffincome',
+      'totalexpense',
+      'totalincome',
+    };
+    final isMoneyKey = moneyKeys.contains(lowerKey) ||
+        lowerKey.contains('amount') ||
+        lowerKey.contains('limit');
+    if (isMoneyKey) {
+      final amount = _tryParseNumber(value);
       if (amount != null) {
+        if (lowerKey.startsWith('diff')) {
+          if (amount == 0) {
+            return _moneyFormat.format(0);
+          }
+          final sign = amount > 0 ? '+' : '-';
+          return '$sign${_moneyFormat.format(amount.abs())}';
+        }
         return _moneyFormat.format(amount);
       }
     }
-    if (lowerKey.contains('percentage') || lowerKey.contains('percent')) {
+    if (lowerKey.contains('percentage') ||
+        lowerKey.contains('percent') ||
+        lowerKey.contains('rate')) {
       if (value.contains('%')) return value;
-      final percentage = num.tryParse(value);
+      final percentage = _tryParseNumber(value);
       if (percentage != null) {
-        return '${percentage.toStringAsFixed(percentage % 1 == 0 ? 0 : 2)}%';
+        final normalized = percentage <= 1 ? percentage * 100 : percentage;
+        return '${normalized.toStringAsFixed(normalized % 1 == 0 ? 0 : 2)}%';
       }
       return '$value%';
     }
@@ -417,6 +513,36 @@ class _SuggestionDetailPageState extends ConsumerState<SuggestionDetailPage> {
         .join(' ');
   }
 
+  List<MapEntry<String, String>> _sortedDetailEntries(
+    Map<String, String> source,
+  ) {
+    const priority = [
+      'totalAmount',
+      'spentAmount',
+      'totalExpense',
+      'totalIncome',
+      'saving',
+      'count',
+      'usagePercentage',
+      'percentage',
+      'savingRate',
+      'diffExpense',
+      'diffIncome',
+    ];
+    final entries = source.entries.toList();
+    entries.sort((a, b) {
+      final aIndex = priority.indexOf(a.key);
+      final bIndex = priority.indexOf(b.key);
+      if (aIndex == -1 && bIndex == -1) {
+        return a.key.compareTo(b.key);
+      }
+      if (aIndex == -1) return 1;
+      if (bIndex == -1) return -1;
+      return aIndex.compareTo(bIndex);
+    });
+    return entries;
+  }
+
   Widget _buildDetailItem(String raw, Color accentColor) {
     final cleanRaw = raw.replaceFirst(RegExp(r'^-\s*'), '').trim();
     final map = _parseDetailMap(cleanRaw);
@@ -432,6 +558,14 @@ class _SuggestionDetailPageState extends ConsumerState<SuggestionDetailPage> {
       if (kv != null) {
         if (kv.key == 'categoryId') {
           return const SizedBox.shrink();
+        }
+        final mapValue = _parseDetailMap(kv.value);
+        if (mapValue.isNotEmpty) {
+          return _buildKeyValueMapTile(kv.key, mapValue, accentColor);
+        }
+        final listItems = _parseListOfMaps(kv.value);
+        if (listItems.isNotEmpty) {
+          return _buildKeyValueListTile(kv.key, listItems, accentColor);
         }
         return _buildKeyValueTile(kv.key, kv.value, accentColor);
       }
@@ -506,7 +640,7 @@ class _SuggestionDetailPageState extends ConsumerState<SuggestionDetailPage> {
                         ),
                       ),
                     if (title != null) SizedBox(height: 10.h),
-                    ...detailEntries.entries.map((entry) {
+                    ..._sortedDetailEntries(detailEntries).map((entry) {
                       return Padding(
                         padding: EdgeInsets.only(bottom: 8.h),
                         child: Row(
@@ -539,6 +673,220 @@ class _SuggestionDetailPageState extends ConsumerState<SuggestionDetailPage> {
                         ),
                       );
                     }).toList(),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildKeyValueMapTile(
+    String key,
+    Map<String, String> mapValue,
+    Color accentColor,
+  ) {
+    final detailEntries = Map<String, String>.from(mapValue)
+      ..removeWhere((_, value) => value.trim().isEmpty);
+    return Container(
+      width: double.infinity,
+      margin: EdgeInsets.only(bottom: 12.h),
+      decoration: BoxDecoration(
+        color: accentColor.withOpacity(0.04),
+        borderRadius: BorderRadius.circular(14.r),
+        border: Border.all(color: accentColor.withOpacity(0.18)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: IntrinsicHeight(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Container(
+              width: 4.w,
+              decoration: BoxDecoration(
+                color: accentColor,
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(14.r),
+                  bottomLeft: Radius.circular(14.r),
+                ),
+              ),
+            ),
+            Expanded(
+              child: Padding(
+                padding: EdgeInsets.all(14.w),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      _prettyKey(key),
+                      style: TextStyle(
+                        fontSize: 13.5.sp,
+                        color: AppColors.typoBody,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    SizedBox(height: 10.h),
+                    ..._sortedDetailEntries(detailEntries).map(
+                      (entry) => Padding(
+                        padding: EdgeInsets.only(bottom: 8.h),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              flex: 2,
+                              child: Text(
+                                _prettyKey(entry.key),
+                                style: TextStyle(
+                                  fontSize: 13.sp,
+                                  color: AppColors.typoBody,
+                                ),
+                              ),
+                            ),
+                            SizedBox(width: 12.w),
+                            Expanded(
+                              flex: 3,
+                              child: Text(
+                                _formatValue(entry.key, entry.value),
+                                textAlign: TextAlign.right,
+                                style: TextStyle(
+                                  fontSize: 13.sp,
+                                  color: AppColors.typoHeading,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildKeyValueListTile(
+    String key,
+    List<Map<String, String>> items,
+    Color accentColor,
+  ) {
+    return Container(
+      width: double.infinity,
+      margin: EdgeInsets.only(bottom: 12.h),
+      decoration: BoxDecoration(
+        color: accentColor.withOpacity(0.04),
+        borderRadius: BorderRadius.circular(14.r),
+        border: Border.all(color: accentColor.withOpacity(0.18)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: IntrinsicHeight(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Container(
+              width: 4.w,
+              decoration: BoxDecoration(
+                color: accentColor,
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(14.r),
+                  bottomLeft: Radius.circular(14.r),
+                ),
+              ),
+            ),
+            Expanded(
+              child: Padding(
+                padding: EdgeInsets.all(14.w),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      _prettyKey(key),
+                      style: TextStyle(
+                        fontSize: 13.5.sp,
+                        color: AppColors.typoBody,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    SizedBox(height: 10.h),
+                    ...items.map((item) {
+                      final title =
+                          item['categoryName'] ?? item['title'] ?? item['name'];
+                      final detailEntries = Map<String, String>.from(item)
+                        ..remove('categoryName')
+                        ..remove('categoryId')
+                        ..remove('title')
+                        ..remove('name');
+                      return Padding(
+                        padding: EdgeInsets.only(bottom: 12.h),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            if (title != null && title.trim().isNotEmpty)
+                              Text(
+                                _titleize(title),
+                                style: TextStyle(
+                                  fontSize: 14.sp,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.typoHeading,
+                                ),
+                              ),
+                            if (title != null && title.trim().isNotEmpty)
+                              SizedBox(height: 8.h),
+                            ..._sortedDetailEntries(detailEntries).map(
+                              (entry) => Padding(
+                                padding: EdgeInsets.only(bottom: 6.h),
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Expanded(
+                                      flex: 2,
+                                      child: Text(
+                                        _prettyKey(entry.key),
+                                        style: TextStyle(
+                                          fontSize: 12.5.sp,
+                                          color: AppColors.typoBody,
+                                        ),
+                                      ),
+                                    ),
+                                    SizedBox(width: 12.w),
+                                    Expanded(
+                                      flex: 3,
+                                      child: Text(
+                                        _formatValue(entry.key, entry.value),
+                                        textAlign: TextAlign.right,
+                                        style: TextStyle(
+                                          fontSize: 12.5.sp,
+                                          color: AppColors.typoHeading,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }),
                   ],
                 ),
               ),

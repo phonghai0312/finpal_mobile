@@ -40,8 +40,11 @@ class TransactionsPageState extends ConsumerState<TransactionsPage> {
       appBar: const HeaderSimple(title: 'Giao dịch', onMore: null),
 
       floatingActionButton: FloatingActionButton(
-        backgroundColor: AppColors.primaryGreen,
+        backgroundColor: AppColors.bgDarkGreen,
         onPressed: () => notifier.onPressAdd(context),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(22.r),
+        ),
         child: const Icon(Icons.add, color: Colors.white),
       ),
 
