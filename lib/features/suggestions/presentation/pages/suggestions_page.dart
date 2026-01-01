@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fridge_to_fork_ai/features/suggestions/domain/entities/insight.dart';
+import 'package:intl/intl.dart';
 import '../../../../../core/presentation/theme/app_colors.dart';
 import '../../../../../core/presentation/widget/header/header_simple.dart';
 import 'package:fridge_to_fork_ai/features/suggestions/presentation/provider/insight/insight_provider.dart';
@@ -93,7 +94,7 @@ class _SuggestionsPageState extends ConsumerState<SuggestionsPage> {
         child: Container(
           width: double.infinity,
           margin: EdgeInsets.only(bottom: 14.h),
-          padding: EdgeInsets.all(14.w),
+          padding: EdgeInsets.all(16.w),
           decoration: BoxDecoration(
             color: AppColors.bgWhite,
             borderRadius: BorderRadius.circular(18.r),
@@ -109,72 +110,108 @@ class _SuggestionsPageState extends ConsumerState<SuggestionsPage> {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              Container(
+                width: 4.w,
+                height: 88.h,
+                decoration: BoxDecoration(
+                  color: style.bgColor,
+                  borderRadius: BorderRadius.circular(99.r),
+                ),
+              ),
+              SizedBox(width: 12.w),
               // ICON
               Container(
-                width: 44.w,
-                height: 44.w,
+                width: 46.w,
+                height: 46.w,
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
-                      style.bgColor.withOpacity(0.18),
-                      style.bgColor.withOpacity(0.32),
+                      style.bgColor.withOpacity(0.2),
+                      style.bgColor.withOpacity(0.35),
                     ],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
-                  borderRadius: BorderRadius.circular(12.r),
+                  borderRadius: BorderRadius.circular(14.r),
                 ),
                 child: Icon(style.icon, color: style.bgColor, size: 22.sp),
               ),
-
               SizedBox(width: 12.w),
-
               // TEXT
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    Row(
+                      children: [
+                        Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 8.w,
+                            vertical: 4.h,
+                          ),
+                          decoration: BoxDecoration(
+                            color: style.bgColor.withOpacity(0.12),
+                            borderRadius: BorderRadius.circular(8.r),
+                          ),
+                          child: Text(
+                            style.label,
+                            style: TextStyle(
+                              fontSize: 11.5.sp,
+                              fontWeight: FontWeight.w700,
+                              color: style.bgColor,
+                            ),
+                          ),
+                        ),
+                        SizedBox(width: 8.w),
+                        Text(
+                          _formatTime(insight.createdAt),
+                          style: TextStyle(
+                            fontSize: 11.5.sp,
+                            color: AppColors.typoBody,
+                          ),
+                        ),
+                        const Spacer(),
+                        if (!insight.read)
+                          Container(
+                            width: 8.w,
+                            height: 8.w,
+                            decoration: BoxDecoration(
+                              color: style.bgColor,
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                      ],
+                    ),
+                    SizedBox(height: 8.h),
                     Text(
                       insight.title,
                       style: TextStyle(
-                        fontSize: 15.5.sp,
+                        fontSize: 16.sp,
                         fontWeight: FontWeight.w700,
                         color: AppColors.typoHeading,
                       ),
                     ),
                     SizedBox(height: 8.h),
-                    Container(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 10.w,
-                        vertical: 8.h,
-                      ),
-                      decoration: BoxDecoration(
-                        color: AppColors.bgSecondary,
-                        borderRadius: BorderRadius.circular(10.r),
-                      ),
-                      child: Text(
-                        insight.message,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontSize: 13.5.sp,
-                          color: AppColors.typoBody,
-                          height: 1.35,
-                        ),
+                    Text(
+                      insight.message,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 13.5.sp,
+                        color: AppColors.typoBody,
+                        height: 1.35,
                       ),
                     ),
                   ],
                 ),
               ),
-
               SizedBox(width: 10.w),
-
               Container(
-                width: 28.w,
-                height: 28.w,
+                width: 30.w,
+                height: 30.w,
                 decoration: BoxDecoration(
                   color: style.bgColor.withOpacity(0.12),
-                  borderRadius: BorderRadius.circular(8.r),
+                  borderRadius: BorderRadius.circular(10.r),
                 ),
                 child: Icon(
                   Icons.arrow_forward_ios,
@@ -197,42 +234,57 @@ class _SuggestionsPageState extends ConsumerState<SuggestionsPage> {
       case "alert":
         return _InsightStyle(
           icon: Icons.warning_amber_rounded,
-          bgColor: AppColors.lightRed,
+          bgColor: Colors.amber.shade400,
+          label: "Cảnh báo",
         );
 
       case "tip":
         return _InsightStyle(
           icon: Icons.lightbulb_outline,
-          bgColor: AppColors.primaryGreen,
+          bgColor: Colors.lightGreen.shade400,
+          label: "Mẹo hay",
         );
 
       case "budget_alert":
         return _InsightStyle(
           icon: Icons.account_balance_wallet_outlined,
-          bgColor: Colors.orange,
+          bgColor: Colors.orange.shade400,
+          label: "Ngân sách",
         );
 
       case "monthly_summary":
         return _InsightStyle(
           icon: Icons.stacked_line_chart,
-          bgColor: Colors.blue,
+          bgColor: Colors.lightBlue.shade400,
+          label: "Tổng kết",
         );
 
       case "daily_report":
-        return _InsightStyle(icon: Icons.show_chart, bgColor: Colors.cyan);
+        return _InsightStyle(
+          icon: Icons.show_chart,
+          bgColor: Colors.lightBlue.shade400,
+          label: "Hằng ngày",
+        );
 
       case "monthly_report":
         return _InsightStyle(
           icon: Icons.monitor_heart_outlined,
-          bgColor: Colors.indigo,
+          bgColor: Colors.lightBlue.shade400,
+          label: "Tháng",
         );
 
       default:
         return _InsightStyle(
           icon: Icons.info_outline,
           bgColor: AppColors.bgDarkGreen,
+          label: "Thông tin",
         );
     }
+  }
+
+  String _formatTime(int createdAt) {
+    final dt = DateTime.fromMillisecondsSinceEpoch(createdAt);
+    return DateFormat('dd/MM • HH:mm').format(dt);
   }
 }
 
@@ -240,6 +292,11 @@ class _SuggestionsPageState extends ConsumerState<SuggestionsPage> {
 class _InsightStyle {
   final IconData icon;
   final Color bgColor;
+  final String label;
 
-  _InsightStyle({required this.icon, required this.bgColor});
+  _InsightStyle({
+    required this.icon,
+    required this.bgColor,
+    required this.label,
+  });
 }

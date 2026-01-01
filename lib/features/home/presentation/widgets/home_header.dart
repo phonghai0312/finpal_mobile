@@ -134,15 +134,32 @@ class HomeHeader extends ConsumerWidget {
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(20.r),
                 border: Border.all(
-                  color: const Color(0xFF3A8DFF).withOpacity(0.4),
-                  width: 1.4,
+                  color: AppColors.primaryGreen.withOpacity(0.2),
+                  width: 1.2,
                 ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.06),
+                    blurRadius: 10,
+                    offset: const Offset(0, 6),
+                  ),
+                ],
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  _amountItem("Tổng thu", totalIncomeText, Colors.green),
-                  _amountItem("Tổng chi", totalExpenseText, Colors.red),
+                  _amountItem(
+                    "Tổng thu",
+                    totalIncomeText,
+                    AppColors.darkGreen,
+                    Icons.arrow_downward,
+                  ),
+                  _amountItem(
+                    "Tổng chi",
+                    totalExpenseText,
+                    AppColors.darkRed,
+                    Icons.arrow_upward,
+                  ),
                 ],
               ),
             ),
@@ -152,12 +169,35 @@ class HomeHeader extends ConsumerWidget {
     );
   }
 
-  Widget _amountItem(String title, String value, Color color) {
+  Widget _amountItem(
+    String title,
+    String value,
+    Color color,
+    IconData icon,
+  ) {
     return Column(
       children: [
-        Text(
-          title,
-          style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600),
+        Row(
+          children: [
+            Container(
+              width: 26.w,
+              height: 26.w,
+              decoration: BoxDecoration(
+                color: color.withOpacity(0.12),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, size: 14.sp, color: color),
+            ),
+            SizedBox(width: 8.w),
+            Text(
+              title,
+              style: TextStyle(
+                fontSize: 14.sp,
+                fontWeight: FontWeight.w600,
+                color: AppColors.typoHeading,
+              ),
+            ),
+          ],
         ),
         6.verticalSpace,
         Text(

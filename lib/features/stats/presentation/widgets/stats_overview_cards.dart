@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
 
+import '../../../../core/presentation/theme/app_colors.dart';
+
 class StatsOverviewCards extends StatelessWidget {
   final double income;
   final double expense;
@@ -25,6 +27,7 @@ class StatsOverviewCards extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16.r),
+        border: Border.all(color: AppColors.primaryGreen.withOpacity(0.12)),
         boxShadow: [
           BoxShadow(
             // ignore: deprecated_member_use
@@ -36,11 +39,17 @@ class StatsOverviewCards extends StatelessWidget {
       ),
       child: Column(
         children: [
-          _buildRow('Thu nhập', income, Colors.black87, formatter),
+          _buildRow('Thu nhập', income, AppColors.darkGreen, formatter),
           SizedBox(height: 12.h),
-          _buildRow('Chi tiêu', -expense, Colors.red, formatter),
+          _buildRow('Chi tiêu', -expense, AppColors.darkRed, formatter),
           const Divider(height: 24),
-          _buildRow('Còn lại', remaining, Colors.blue, formatter, isBold: true),
+          _buildRow(
+            'Còn lại',
+            remaining,
+            AppColors.primaryGreen,
+            formatter,
+            isBold: true,
+          ),
         ],
       ),
     );
@@ -60,7 +69,7 @@ class StatsOverviewCards extends StatelessWidget {
           label,
           style: TextStyle(
             fontSize: 14.sp,
-            color: Colors.grey[700],
+            color: AppColors.typoBody,
             fontWeight: isBold ? FontWeight.w600 : FontWeight.normal,
           ),
         ),
