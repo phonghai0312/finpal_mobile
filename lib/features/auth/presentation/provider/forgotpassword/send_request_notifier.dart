@@ -85,56 +85,60 @@ class SendRequestNotifier extends StateNotifier<SendRequestState> {
   }
 
   // Trigger when user presses "Send Code"
-  // Future<void> onSendCode(BuildContext context) async {
-  //   final input = state.username.trim();
+  Future<void> onSendCode(BuildContext context) async {
+    final input = state.username.trim();
+    if (!state.isValid || state.isLoading) return;
 
-  //   try {
-  //     _setLoading(true);
-  //     await _sendRequestUseCase(input);
-  //     await _handleSuccess(context);
-  //   } catch (e) {
-  //     _handleFailure(context, e);
-  //   }
-  // }
+    try {
+      _setLoading(true);
+      await sendRequestUseCase(input);
+      await _handleSuccess(context);
+    } catch (e) {
+      _handleFailure(context, e);
+    }
+  }
 
-  // Handle success
-  // Future<void> _handleSuccess(BuildContext context) async {
-  //   _setLoading(false);
-  //   state = state.copyWith(isSuccess: true);
+  Future<void> _handleSuccess(BuildContext context) async {
+    _setLoading(false);
+    state = state.copyWith(isSuccess: true);
 
-  //   context.go(AppRoutes.verifypassword);
-  // }
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Đã gửi yêu cầu. Vui lòng kiểm tra email/số điện thoại.'),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
 
-  // // Handle failure
-  // void _handleFailure(BuildContext context, Object error) {
-  //   final message = _translateError(error.toString());
-  //   state = state.copyWith(isLoading: false, errorMessage: message);
+  void _handleFailure(BuildContext context, Object error) {
+    final message = _translateError(error.toString());
+    state = state.copyWith(isLoading: false, errorMessage: message);
 
-  //   ScaffoldMessenger.of(context).showSnackBar(
-  //     SnackBar(
-  //       content: Text(message),
-  //       backgroundColor: Colors.red,
-  //       behavior: SnackBarBehavior.floating,
-  //     ),
-  //   );
-  // }
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.red,
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
 
-  // // Update loading state
-  // void _setLoading(bool value) {
-  //   state = state.copyWith(isLoading: value, errorMessage: null);
-  // }
+  void _setLoading(bool value) {
+    state = state.copyWith(isLoading: value, errorMessage: null);
+  }
 
-  // // Translate error messages
-  // String _translateError(String errorMessage) {
-  //   final error = errorMessage.replaceFirst('Exception: ', '').trim();
+  String _translateError(String errorMessage) {
+    final error = errorMessage.replaceFirst('Exception: ', '').trim();
 
-  //   switch (error) {
-  //     case 'User not found':
-  //       return 'User not found. Please try again later!';
-  //     default:
-  //       return 'An unexpected error occurred. Please try again later.';
-  //   }
-  // }
+    switch (error) {
+      case 'Invalid username':
+        return 'Email hoặc số điện thoại không hợp lệ.';
+      case 'User not found':
+        return 'Không tìm thấy người dùng. Vui lòng thử lại.';
+      default:
+        return 'Có lỗi xảy ra. Vui lòng thử lại.';
+    }
+  }
 
   // Navigate to Login page
   void onPressBack(BuildContext context) {

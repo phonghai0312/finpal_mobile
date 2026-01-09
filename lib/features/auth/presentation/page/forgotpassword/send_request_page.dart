@@ -56,8 +56,11 @@ class SendRequestPage extends ConsumerWidget {
 
               /// 🔹 Button Xác nhận
               Button(
-                text: "Xác nhận",
-                onPressed: state.isValid ? () {} : null,
+                text: state.isLoading ? "Đang xử lý..." : "Xác nhận",
+                onPressed:
+                    state.isValid && !state.isLoading
+                        ? () => notifier.onSendCode(context)
+                        : null,
                 color: AppColors.bgDarkGreen,
               ),
 
