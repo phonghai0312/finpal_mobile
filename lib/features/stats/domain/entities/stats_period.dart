@@ -1,4 +1,4 @@
-class StatsPeriod {
+﻿class StatsPeriod {
   final int from;
   final int to;
 

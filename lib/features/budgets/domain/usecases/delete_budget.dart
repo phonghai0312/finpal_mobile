@@ -1,4 +1,4 @@
-import 'package:fridge_to_fork_ai/features/budgets/domain/repositories/budget_repository.dart';
+﻿import 'package:finpal/features/budgets/domain/repositories/budget_repository.dart';
 
 class DeleteBudgetUseCase {
   final BudgetRepository repository;

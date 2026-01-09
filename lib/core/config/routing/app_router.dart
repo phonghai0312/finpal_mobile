@@ -1,31 +1,29 @@
-import 'package:flutter/material.dart';
-import 'package:fridge_to_fork_ai/core/config/routing/app_routes.dart';
-import 'package:fridge_to_fork_ai/core/presentation/widget/navigation/custom_bottom_navigation.dart';
-import 'package:fridge_to_fork_ai/core/utils/navigation_key.dart';
-import 'package:fridge_to_fork_ai/features/auth/presentation/page/forgotpassword/send_request_page.dart';
-import 'package:fridge_to_fork_ai/features/auth/presentation/page/forgotpassword/reset_password_page.dart';
-import 'package:fridge_to_fork_ai/features/auth/presentation/page/forgotpassword/verify_otp_page.dart';
-import 'package:fridge_to_fork_ai/features/auth/presentation/page/register/register_page.dart';
-import 'package:fridge_to_fork_ai/features/home/presentation/page/home_page.dart';
-import 'package:fridge_to_fork_ai/features/onboarding/presentation/page/onboarding_page.dart';
-import 'package:fridge_to_fork_ai/features/onboarding/presentation/page/splash_page.dart';
-import 'package:fridge_to_fork_ai/features/transactions/presentation/pages/transactions_page.dart';
-import 'package:fridge_to_fork_ai/features/stats/presentation/page/stats_page.dart';
-import 'package:fridge_to_fork_ai/features/profile/presentation/pages/profile_page.dart';
-import 'package:fridge_to_fork_ai/features/suggestions/presentation/pages/suggestions_page.dart';
-import 'package:fridge_to_fork_ai/features/welcome/presentation/page/connectsepay/connect_sepay_page.dart';
-import 'package:fridge_to_fork_ai/features/welcome/presentation/page/welcome/welcome_page.dart';
-import 'package:go_router/go_router.dart';
 
+﻿import 'package:flutter/material.dart';
+import 'package:finpal/core/config/routing/app_routes.dart';
+import 'package:finpal/core/presentation/widget/navigation/custom_bottom_navigation.dart';
+import 'package:finpal/core/utils/navigation_key.dart';
+import 'package:finpal/features/auth/presentation/page/forgotpassword/send_request_page.dart';
+import 'package:finpal/features/auth/presentation/page/register/register_page.dart';
+import 'package:finpal/features/home/presentation/page/home_page.dart';
+import 'package:finpal/features/onboarding/presentation/page/onboarding_page.dart';
+import 'package:finpal/features/onboarding/presentation/page/splash_page.dart';
+import 'package:finpal/features/transactions/presentation/pages/transactions_page.dart';
+import 'package:finpal/features/stats/presentation/page/stats_page.dart';
+import 'package:finpal/features/profile/presentation/pages/profile_page.dart';
+import 'package:finpal/features/suggestions/presentation/pages/suggestions_page.dart';
+import 'package:finpal/features/welcome/presentation/page/connectsepay/connect_sepay_page.dart';
+import 'package:finpal/features/welcome/presentation/page/welcome/welcome_page.dart';
+import 'package:go_router/go_router.dart';
 import '../../../features/auth/presentation/page/login/login_page.dart';
-import 'package:fridge_to_fork_ai/features/transactions/presentation/pages/transaction_detail_page.dart';
-import 'package:fridge_to_fork_ai/features/transactions/presentation/pages/create_transaction_page.dart';
-import 'package:fridge_to_fork_ai/features/profile/presentation/pages/edit_profile_page.dart';
-import 'package:fridge_to_fork_ai/features/profile/presentation/pages/user_settings_page.dart';
-import 'package:fridge_to_fork_ai/features/profile/presentation/pages/about_app_page.dart';
-import 'package:fridge_to_fork_ai/features/suggestions/presentation/pages/suggestion_detail_page.dart';
-import 'package:fridge_to_fork_ai/features/budgets/presentation/pages/budget_detail_page.dart';
-import 'package:fridge_to_fork_ai/features/budgets/presentation/pages/budget_form_page.dart';
+import 'package:finpal/features/transactions/presentation/pages/transaction_detail_page.dart';
+import 'package:finpal/features/transactions/presentation/pages/create_transaction_page.dart';
+import 'package:finpal/features/profile/presentation/pages/edit_profile_page.dart';
+import 'package:finpal/features/profile/presentation/pages/user_settings_page.dart';
+import 'package:finpal/features/profile/presentation/pages/about_app_page.dart';
+import 'package:finpal/features/suggestions/presentation/pages/suggestion_detail_page.dart';
+import 'package:finpal/features/budgets/presentation/pages/budget_detail_page.dart';
+import 'package:finpal/features/budgets/presentation/pages/budget_form_page.dart';
 
 class AppRouter {
   static final customerRouter = GoRouter(

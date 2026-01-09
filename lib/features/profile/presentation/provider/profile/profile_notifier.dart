@@ -1,9 +1,9 @@
-// ignore_for_file: use_build_context_synchronously
+﻿// ignore_for_file: use_build_context_synchronously
 
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fridge_to_fork_ai/core/presentation/theme/app_colors.dart';
+import 'package:finpal/core/presentation/theme/app_colors.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../../core/config/routing/app_routes.dart';

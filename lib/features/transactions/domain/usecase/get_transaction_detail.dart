@@ -1,4 +1,4 @@
-import 'package:fridge_to_fork_ai/features/transactions/domain/entities/transaction.dart';
+﻿import 'package:finpal/features/transactions/domain/entities/transaction.dart';
 
 import '../repositories/transaction_repository.dart';
 

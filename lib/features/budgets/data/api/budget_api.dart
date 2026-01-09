@@ -1,9 +1,9 @@
-import 'package:dio/dio.dart';
-import 'package:fridge_to_fork_ai/features/budgets/data/models/budget_detail_response_model.dart';
+﻿import 'package:dio/dio.dart';
+import 'package:finpal/features/budgets/data/models/budget_detail_response_model.dart';
 import 'package:retrofit/retrofit.dart';
 
-import 'package:fridge_to_fork_ai/core/config/constant/api_base.dart';
-import 'package:fridge_to_fork_ai/features/budgets/data/models/budget_model.dart';
+import 'package:finpal/core/config/constant/api_base.dart';
+import 'package:finpal/features/budgets/data/models/budget_model.dart';
 
 part 'budget_api.g.dart';
 

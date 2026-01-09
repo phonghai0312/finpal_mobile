@@ -1,4 +1,4 @@
-import 'package:fridge_to_fork_ai/features/suggestions/data/models/insight_model.dart';
+﻿import 'package:finpal/features/suggestions/data/models/insight_model.dart';
 
 class InsightResponseModel {
   final List<InsightModel> items;

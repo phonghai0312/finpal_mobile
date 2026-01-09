@@ -1,9 +1,9 @@
-import 'package:dio/dio.dart';
+﻿import 'package:dio/dio.dart';
 import 'package:retrofit/retrofit.dart';
 
-import 'package:fridge_to_fork_ai/core/config/constant/api_base.dart';
-import 'package:fridge_to_fork_ai/features/stats/data/models/stats_by_category_model.dart';
-import 'package:fridge_to_fork_ai/features/stats/data/models/stats_overview_model.dart';
+import 'package:finpal/core/config/constant/api_base.dart';
+import 'package:finpal/features/stats/data/models/stats_by_category_model.dart';
+import 'package:finpal/features/stats/data/models/stats_overview_model.dart';
 
 part 'stats_api.g.dart';
 

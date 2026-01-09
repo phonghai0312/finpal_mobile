@@ -2,8 +2,9 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:fridge_to_fork_ai/core/presentation/theme/app_chart_colors.dart';
-import 'package:fridge_to_fork_ai/features/stats/domain/entities/stats_by_category_item.dart';
+import 'package:finpal/core/presentation/theme/app_chart_colors.dart';
+import 'package:finpal/core/utils/category_translator.dart';
+import 'package:finpal/features/stats/domain/entities/stats_by_category_item.dart';
 
 class StatsCategoryList extends StatelessWidget {
   final List<StatsByCategoryItem> items;
@@ -28,28 +29,45 @@ class StatsCategoryList extends StatelessWidget {
         Wrap(
           spacing: 8.w, // Spacing between chips
           runSpacing: 8.h, // Spacing between rows of chips
-          children: items.take(3).map((item) => item).toList().asMap().entries.map((entry) {
-            final index = entry.key;
-            final item = entry.value;
-            final color = AppChartColors.colors[index % AppChartColors.colors.length];
-            return GestureDetector(
-              onTap: onCategoryTap != null ? () => onCategoryTap!(item) : null,
-              child: Chip(
-                label: Text(
-                  item.categoryName,
-                  style: TextStyle(
-                    fontSize: 14.sp,
-                    color: color,
-                    fontWeight: FontWeight.w500,
+          children: items
+              .take(3)
+              .map((item) => item)
+              .toList()
+              .asMap()
+              .entries
+              .map((entry) {
+                final index = entry.key;
+                final item = entry.value;
+                final color =
+                    AppChartColors.colors[index % AppChartColors.colors.length];
+                return GestureDetector(
+                  onTap: onCategoryTap != null
+                      ? () => onCategoryTap!(item)
+                      : null,
+                  child: Chip(
+                    label: Text(
+                      CategoryTranslator.getCategoryDisplayName(
+                        item.categoryName,
+                      ),
+                      style: TextStyle(
+                        fontSize: 14.sp,
+                        color: color,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    backgroundColor: color.withOpacity(0.1),
+                    side: BorderSide(color: color.withOpacity(0.5)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20.r),
+                    ),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 12.w,
+                      vertical: 8.h,
+                    ),
                   ),
-                ),
-                backgroundColor: color.withOpacity(0.1),
-                side: BorderSide(color: color.withOpacity(0.5)),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.r)),
-                padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
-              ),
-            );
-          }).toList(),
+                );
+              })
+              .toList(),
         ),
       ],
     );

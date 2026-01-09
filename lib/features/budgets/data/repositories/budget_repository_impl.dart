@@ -1,9 +1,9 @@
-import 'package:fridge_to_fork_ai/features/budgets/data/datasources/budget_remote_data_source.dart';
-import 'package:fridge_to_fork_ai/features/budgets/data/models/budget_model.dart';
-import 'package:fridge_to_fork_ai/features/budgets/domain/entities/budget.dart';
-import 'package:fridge_to_fork_ai/features/budgets/domain/repositories/budget_repository.dart';
-import 'package:fridge_to_fork_ai/features/budgets/domain/entities/create_budget_request.dart';
-import 'package:fridge_to_fork_ai/features/budgets/domain/entities/update_budget_request.dart';
+﻿import 'package:finpal/features/budgets/data/datasources/budget_remote_data_source.dart';
+import 'package:finpal/features/budgets/data/models/budget_model.dart';
+import 'package:finpal/features/budgets/domain/entities/budget.dart';
+import 'package:finpal/features/budgets/domain/repositories/budget_repository.dart';
+import 'package:finpal/features/budgets/domain/entities/create_budget_request.dart';
+import 'package:finpal/features/budgets/domain/entities/update_budget_request.dart';
 
 class BudgetRepositoryImpl implements BudgetRepository {
   final BudgetRemoteDataSource remoteDataSource;

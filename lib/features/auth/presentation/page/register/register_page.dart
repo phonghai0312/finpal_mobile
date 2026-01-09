@@ -1,9 +1,9 @@
-// ignore_for_file: use_build_context_synchronously
+﻿// ignore_for_file: use_build_context_synchronously
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:fridge_to_fork_ai/features/auth/presentation/widget/auth_footer.dart'
+import 'package:finpal/features/auth/presentation/widget/auth_footer.dart'
     show AuthFooter;
 
 import '../../../../../core/presentation/theme/app_colors.dart';

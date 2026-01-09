@@ -1,4 +1,4 @@
-import 'period.dart';
+﻿import 'period.dart';
 
 class Insight {
   final String id;

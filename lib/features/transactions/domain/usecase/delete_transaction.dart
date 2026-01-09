@@ -1,4 +1,4 @@
-import 'package:fridge_to_fork_ai/features/transactions/domain/repositories/transaction_repository.dart';
+﻿import 'package:finpal/features/transactions/domain/repositories/transaction_repository.dart';
 
 class DeleteTransaction {
   final TransactionRepository repository;

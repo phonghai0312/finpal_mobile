@@ -1,5 +1,5 @@
-import 'package:fridge_to_fork_ai/features/budgets/domain/entities/budget.dart';
-import 'package:fridge_to_fork_ai/features/budgets/domain/repositories/budget_repository.dart';
+﻿import 'package:finpal/features/budgets/domain/entities/budget.dart';
+import 'package:finpal/features/budgets/domain/repositories/budget_repository.dart';
 
 class GetBudgetsUseCase {
   final BudgetRepository repository;

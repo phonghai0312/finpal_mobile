@@ -1,10 +1,10 @@
-import 'package:dio/dio.dart';
+﻿import 'package:dio/dio.dart';
 import 'package:retrofit/retrofit.dart';
 
-import 'package:fridge_to_fork_ai/core/config/constant/api_base.dart';
-import 'package:fridge_to_fork_ai/features/transactions/data/models/transaction_model.dart';
-import 'package:fridge_to_fork_ai/features/transactions/data/models/transaction_list_response_model.dart';
-import 'package:fridge_to_fork_ai/features/transactions/data/models/spend_amount_model.dart';
+import 'package:finpal/core/config/constant/api_base.dart';
+import 'package:finpal/features/transactions/data/models/transaction_model.dart';
+import 'package:finpal/features/transactions/data/models/transaction_list_response_model.dart';
+import 'package:finpal/features/transactions/data/models/spend_amount_model.dart';
 
 part 'transaction_api.g.dart';
 

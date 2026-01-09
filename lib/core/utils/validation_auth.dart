@@ -1,4 +1,4 @@
-class ValidationAuth {
+﻿class ValidationAuth {
   static bool isPhoneOrEmailValid(String input) {
     if (input.contains('@')) {
       return isValidEmail(input);

@@ -1,4 +1,4 @@
-import 'package:fridge_to_fork_ai/features/categories/domain/entities/category_entity.dart';
+﻿import 'package:finpal/features/categories/domain/entities/category_entity.dart';
 
 class CategoryModel {
   final String id;

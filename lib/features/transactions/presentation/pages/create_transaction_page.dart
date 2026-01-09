@@ -3,14 +3,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:fridge_to_fork_ai/core/presentation/widget/button/button.dart';
+import 'package:finpal/core/presentation/widget/button/button.dart';
 import 'package:intl/intl.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../../core/presentation/theme/app_colors.dart';
 import '../../../../../core/presentation/widget/header/header_with_back.dart';
-import 'package:fridge_to_fork_ai/features/categories/presentation/provider/category.notifier.dart';
-import 'package:fridge_to_fork_ai/features/categories/presentation/provider/category_provider.dart';
+import 'package:finpal/features/categories/presentation/provider/category.notifier.dart';
+import 'package:finpal/features/categories/presentation/provider/category_provider.dart';
 import '../provider/createtransaction/create_transaction_provider.dart';
 import '../provider/createtransaction/create_transaction_notifier.dart';
 import '../../../../../core/config/routing/app_routes.dart';
@@ -231,10 +231,13 @@ class CreateTransactionPageState extends ConsumerState<CreateTransactionPage> {
             hintText: hintText,
             filled: true,
             fillColor: Colors.white,
-            contentPadding:
-                EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
-            border:
-                OutlineInputBorder(borderRadius: BorderRadius.circular(12.r)),
+            contentPadding: EdgeInsets.symmetric(
+              horizontal: 14.w,
+              vertical: 12.h,
+            ),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12.r),
+            ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12.r),
               borderSide: BorderSide(color: Colors.grey.shade300),
@@ -270,9 +273,7 @@ class CreateTransactionPageState extends ConsumerState<CreateTransactionPage> {
               );
               if (picked != null) notifier.setDate(picked);
             },
-            child: _readonlyBox(
-              DateFormat('dd/MM/yyyy').format(state.date),
-            ),
+            child: _readonlyBox(DateFormat('dd/MM/yyyy').format(state.date)),
           ),
         ),
         SizedBox(width: 14.w),
@@ -386,7 +387,7 @@ class CreateTransactionPageState extends ConsumerState<CreateTransactionPage> {
                 ),
                 SizedBox(height: 8.h),
                 Text(
-                  category.displayName,
+                  category.getLocalizedName(),
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 13.sp,

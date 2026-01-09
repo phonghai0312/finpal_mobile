@@ -1,4 +1,4 @@
-import '../../domain/entities/insight.dart';
+﻿import '../../domain/entities/insight.dart';
 import '../../domain/entities/period.dart';
 
 class InsightModel extends Insight {

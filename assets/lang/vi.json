@@ -1,6 +1,6 @@
 {
-    "app_name": "Từ Tủ Lạnh Đến Bàn Ăn AI",
-    "welcome": "Chào mừng bạn đến với Fridge to Fork!",
+    "app_name": "FinPal",
+    "welcome": "Chào mừng bạn đến với FinPal!",
     "loading": "Đang tải...",
     "error": "Đã xảy ra lỗi",
     "confirm": "Xác nhận",
@@ -40,5 +40,29 @@
         "subtitle": "Quản lý tài khoản và cài đặt",
         "logout": "Đăng xuất",
         "language": "Ngôn ngữ"
+    },
+    "categories": {
+        "food_drink": "Ăn uống",
+        "shopping": "Mua sắm",
+        "transportation": "Di chuyển",
+        "entertainment": "Giải trí",
+        "healthcare": "Y tế",
+        "education": "Giáo dục",
+        "utilities": "Tiện ích",
+        "housing": "Nhà ở",
+        "salary": "Lương",
+        "income": "Thu nhập",
+        "investment": "Đầu tư",
+        "bonus": "Tiền thưởng",
+        "interest": "Lãi suất",
+        "dividend": "Cổ tức",
+        "business": "Kinh doanh",
+        "profit": "Lợi nhuận",
+        "personal_care": "Chăm sóc cá nhân",
+        "travel": "Du lịch",
+        "insurance": "Bảo hiểm",
+        "gifts": "Quà tặng",
+        "other": "Khác",
+        "unknown": "Không xác định"
     }
 }

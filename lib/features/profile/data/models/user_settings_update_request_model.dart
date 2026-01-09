@@ -1,4 +1,4 @@
-class UserSettingsUpdateRequestModel {
+﻿class UserSettingsUpdateRequestModel {
   final String? currency;
   final String? language;
   final String? timezone;

@@ -1,15 +1,16 @@
-// ignore_for_file: use_build_context_synchronously
+﻿// ignore_for_file: use_build_context_synchronously
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
 
-import 'package:fridge_to_fork_ai/core/presentation/theme/app_colors.dart';
-import 'package:fridge_to_fork_ai/features/home/presentation/providers/home/home_provider.dart';
-import 'package:fridge_to_fork_ai/features/home/presentation/widgets/home_header.dart';
-import 'package:fridge_to_fork_ai/features/home/presentation/widgets/budget/budget_list.dart';
-import 'package:fridge_to_fork_ai/features/transactions/domain/entities/transaction.dart';
+import 'package:finpal/core/presentation/theme/app_colors.dart';
+import 'package:finpal/core/utils/category_translator.dart';
+import 'package:finpal/features/home/presentation/providers/home/home_provider.dart';
+import 'package:finpal/features/home/presentation/widgets/home_header.dart';
+import 'package:finpal/features/home/presentation/widgets/budget/budget_list.dart';
+import 'package:finpal/features/transactions/domain/entities/transaction.dart';
 
 class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
@@ -117,8 +118,8 @@ class _HomePageState extends ConsumerState<HomePage> {
                           fontWeight: FontWeight.w700,
                         ),
                       ),
-                      12.verticalSpace,
 
+                      //.verticalSpace,
                       if (state.recentTransactions.isEmpty)
                         Padding(
                           padding: EdgeInsets.symmetric(vertical: 24.h),
@@ -185,10 +186,7 @@ class _HomePageState extends ConsumerState<HomePage> {
             ),
           ],
           gradient: LinearGradient(
-            colors: [
-              Colors.white,
-              bgColor.withOpacity(0.08),
-            ],
+            colors: [Colors.white, bgColor.withOpacity(0.08)],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
@@ -220,7 +218,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                   ),
                   SizedBox(height: 4.h),
                   Text(
-                    "${tx.categoryName ?? 'Không xác định'} • $dateString",
+                    "${CategoryTranslator.getCategoryDisplayName(tx.categoryName)} • $dateString",
                     style: TextStyle(
                       fontSize: 12.sp,
                       color: Colors.grey.shade600,

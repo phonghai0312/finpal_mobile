@@ -1,19 +1,19 @@
-// ignore_for_file: deprecated_member_use
+﻿// ignore_for_file: deprecated_member_use
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:fridge_to_fork_ai/features/categories/presentation/provider/category.notifier.dart';
+import 'package:finpal/features/categories/presentation/provider/category.notifier.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
-import 'package:fridge_to_fork_ai/core/presentation/theme/app_colors.dart';
-import 'package:fridge_to_fork_ai/core/presentation/widget/button/button.dart';
-import 'package:fridge_to_fork_ai/core/presentation/widget/header/header_with_back.dart';
+import 'package:finpal/core/presentation/theme/app_colors.dart';
+import 'package:finpal/core/presentation/widget/button/button.dart';
+import 'package:finpal/core/presentation/widget/header/header_with_back.dart';
 
-import 'package:fridge_to_fork_ai/features/budgets/presentation/providers/budget_form/budget_form_notifier.dart';
-import 'package:fridge_to_fork_ai/features/budgets/presentation/providers/budget_form/budget_form_provider.dart';
-import 'package:fridge_to_fork_ai/features/categories/presentation/provider/category_provider.dart';
+import 'package:finpal/features/budgets/presentation/providers/budget_form/budget_form_notifier.dart';
+import 'package:finpal/features/budgets/presentation/providers/budget_form/budget_form_provider.dart';
+import 'package:finpal/features/categories/presentation/provider/category_provider.dart';
 
 class BudgetFormPage extends ConsumerStatefulWidget {
   const BudgetFormPage({super.key});

@@ -1,4 +1,4 @@
-class CreateBudgetRequest {
+﻿class CreateBudgetRequest {
   final String categoryId;
   final double amount;
   final String period;

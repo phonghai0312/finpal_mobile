@@ -1,11 +1,11 @@
-// ignore_for_file: deprecated_member_use
+﻿// ignore_for_file: deprecated_member_use
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:fridge_to_fork_ai/core/config/routing/app_routes.dart';
-import 'package:fridge_to_fork_ai/core/presentation/theme/app_colors.dart';
-import 'package:fridge_to_fork_ai/features/suggestions/presentation/provider/insight/insight_provider.dart';
+import 'package:finpal/core/config/routing/app_routes.dart';
+import 'package:finpal/core/presentation/theme/app_colors.dart';
+import 'package:finpal/features/suggestions/presentation/provider/insight/insight_provider.dart';
 import 'package:go_router/go_router.dart';
 
 class HomeHeader extends ConsumerWidget {

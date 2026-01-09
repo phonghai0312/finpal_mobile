@@ -1,12 +1,12 @@
-import 'package:dio/dio.dart';
+﻿import 'package:dio/dio.dart';
 
-import 'package:fridge_to_fork_ai/core/network/api_client.dart';
-import 'package:fridge_to_fork_ai/core/utils/validation_auth.dart';
-import 'package:fridge_to_fork_ai/features/auth/data/api/auth_api.dart';
-import 'package:fridge_to_fork_ai/features/auth/data/api/fcm_token_api.dart';
-import 'package:fridge_to_fork_ai/features/auth/data/models/login_model.dart';
-import 'package:fridge_to_fork_ai/features/auth/data/models/register_model.dart';
-import 'package:fridge_to_fork_ai/features/auth/data/models/fcm_token_model.dart';
+import 'package:finpal/core/network/api_client.dart';
+import 'package:finpal/core/utils/validation_auth.dart';
+import 'package:finpal/features/auth/data/api/auth_api.dart';
+import 'package:finpal/features/auth/data/api/fcm_token_api.dart';
+import 'package:finpal/features/auth/data/models/login_model.dart';
+import 'package:finpal/features/auth/data/models/register_model.dart';
+import 'package:finpal/features/auth/data/models/fcm_token_model.dart';
 
 import '../models/refresh_token_model.dart';
 

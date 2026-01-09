@@ -1,4 +1,4 @@
-class TransactionNormalized {
+﻿class TransactionNormalized {
   final String? title;
   final String? description;
   final String? peerName;

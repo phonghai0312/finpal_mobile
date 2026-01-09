@@ -1,9 +1,9 @@
-// ignore_for_file: deprecated_member_use
+﻿// ignore_for_file: deprecated_member_use
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:fridge_to_fork_ai/core/presentation/widget/button/button.dart';
+import 'package:finpal/core/presentation/widget/button/button.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../../core/presentation/theme/app_colors.dart';
