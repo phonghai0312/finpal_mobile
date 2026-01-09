@@ -1,4 +1,4 @@
-import '../../domain/entities/stats_overview.dart';
+﻿import '../../domain/entities/stats_overview.dart';
 import '../../domain/entities/stats_period.dart';
 
 class StatsOverviewModel extends StatsOverview {

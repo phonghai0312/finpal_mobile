@@ -1,5 +1,5 @@
-import 'package:fridge_to_fork_ai/features/transactions/domain/entities/transaction_ai.dart';
-import 'package:fridge_to_fork_ai/features/transactions/domain/entities/transaction_nomalized.dart';
+﻿import 'package:finpal/features/transactions/domain/entities/transaction_ai.dart';
+import 'package:finpal/features/transactions/domain/entities/transaction_nomalized.dart';
 
 class Transaction {
   final String id;

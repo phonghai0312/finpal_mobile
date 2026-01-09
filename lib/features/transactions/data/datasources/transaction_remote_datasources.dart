@@ -1,9 +1,9 @@
-import 'package:dio/dio.dart';
+﻿import 'package:dio/dio.dart';
 
-import 'package:fridge_to_fork_ai/core/network/api_client.dart';
-import 'package:fridge_to_fork_ai/features/transactions/data/api/transaction_api.dart';
-import 'package:fridge_to_fork_ai/features/transactions/data/models/transaction_model.dart';
-import 'package:fridge_to_fork_ai/features/transactions/data/models/spend_amount_model.dart';
+import 'package:finpal/core/network/api_client.dart';
+import 'package:finpal/features/transactions/data/api/transaction_api.dart';
+import 'package:finpal/features/transactions/data/models/transaction_model.dart';
+import 'package:finpal/features/transactions/data/models/spend_amount_model.dart';
 
 class TransactionRemoteDataSource {
   TransactionRemoteDataSource({TransactionApi? api, ApiClient? client})

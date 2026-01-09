@@ -1,8 +1,8 @@
-// ignore_for_file: file_names
+﻿// ignore_for_file: file_names
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:fridge_to_fork_ai/core/presentation/theme/app_colors.dart';
+import 'package:finpal/core/presentation/theme/app_colors.dart';
 
 class OnboardingItem extends StatelessWidget {
   final IconData icon;

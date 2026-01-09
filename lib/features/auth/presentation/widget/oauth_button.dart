@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:fridge_to_fork_ai/core/presentation/theme/app_colors.dart';
+import 'package:finpal/core/presentation/theme/app_colors.dart';
 
 class OAuthButton extends StatelessWidget {
   final String text;

@@ -1,8 +1,8 @@
-import 'package:dio/dio.dart';
+﻿import 'package:dio/dio.dart';
 
-import 'package:fridge_to_fork_ai/core/network/api_client.dart';
-import 'package:fridge_to_fork_ai/features/categories/data/api/category_api.dart';
-import 'package:fridge_to_fork_ai/features/categories/data/models/category_model.dart';
+import 'package:finpal/core/network/api_client.dart';
+import 'package:finpal/features/categories/data/api/category_api.dart';
+import 'package:finpal/features/categories/data/models/category_model.dart';
 
 import 'category_remote_datasources.dart';
 

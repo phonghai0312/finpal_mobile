@@ -1,8 +1,8 @@
-// ignore_for_file: use_build_context_synchronously, unnecessary_null_comparison
+﻿// ignore_for_file: use_build_context_synchronously, unnecessary_null_comparison
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fridge_to_fork_ai/features/auth/domain/entities/fcm_token.dart';
+import 'package:finpal/features/auth/domain/entities/fcm_token.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 

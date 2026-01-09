@@ -1,9 +1,9 @@
-// ignore_for_file: use_build_context_synchronously, deprecated_member_use
+﻿// ignore_for_file: use_build_context_synchronously, deprecated_member_use
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:fridge_to_fork_ai/features/suggestions/presentation/provider/insight_detail/insight_detail_provider.dart';
+import 'package:finpal/features/suggestions/presentation/provider/insight_detail/insight_detail_provider.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../../core/presentation/theme/app_colors.dart';

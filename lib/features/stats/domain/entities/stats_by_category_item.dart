@@ -1,4 +1,4 @@
-class StatsByCategoryItem {
+﻿class StatsByCategoryItem {
   final String categoryId;
   final String categoryName;
   final double totalAmount;

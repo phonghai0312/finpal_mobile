@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fridge_to_fork_ai/core/config/routing/app_routes.dart';
+import 'package:finpal/core/config/routing/app_routes.dart';
 import 'package:go_router/go_router.dart';
 
 class UserSettingsState {

@@ -1,5 +1,5 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fridge_to_fork_ai/features/auth/data/repositories/auth_repositoty_impl.dart'
+﻿import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:finpal/features/auth/data/repositories/auth_repositoty_impl.dart'
     show AuthRepositoryImpl;
 
 import '../../../data/datasouces/auth_remote_datasouces.dart';

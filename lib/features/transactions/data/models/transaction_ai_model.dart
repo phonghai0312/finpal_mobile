@@ -1,4 +1,4 @@
-import '../../domain/entities/transaction_ai.dart';
+﻿import '../../domain/entities/transaction_ai.dart';
 
 class TransactionAIModel extends TransactionAI {
   const TransactionAIModel({super.categorySuggestionId, super.confidence});

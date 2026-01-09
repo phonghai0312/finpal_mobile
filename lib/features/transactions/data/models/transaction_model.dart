@@ -1,5 +1,5 @@
-import 'package:fridge_to_fork_ai/features/transactions/data/models/transaction_ai_model.dart';
-import 'package:fridge_to_fork_ai/features/transactions/data/models/transaction_normalized_model.dart';
+﻿import 'package:finpal/features/transactions/data/models/transaction_ai_model.dart';
+import 'package:finpal/features/transactions/data/models/transaction_normalized_model.dart';
 
 import '../../domain/entities/transaction.dart';
 

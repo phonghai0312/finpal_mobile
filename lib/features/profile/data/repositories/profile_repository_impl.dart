@@ -1,4 +1,4 @@
-import 'package:fridge_to_fork_ai/core/domain/entities/user.dart';
+﻿import 'package:finpal/core/domain/entities/user.dart';
 import '../../domain/repositories/profile_repository.dart';
 import '../datasources/profile_remote_data_source.dart';
 

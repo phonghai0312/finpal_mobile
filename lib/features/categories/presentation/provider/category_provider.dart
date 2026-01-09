@@ -1,8 +1,8 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fridge_to_fork_ai/core/network/api_client.dart';
-import 'package:fridge_to_fork_ai/features/categories/data/api/category_api.dart';
-import 'package:fridge_to_fork_ai/features/categories/data/datasources/category_remote_datasources_impl.dart';
-import 'package:fridge_to_fork_ai/features/categories/presentation/provider/category.notifier.dart';
+﻿import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:finpal/core/network/api_client.dart';
+import 'package:finpal/features/categories/data/api/category_api.dart';
+import 'package:finpal/features/categories/data/datasources/category_remote_datasources_impl.dart';
+import 'package:finpal/features/categories/presentation/provider/category.notifier.dart';
 import '../../data/datasources/category_remote_datasources.dart';
 import '../../data/repositories/category_repository_impl.dart';
 import '../../domain/usecase/get_categories_usecase.dart';

@@ -1,5 +1,5 @@
-import 'package:fridge_to_fork_ai/features/stats/domain/entities/stats_by_category_item.dart';
-import 'package:fridge_to_fork_ai/features/stats/domain/entities/stats_period.dart';
+﻿import 'package:finpal/features/stats/domain/entities/stats_by_category_item.dart';
+import 'package:finpal/features/stats/domain/entities/stats_period.dart';
 
 class StatsByCategory {
   final StatsPeriod period;

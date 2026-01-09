@@ -1,6 +1,6 @@
-import 'package:fridge_to_fork_ai/features/suggestions/data/datasources/insight_remote_data_source.dart';
-import 'package:fridge_to_fork_ai/features/suggestions/domain/entities/insight.dart';
-import 'package:fridge_to_fork_ai/features/suggestions/domain/repositories/insight_repository.dart';
+﻿import 'package:finpal/features/suggestions/data/datasources/insight_remote_data_source.dart';
+import 'package:finpal/features/suggestions/domain/entities/insight.dart';
+import 'package:finpal/features/suggestions/domain/repositories/insight_repository.dart';
 
 class InsightRepositoryImpl implements InsightRepository {
   final InsightRemoteDataSource remoteDataSource;

@@ -1,11 +1,11 @@
-/// Stats Remote DataSource
+﻿/// Stats Remote DataSource
 /// Lấy dữ liệu thống kê từ backend theo swagger.yaml
 library;
 
-import 'package:fridge_to_fork_ai/features/stats/data/api/stats_api.dart';
-import 'package:fridge_to_fork_ai/features/stats/data/models/stats_by_category_model.dart';
-import 'package:fridge_to_fork_ai/features/transactions/data/datasources/transaction_remote_datasources.dart';
-import 'package:fridge_to_fork_ai/features/transactions/data/models/transaction_model.dart';
+import 'package:finpal/features/stats/data/api/stats_api.dart';
+import 'package:finpal/features/stats/data/models/stats_by_category_model.dart';
+import 'package:finpal/features/transactions/data/datasources/transaction_remote_datasources.dart';
+import 'package:finpal/features/transactions/data/models/transaction_model.dart';
 
 import '../models/stats_overview_model.dart';
 

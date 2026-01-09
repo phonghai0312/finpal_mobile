@@ -1,12 +1,12 @@
-// ignore_for_file: deprecated_member_use
+﻿// ignore_for_file: deprecated_member_use
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:fridge_to_fork_ai/core/presentation/widget/button/button.dart';
-import 'package:fridge_to_fork_ai/core/presentation/widget/header/header_with_back.dart';
-import 'package:fridge_to_fork_ai/features/profile/presentation/provider/editprofie/edit_profile_provider.dart';
+import 'package:finpal/core/presentation/widget/button/button.dart';
+import 'package:finpal/core/presentation/widget/header/header_with_back.dart';
+import 'package:finpal/features/profile/presentation/provider/editprofie/edit_profile_provider.dart';
 
 import '../../../../../core/presentation/theme/app_colors.dart';
 

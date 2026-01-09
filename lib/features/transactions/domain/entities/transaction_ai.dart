@@ -1,4 +1,4 @@
-class TransactionAI {
+﻿class TransactionAI {
   final String? categorySuggestionId;
   final double? confidence;
   final String? model;

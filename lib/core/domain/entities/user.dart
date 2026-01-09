@@ -1,4 +1,4 @@
-import 'package:fridge_to_fork_ai/core/domain/entities/user_settings.dart';
+﻿import 'package:finpal/core/domain/entities/user_settings.dart';
 
 class User {
   final String? id;

@@ -1,4 +1,4 @@
-class UserSettings {
+﻿class UserSettings {
   final String currency;
   final String language;
   final String timezone;

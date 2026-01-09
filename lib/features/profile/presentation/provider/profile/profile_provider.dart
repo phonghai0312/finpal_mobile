@@ -1,13 +1,13 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+﻿import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:fridge_to_fork_ai/core/network/api_client.dart';
-import 'package:fridge_to_fork_ai/features/profile/data/api/profile_api.dart';
-import 'package:fridge_to_fork_ai/features/profile/data/datasources/profile_remote_data_source.dart';
-import 'package:fridge_to_fork_ai/features/profile/data/repositories/profile_repository_impl.dart';
-import 'package:fridge_to_fork_ai/features/profile/domain/usecases/get_user_profile.dart';
-import 'package:fridge_to_fork_ai/features/profile/domain/usecases/logout.dart';
+import 'package:finpal/core/network/api_client.dart';
+import 'package:finpal/features/profile/data/api/profile_api.dart';
+import 'package:finpal/features/profile/data/datasources/profile_remote_data_source.dart';
+import 'package:finpal/features/profile/data/repositories/profile_repository_impl.dart';
+import 'package:finpal/features/profile/domain/usecases/get_user_profile.dart';
+import 'package:finpal/features/profile/domain/usecases/logout.dart';
 
-import 'package:fridge_to_fork_ai/features/profile/presentation/provider/profile/profile_notifier.dart';
+import 'package:finpal/features/profile/presentation/provider/profile/profile_notifier.dart';
 
 /// -------------------------------------------------------
 /// API

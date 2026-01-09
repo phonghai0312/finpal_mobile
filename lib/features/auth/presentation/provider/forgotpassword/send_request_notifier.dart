@@ -1,4 +1,4 @@
-// Represents the state of the Send Request screen
+﻿// Represents the state of the Send Request screen
 // ignore_for_file: use_build_context_synchronously
 
 import 'package:flutter/material.dart';

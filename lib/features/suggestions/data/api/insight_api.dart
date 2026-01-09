@@ -1,5 +1,5 @@
-import 'package:dio/dio.dart';
-import 'package:fridge_to_fork_ai/features/suggestions/data/models/insight_response_model.dart';
+﻿import 'package:dio/dio.dart';
+import 'package:finpal/features/suggestions/data/models/insight_response_model.dart';
 import 'package:retrofit/retrofit.dart';
 
 import '../../../../core/config/constant/api_base.dart';

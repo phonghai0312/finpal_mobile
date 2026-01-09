@@ -1,7 +1,7 @@
-import 'package:fridge_to_fork_ai/features/transactions/data/datasources/transaction_remote_datasources.dart';
-import 'package:fridge_to_fork_ai/features/transactions/domain/entities/spend_amount.dart';
-import 'package:fridge_to_fork_ai/features/transactions/domain/entities/transaction.dart';
-import 'package:fridge_to_fork_ai/features/transactions/domain/repositories/transaction_repository.dart'
+﻿import 'package:finpal/features/transactions/data/datasources/transaction_remote_datasources.dart';
+import 'package:finpal/features/transactions/domain/entities/spend_amount.dart';
+import 'package:finpal/features/transactions/domain/entities/transaction.dart';
+import 'package:finpal/features/transactions/domain/repositories/transaction_repository.dart'
     show TransactionRepository;
 
 class TransactionRepositoryImpl implements TransactionRepository {

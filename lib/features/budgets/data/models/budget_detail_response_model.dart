@@ -1,4 +1,4 @@
-import 'package:fridge_to_fork_ai/features/budgets/data/models/budget_model.dart';
+﻿import 'package:finpal/features/budgets/data/models/budget_model.dart';
 
 class BudgetDetailResponse {
   final BudgetModel budget;

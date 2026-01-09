@@ -1,4 +1,4 @@
-import 'package:fridge_to_fork_ai/features/budgets/domain/entities/budget.dart';
+﻿import 'package:finpal/features/budgets/domain/entities/budget.dart';
 
 class BudgetModel extends Budget {
   const BudgetModel({

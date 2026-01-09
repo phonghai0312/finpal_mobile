@@ -1,4 +1,4 @@
-class UpdateBudgetRequest {
+﻿class UpdateBudgetRequest {
   final String? categoryId;
   final double? amount;
   final String? period;

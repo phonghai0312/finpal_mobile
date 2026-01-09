@@ -1,4 +1,4 @@
-import '../entities/insight.dart';
+﻿import '../entities/insight.dart';
 import '../repositories/insight_repository.dart';
 
 class GetInsightsUseCase {

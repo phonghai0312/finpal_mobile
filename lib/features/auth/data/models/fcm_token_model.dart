@@ -1,4 +1,4 @@
-import 'package:fridge_to_fork_ai/features/auth/domain/entities/fcm_token.dart';
+﻿import 'package:finpal/features/auth/domain/entities/fcm_token.dart';
 
 class FcmTokenModel extends FcmToken {
   FcmTokenModel({super.message, required super.success, super.statusCode});

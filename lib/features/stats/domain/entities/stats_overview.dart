@@ -1,4 +1,4 @@
-import 'package:fridge_to_fork_ai/features/stats/domain/entities/stats_period.dart';
+﻿import 'package:finpal/features/stats/domain/entities/stats_period.dart';
 
 class StatsOverview {
   final StatsPeriod period;

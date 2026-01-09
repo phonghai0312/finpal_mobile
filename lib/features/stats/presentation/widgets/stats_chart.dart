@@ -1,8 +1,9 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:fridge_to_fork_ai/core/presentation/theme/app_chart_colors.dart'; // Import the new color class
-import 'package:fridge_to_fork_ai/features/stats/domain/entities/stats_by_category_item.dart';
+import 'package:finpal/core/presentation/theme/app_chart_colors.dart'; // Import the new color class
+import 'package:finpal/core/utils/category_translator.dart';
+import 'package:finpal/features/stats/domain/entities/stats_by_category_item.dart';
 
 class StatsChart extends StatelessWidget {
   final List<StatsByCategoryItem> items;
@@ -44,7 +45,8 @@ class StatsChart extends StatelessWidget {
                 sections: items.asMap().entries.map((entry) {
                   final index = entry.key;
                   final item = entry.value;
-                  final color = AppChartColors.colors[index % AppChartColors.colors.length];
+                  final color = AppChartColors
+                      .colors[index % AppChartColors.colors.length];
                   return PieChartSectionData(
                     value: item.percentage * 100,
                     title: '',
@@ -66,34 +68,47 @@ class StatsChart extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: items.take(3).map((item) => item).toList().asMap().entries.map((entry) {
-                final index = entry.key;
-                final item = entry.value;
-                final color = AppChartColors.colors[index % AppChartColors.colors.length];
-                return Padding(
-                  padding: EdgeInsets.symmetric(vertical: 4.h),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 12.w,
-                        height: 12.w,
-                        decoration: BoxDecoration(shape: BoxShape.circle, color: color), // Assign color to legend
-                      ),
-                      SizedBox(width: 8.w),
-                      Expanded(
-                        child: Text(
-                          item.categoryName,
-                          style: TextStyle(
-                            fontSize: 12.sp,
-                            color: Colors.grey[700],
+              children: items
+                  .take(3)
+                  .map((item) => item)
+                  .toList()
+                  .asMap()
+                  .entries
+                  .map((entry) {
+                    final index = entry.key;
+                    final item = entry.value;
+                    final color = AppChartColors
+                        .colors[index % AppChartColors.colors.length];
+                    return Padding(
+                      padding: EdgeInsets.symmetric(vertical: 4.h),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 12.w,
+                            height: 12.w,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: color,
+                            ), // Assign color to legend
                           ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
+                          SizedBox(width: 8.w),
+                          Expanded(
+                            child: Text(
+                              CategoryTranslator.getCategoryDisplayName(
+                                item.categoryName,
+                              ),
+                              style: TextStyle(
+                                fontSize: 12.sp,
+                                color: Colors.grey[700],
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                );
-              }).toList(),
+                    );
+                  })
+                  .toList(),
             ),
           ),
         ],

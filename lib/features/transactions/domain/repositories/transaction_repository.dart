@@ -1,4 +1,4 @@
-import '../../domain/entities/transaction.dart';
+﻿import '../../domain/entities/transaction.dart';
 import '../entities/spend_amount.dart';
 
 abstract class TransactionRepository {

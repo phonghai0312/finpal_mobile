@@ -1,15 +1,15 @@
-// ignore_for_file: use_build_context_synchronously
+﻿// ignore_for_file: use_build_context_synchronously
 
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fridge_to_fork_ai/core/presentation/theme/app_colors.dart';
-import 'package:fridge_to_fork_ai/features/stats/domain/entities/stats_by_category.dart';
-import 'package:fridge_to_fork_ai/features/stats/domain/entities/stats_overview.dart';
-import 'package:fridge_to_fork_ai/features/stats/domain/usecases/get_category_transactions.dart';
-import 'package:fridge_to_fork_ai/features/stats/domain/usecases/get_stats_by_category.dart';
-import 'package:fridge_to_fork_ai/features/stats/domain/usecases/get_stats_overview.dart';
-import 'package:fridge_to_fork_ai/features/transactions/domain/entities/transaction.dart';
+import 'package:finpal/core/presentation/theme/app_colors.dart';
+import 'package:finpal/features/stats/domain/entities/stats_by_category.dart';
+import 'package:finpal/features/stats/domain/entities/stats_overview.dart';
+import 'package:finpal/features/stats/domain/usecases/get_category_transactions.dart';
+import 'package:finpal/features/stats/domain/usecases/get_stats_by_category.dart';
+import 'package:finpal/features/stats/domain/usecases/get_stats_overview.dart';
+import 'package:finpal/features/transactions/domain/entities/transaction.dart';
 
 class StatsState {
   final bool isLoading;

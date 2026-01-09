@@ -1,15 +1,15 @@
-// ignore_for_file: use_build_context_synchronously
+﻿// ignore_for_file: use_build_context_synchronously
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fridge_to_fork_ai/features/budgets/presentation/providers/budget_form/budget_form_provider.dart';
+import 'package:finpal/features/budgets/presentation/providers/budget_form/budget_form_provider.dart';
 import 'package:go_router/go_router.dart';
 
-import 'package:fridge_to_fork_ai/core/config/routing/app_routes.dart';
-import 'package:fridge_to_fork_ai/features/budgets/domain/entities/budget.dart';
-import 'package:fridge_to_fork_ai/features/budgets/domain/usecases/get_budget_by_id.dart';
-import 'package:fridge_to_fork_ai/features/budgets/domain/usecases/delete_budget.dart';
-import 'package:fridge_to_fork_ai/features/budgets/presentation/providers/budget/budget_provider.dart';
+import 'package:finpal/core/config/routing/app_routes.dart';
+import 'package:finpal/features/budgets/domain/entities/budget.dart';
+import 'package:finpal/features/budgets/domain/usecases/get_budget_by_id.dart';
+import 'package:finpal/features/budgets/domain/usecases/delete_budget.dart';
+import 'package:finpal/features/budgets/presentation/providers/budget/budget_provider.dart';
 
 /// ===============================
 /// STATE

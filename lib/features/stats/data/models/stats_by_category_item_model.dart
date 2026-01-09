@@ -1,4 +1,4 @@
-library;
+﻿library;
 
 import '../../domain/entities/stats_by_category_item.dart';
 
