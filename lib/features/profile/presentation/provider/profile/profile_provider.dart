@@ -6,6 +6,7 @@ import 'package:finpal/features/profile/data/datasources/profile_remote_data_sou
 import 'package:finpal/features/profile/data/repositories/profile_repository_impl.dart';
 import 'package:finpal/features/profile/domain/usecases/get_user_profile.dart';
 import 'package:finpal/features/profile/domain/usecases/logout.dart';
+import 'package:finpal/features/profile/domain/usecases/update_user_profile.dart';
 
 import 'package:finpal/features/profile/presentation/provider/profile/profile_notifier.dart';
 
@@ -43,6 +44,12 @@ final logoutUseCaseProvider = Provider<LogoutUseCase>((ref) {
   return LogoutUseCase(ref.read(profileRepositoryProvider));
 });
 
+final updateUserProfileUseCaseProvider = Provider<UpdateUserProfileUseCase>((
+  ref,
+) {
+  return UpdateUserProfileUseCase(ref.read(profileRepositoryProvider));
+});
+
 /// -------------------------------------------------------
 /// NOTIFIER PROVIDER (đúng với ProfileNotifier mới)
 /// -------------------------------------------------------
@@ -51,6 +58,7 @@ final profileNotifierProvider =
       (ref) => ProfileNotifier(
         ref.read(getUserProfileUseCaseProvider),
         ref.read(logoutUseCaseProvider),
+        ref.read(updateUserProfileUseCaseProvider),
         ref,
       ),
     );

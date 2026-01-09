@@ -67,7 +67,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     );
   }
 
-  Widget _profileCard(BuildContext context, dynamic user) {
+  Widget _profileCard(BuildContext context, dynamic user, dynamic notifier) {
     return Container(
       width: double.infinity,
       margin: EdgeInsets.symmetric(horizontal: 16.w),
@@ -78,11 +78,35 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       ),
       child: Column(
         children: [
-          CircleAvatar(
-            radius: 40.r,
-            backgroundColor: AppColors.bgWhite,
-            backgroundImage: NetworkImage(
-              user?.avatarUrl ?? "https://www.gravatar.com/avatar/?d=mp",
+          GestureDetector(
+            onTap: () => notifier.showImageSourceDialog(context),
+            child: Stack(
+              children: [
+                CircleAvatar(
+                  radius: 40.r,
+                  backgroundColor: AppColors.bgWhite,
+                  backgroundImage: NetworkImage(
+                    user?.avatarUrl ?? "https://www.gravatar.com/avatar/?d=mp",
+                  ),
+                ),
+                Positioned(
+                  bottom: 0,
+                  right: 0,
+                  child: Container(
+                    padding: EdgeInsets.all(6.w),
+                    decoration: BoxDecoration(
+                      color: AppColors.bgDarkGreen,
+                      shape: BoxShape.circle,
+                      border: Border.all(color: AppColors.bgWhite, width: 2),
+                    ),
+                    child: Icon(
+                      Icons.camera_alt,
+                      color: AppColors.typoWhite,
+                      size: 16.sp,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
           SizedBox(height: 12.h),
@@ -126,7 +150,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           children: [
             SizedBox(height: 16.h),
 
-            _profileCard(context, state.user),
+            _profileCard(context, state.user, notifier),
 
             SizedBox(height: 24.h),
 

@@ -1,6 +1,8 @@
 ﻿import 'package:dio/dio.dart';
 
 import '../api/profile_api.dart';
+import '../models/presigned_url_response_model.dart';
+import '../models/public_url_response_model.dart';
 import '../models/user_model.dart';
 
 class ProfileRemoteDataSource {
@@ -12,15 +14,28 @@ class ProfileRemoteDataSource {
   Future<UserModel> getUser() => _guardRequest(api.getCurrentUser);
 
   /// UPDATE PROFILE
-  Future<UserModel> updateUser({String? name, String? phone}) {
+  Future<UserModel> updateUser({
+    String? name,
+    String? phone,
+    String? avatarUrl,
+  }) {
     final body = <String, dynamic>{};
 
     if (name != null) body['name'] = name;
     if (phone != null) body['phone'] = phone;
+    if (avatarUrl != null) body['avatarUrl'] = avatarUrl;
     return _guardRequest(() => api.updateUserProfile(body));
   }
 
   Future<void> logout() => _guardRequest(api.logout);
+
+  /// GET PRESIGNED URL
+  Future<PresignedUrlResponseModel> getPresignedUrl(String fileName) =>
+      _guardRequest(() => api.getPresignedUrl(fileName));
+
+  /// GET PUBLIC URL
+  Future<PublicUrlResponseModel> getPublicUrl(String filePath) =>
+      _guardRequest(() => api.getPublicUrl(filePath));
 
   // /// CHANGE PASSWORD
   // Future<void> changePassword({

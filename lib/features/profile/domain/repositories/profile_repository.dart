@@ -5,7 +5,7 @@ abstract class ProfileRepository {
   Future<User> getUser();
 
   /// Cập nhật thông tin cá nhân (profile)
-  Future<User> updateUser(String? name, String? phone);
+  Future<User> updateUser({String? name, String? phone, String? avatarUrl});
   Future<void> logout();
   // /// Đổi mật khẩu
   // Future<void> changePassword(

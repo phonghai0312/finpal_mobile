@@ -2,6 +2,8 @@
 import 'package:retrofit/retrofit.dart';
 
 import 'package:finpal/core/config/constant/api_base.dart';
+import 'package:finpal/features/profile/data/models/presigned_url_response_model.dart';
+import 'package:finpal/features/profile/data/models/public_url_response_model.dart';
 import 'package:finpal/features/profile/data/models/user_model.dart';
 
 part 'profile_api.g.dart';
@@ -21,4 +23,14 @@ abstract class ProfileApi {
 
   @POST('/auth/logout')
   Future<void> logout();
+
+  @GET('/getPresignedUrl')
+  Future<PresignedUrlResponseModel> getPresignedUrl(
+    @Query('name') String fileName,
+  );
+
+  @GET('/getPublicUrl/public')
+  Future<PublicUrlResponseModel> getPublicUrl(
+    @Query('path') String filePath,
+  );
 }

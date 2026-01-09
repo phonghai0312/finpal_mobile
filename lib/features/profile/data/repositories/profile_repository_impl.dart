@@ -28,8 +28,16 @@ class ProfileRepositoryImpl implements ProfileRepository {
 
   /// UPDATE PROFILE
   @override
-  Future<User> updateUser(String? name, String? phone) async {
-    final model = await remoteDataSource.updateUser(name: name, phone: phone);
+  Future<User> updateUser({
+    String? name,
+    String? phone,
+    String? avatarUrl,
+  }) async {
+    final model = await remoteDataSource.updateUser(
+      name: name,
+      phone: phone,
+      avatarUrl: avatarUrl,
+    );
 
     return User(
       id: model.id,
