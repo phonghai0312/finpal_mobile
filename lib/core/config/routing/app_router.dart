@@ -3,6 +3,8 @@ import 'package:fridge_to_fork_ai/core/config/routing/app_routes.dart';
 import 'package:fridge_to_fork_ai/core/presentation/widget/navigation/custom_bottom_navigation.dart';
 import 'package:fridge_to_fork_ai/core/utils/navigation_key.dart';
 import 'package:fridge_to_fork_ai/features/auth/presentation/page/forgotpassword/send_request_page.dart';
+import 'package:fridge_to_fork_ai/features/auth/presentation/page/forgotpassword/reset_password_page.dart';
+import 'package:fridge_to_fork_ai/features/auth/presentation/page/forgotpassword/verify_otp_page.dart';
 import 'package:fridge_to_fork_ai/features/auth/presentation/page/register/register_page.dart';
 import 'package:fridge_to_fork_ai/features/home/presentation/page/home_page.dart';
 import 'package:fridge_to_fork_ai/features/onboarding/presentation/page/onboarding_page.dart';
@@ -59,6 +61,14 @@ class AppRouter {
       GoRoute(
         path: AppRoutes.sendrequest,
         builder: (context, state) => const SendRequestPage(),
+      ),
+      GoRoute(
+        path: AppRoutes.verifyOtp,
+        builder: (context, state) => const VerifyOtpPage(),
+      ),
+      GoRoute(
+        path: AppRoutes.resetPassword,
+        builder: (context, state) => const ResetPasswordPage(),
       ),
 
       // Transactions

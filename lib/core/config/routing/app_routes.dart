@@ -9,6 +9,8 @@ class AppRoutes {
   static const String register = '/register';
   static const String verifyaccount = '/verifyAccount';
   static const String sendrequest = '/sendRequest';
+  static const String verifyOtp = '/verifyOtp';
+  static const String resetPassword = '/resetPassword';
   // Transactions
   static const String transactionDetail = '/transactionsDetail';
   static const String createTransaction = '/transactionsCreate';
