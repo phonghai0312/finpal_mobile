@@ -1,9 +1,11 @@
 
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:finpal/core/config/routing/app_routes.dart';
 import 'package:finpal/core/presentation/widget/navigation/custom_bottom_navigation.dart';
 import 'package:finpal/core/utils/navigation_key.dart';
 import 'package:finpal/features/auth/presentation/page/forgotpassword/send_request_page.dart';
+import 'package:finpal/features/auth/presentation/page/forgotpassword/verify_otp_page.dart';
+import 'package:finpal/features/auth/presentation/page/forgotpassword/reset_password_page.dart';
 import 'package:finpal/features/auth/presentation/page/register/register_page.dart';
 import 'package:finpal/features/home/presentation/page/home_page.dart';
 import 'package:finpal/features/onboarding/presentation/page/onboarding_page.dart';

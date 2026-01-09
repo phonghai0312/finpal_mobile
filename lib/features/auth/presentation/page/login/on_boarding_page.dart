@@ -61,7 +61,7 @@ class OnBoardingPage extends StatelessWidget {
                     Navigator.of(context).pushNamed(AppRoutes.login);
                   },
                   child: const Text(
-                    'Next >',
+                    'Bước tiếp >',
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,

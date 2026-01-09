@@ -91,7 +91,7 @@ class OnboardingPage extends ConsumerWidget {
                 child: InkWell(
                   onTap: () => notifier.skip(context),
                   child: Text(
-                    "Next >",
+                    "Bước tiếp >",
                     style: TextStyle(
                       fontSize: 20.sp,
                       fontWeight: FontWeight.w700,
