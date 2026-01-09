@@ -1,1 +1,1 @@
-class VerifyAccountPage {}
+﻿class VerifyAccountPage {}

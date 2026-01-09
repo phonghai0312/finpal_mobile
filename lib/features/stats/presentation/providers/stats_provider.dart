@@ -1,12 +1,12 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fridge_to_fork_ai/core/network/api_client.dart';
-import 'package:fridge_to_fork_ai/features/stats/data/api/stats_api.dart';
-import 'package:fridge_to_fork_ai/features/stats/data/datasources/stats_remote_datasource.dart';
-import 'package:fridge_to_fork_ai/features/stats/data/repositories/stats_repository_impl.dart';
-import 'package:fridge_to_fork_ai/features/stats/domain/usecases/get_category_transactions.dart';
-import 'package:fridge_to_fork_ai/features/stats/domain/usecases/get_stats_by_category.dart';
-import 'package:fridge_to_fork_ai/features/stats/domain/usecases/get_stats_overview.dart';
-import 'package:fridge_to_fork_ai/features/transactions/presentation/provider/transaction/transaction_provider.dart';
+﻿import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:finpal/core/network/api_client.dart';
+import 'package:finpal/features/stats/data/api/stats_api.dart';
+import 'package:finpal/features/stats/data/datasources/stats_remote_datasource.dart';
+import 'package:finpal/features/stats/data/repositories/stats_repository_impl.dart';
+import 'package:finpal/features/stats/domain/usecases/get_category_transactions.dart';
+import 'package:finpal/features/stats/domain/usecases/get_stats_by_category.dart';
+import 'package:finpal/features/stats/domain/usecases/get_stats_overview.dart';
+import 'package:finpal/features/transactions/presentation/provider/transaction/transaction_provider.dart';
 
 import 'stats_notifier.dart';
 

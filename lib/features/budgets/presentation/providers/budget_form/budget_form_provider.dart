@@ -1,14 +1,14 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+﻿import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:fridge_to_fork_ai/core/network/api_client.dart';
+import 'package:finpal/core/network/api_client.dart';
 
-import 'package:fridge_to_fork_ai/features/budgets/data/api/budget_api.dart';
-import 'package:fridge_to_fork_ai/features/budgets/data/datasources/budget_remote_data_source.dart';
-import 'package:fridge_to_fork_ai/features/budgets/data/repositories/budget_repository_impl.dart';
+import 'package:finpal/features/budgets/data/api/budget_api.dart';
+import 'package:finpal/features/budgets/data/datasources/budget_remote_data_source.dart';
+import 'package:finpal/features/budgets/data/repositories/budget_repository_impl.dart';
 
-import 'package:fridge_to_fork_ai/features/budgets/domain/usecases/create_budget.dart';
-import 'package:fridge_to_fork_ai/features/budgets/domain/usecases/update_budget.dart';
-import 'package:fridge_to_fork_ai/features/budgets/domain/usecases/get_budget_by_id.dart';
+import 'package:finpal/features/budgets/domain/usecases/create_budget.dart';
+import 'package:finpal/features/budgets/domain/usecases/update_budget.dart';
+import 'package:finpal/features/budgets/domain/usecases/get_budget_by_id.dart';
 
 import 'budget_form_notifier.dart';
 

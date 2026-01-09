@@ -1,7 +1,7 @@
-import 'package:fridge_to_fork_ai/features/auth/data/datasouces/auth_remote_datasouces.dart';
-import 'package:fridge_to_fork_ai/features/auth/domain/entities/fcm_token.dart';
-import 'package:fridge_to_fork_ai/features/auth/domain/entities/register.dart';
-import 'package:fridge_to_fork_ai/features/auth/domain/repositories/auth_repository.dart';
+﻿import 'package:finpal/features/auth/data/datasouces/auth_remote_datasouces.dart';
+import 'package:finpal/features/auth/domain/entities/fcm_token.dart';
+import 'package:finpal/features/auth/domain/entities/register.dart';
+import 'package:finpal/features/auth/domain/repositories/auth_repository.dart';
 
 import '../../domain/entities/login.dart';
 import '../../domain/entities/refresh_token.dart';

@@ -1,19 +1,19 @@
-// ignore_for_file: use_build_context_synchronously
+﻿// ignore_for_file: use_build_context_synchronously
 
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fridge_to_fork_ai/core/config/routing/app_routes.dart';
-import 'package:fridge_to_fork_ai/core/domain/entities/user.dart';
-import 'package:fridge_to_fork_ai/features/budgets/domain/entities/budget.dart';
-import 'package:fridge_to_fork_ai/features/budgets/presentation/providers/budget/budget_notifier.dart';
-import 'package:fridge_to_fork_ai/features/budgets/presentation/providers/budget/budget_provider.dart';
-import 'package:fridge_to_fork_ai/features/budgets/presentation/providers/budget_form/budget_form_provider.dart';
-import 'package:fridge_to_fork_ai/features/profile/presentation/provider/profile/profile_notifier.dart';
-import 'package:fridge_to_fork_ai/features/profile/presentation/provider/profile/profile_provider.dart';
-import 'package:fridge_to_fork_ai/features/transactions/domain/entities/transaction.dart';
-import 'package:fridge_to_fork_ai/features/transactions/presentation/provider/transaction/transaction_notifier.dart';
-import 'package:fridge_to_fork_ai/features/transactions/presentation/provider/transaction/transaction_provider.dart';
+import 'package:finpal/core/config/routing/app_routes.dart';
+import 'package:finpal/core/domain/entities/user.dart';
+import 'package:finpal/features/budgets/domain/entities/budget.dart';
+import 'package:finpal/features/budgets/presentation/providers/budget/budget_notifier.dart';
+import 'package:finpal/features/budgets/presentation/providers/budget/budget_provider.dart';
+import 'package:finpal/features/budgets/presentation/providers/budget_form/budget_form_provider.dart';
+import 'package:finpal/features/profile/presentation/provider/profile/profile_notifier.dart';
+import 'package:finpal/features/profile/presentation/provider/profile/profile_provider.dart';
+import 'package:finpal/features/transactions/domain/entities/transaction.dart';
+import 'package:finpal/features/transactions/presentation/provider/transaction/transaction_notifier.dart';
+import 'package:finpal/features/transactions/presentation/provider/transaction/transaction_provider.dart';
 import 'package:go_router/go_router.dart';
 
 /// State

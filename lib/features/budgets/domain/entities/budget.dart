@@ -1,4 +1,4 @@
-class Budget {
+﻿class Budget {
   final String id;
   final String userId;
 

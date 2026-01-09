@@ -1,4 +1,4 @@
-import 'package:jwt_decoder/jwt_decoder.dart';
+﻿import 'package:jwt_decoder/jwt_decoder.dart';
 
 /// Utility class to decode JWT tokens
 class JwtUtils {

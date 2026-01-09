@@ -1,6 +1,6 @@
 {
-    "app_name": "Fridge to Fork AI",
-    "welcome": "Welcome to Fridge to Fork!",
+    "app_name": "FinPal",
+    "welcome": "Welcome to FinPal!",
     "loading": "Loading...",
     "error": "An error occurred",
     "confirm": "Confirm",
@@ -40,5 +40,29 @@
         "subtitle": "Manage your account and settings",
         "logout": "Logout",
         "language": "Language"
+    },
+    "categories": {
+        "food_drink": "Food & Drink",
+        "shopping": "Shopping",
+        "transportation": "Transportation",
+        "entertainment": "Entertainment",
+        "healthcare": "Healthcare",
+        "education": "Education",
+        "utilities": "Utilities",
+        "housing": "Housing",
+        "salary": "Salary",
+        "income": "Income",
+        "investment": "Investment",
+        "bonus": "Bonus",
+        "interest": "Interest",
+        "dividend": "Dividend",
+        "business": "Business",
+        "profit": "Profit",
+        "personal_care": "Personal Care",
+        "travel": "Travel",
+        "insurance": "Insurance",
+        "gifts": "Gifts",
+        "other": "Other",
+        "unknown": "Unknown"
     }
 }

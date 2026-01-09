@@ -1,8 +1,8 @@
-import 'package:retrofit/retrofit.dart';
+﻿import 'package:retrofit/retrofit.dart';
 import 'package:dio/dio.dart';
 
-import 'package:fridge_to_fork_ai/features/auth/data/models/fcm_token_model.dart';
-import 'package:fridge_to_fork_ai/core/config/constant/api_base.dart';
+import 'package:finpal/features/auth/data/models/fcm_token_model.dart';
+import 'package:finpal/core/config/constant/api_base.dart';
 
 part 'fcm_token_api.g.dart';
 

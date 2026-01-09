@@ -1,1 +1,1 @@
-class UnlockFeaturePopup {}
+﻿class UnlockFeaturePopup {}

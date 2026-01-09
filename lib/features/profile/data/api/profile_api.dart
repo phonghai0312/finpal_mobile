@@ -1,8 +1,8 @@
-import 'package:dio/dio.dart';
+﻿import 'package:dio/dio.dart';
 import 'package:retrofit/retrofit.dart';
 
-import 'package:fridge_to_fork_ai/core/config/constant/api_base.dart';
-import 'package:fridge_to_fork_ai/features/profile/data/models/user_model.dart';
+import 'package:finpal/core/config/constant/api_base.dart';
+import 'package:finpal/features/profile/data/models/user_model.dart';
 
 part 'profile_api.g.dart';
 

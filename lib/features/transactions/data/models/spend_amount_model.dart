@@ -1,4 +1,4 @@
-import '../../domain/entities/spend_amount.dart';
+﻿import '../../domain/entities/spend_amount.dart';
 
 class SpendAmountModel extends SpendAmount {
   const SpendAmountModel({

@@ -1,4 +1,4 @@
-import 'package:fridge_to_fork_ai/features/profile/domain/repositories/profile_repository.dart';
+﻿import 'package:finpal/features/profile/domain/repositories/profile_repository.dart';
 
 class LogoutUseCase {
   final ProfileRepository repository;

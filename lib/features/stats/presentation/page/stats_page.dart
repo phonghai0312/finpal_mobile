@@ -1,19 +1,20 @@
-// ignore_for_file: use_build_context_synchronously
+﻿// ignore_for_file: use_build_context_synchronously
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import 'package:fridge_to_fork_ai/core/presentation/theme/app_colors.dart';
-import 'package:fridge_to_fork_ai/core/presentation/widget/header/header_simple.dart';
+import 'package:finpal/core/presentation/theme/app_colors.dart';
+import 'package:finpal/core/presentation/widget/header/header_simple.dart';
+import 'package:finpal/core/utils/category_translator.dart';
 
-import 'package:fridge_to_fork_ai/features/stats/presentation/providers/stats_provider.dart';
+import 'package:finpal/features/stats/presentation/providers/stats_provider.dart';
 
-import 'package:fridge_to_fork_ai/features/stats/presentation/widgets/stats_header.dart';
-import 'package:fridge_to_fork_ai/features/stats/presentation/widgets/stats_overview_cards.dart';
-import 'package:fridge_to_fork_ai/features/stats/presentation/widgets/stats_chart.dart';
-import 'package:fridge_to_fork_ai/features/stats/presentation/widgets/stats_category_list.dart';
-import 'package:fridge_to_fork_ai/features/stats/presentation/widgets/stats_category_sheet.dart';
+import 'package:finpal/features/stats/presentation/widgets/stats_header.dart';
+import 'package:finpal/features/stats/presentation/widgets/stats_overview_cards.dart';
+import 'package:finpal/features/stats/presentation/widgets/stats_chart.dart';
+import 'package:finpal/features/stats/presentation/widgets/stats_category_list.dart';
+import 'package:finpal/features/stats/presentation/widgets/stats_category_sheet.dart';
 
 class StatsPage extends ConsumerStatefulWidget {
   const StatsPage({super.key});
@@ -106,7 +107,7 @@ class _StatsPageState extends ConsumerState<StatsPage> {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (_) => StatsCategorySheet(
-        title: name,
+        title: CategoryTranslator.getCategoryDisplayName(name),
         monthLabel: "Tháng ${state.month}/${state.year}",
         future: notifier.getTransactionsByCategory(categoryId),
       ),

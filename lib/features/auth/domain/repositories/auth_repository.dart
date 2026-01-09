@@ -1,7 +1,7 @@
-import 'package:fridge_to_fork_ai/features/auth/domain/entities/fcm_token.dart';
-import 'package:fridge_to_fork_ai/features/auth/domain/entities/login.dart';
-import 'package:fridge_to_fork_ai/features/auth/domain/entities/refresh_token.dart';
-import 'package:fridge_to_fork_ai/features/auth/domain/entities/register.dart';
+﻿import 'package:finpal/features/auth/domain/entities/fcm_token.dart';
+import 'package:finpal/features/auth/domain/entities/login.dart';
+import 'package:finpal/features/auth/domain/entities/refresh_token.dart';
+import 'package:finpal/features/auth/domain/entities/register.dart';
 
 abstract class AuthRepository {
   Future<Login> login(String email, String password);

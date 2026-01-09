@@ -1,4 +1,4 @@
-import 'package:fridge_to_fork_ai/features/auth/domain/entities/login.dart';
+﻿import 'package:finpal/features/auth/domain/entities/login.dart';
 
 class LoginModel extends Login {
   const LoginModel({

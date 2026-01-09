@@ -8,6 +8,7 @@ import 'package:intl/intl.dart';
 
 import '../../../../core/presentation/theme/app_colors.dart';
 import '../../../../core/presentation/widget/header/header_simple.dart';
+import '../../../../core/utils/category_translator.dart';
 import '../../../categories/presentation/provider/category.notifier.dart';
 import '../../../categories/presentation/provider/category_provider.dart';
 import '../../domain/entities/transaction.dart';
@@ -426,20 +427,22 @@ class TransactionsPageState extends ConsumerState<TransactionsPage> {
                             leading: _categoryLeadingIcon(
                               icon: _categoryHeroIcon(categories[i].icon),
                               color: _categoryColor(i),
-                              size: _isFoodCategory(
+                              size:
+                                  _isFoodCategory(
                                     displayName: categories[i].displayName,
                                     iconName: categories[i].icon,
                                   )
                                   ? 18
                                   : 16,
-                              backgroundOpacity: _isFoodCategory(
+                              backgroundOpacity:
+                                  _isFoodCategory(
                                     displayName: categories[i].displayName,
                                     iconName: categories[i].icon,
                                   )
                                   ? 0.2
                                   : 0.12,
                             ),
-                            title: Text(categories[i].displayName),
+                            title: Text(categories[i].getLocalizedName()),
                             selected: categories[i].id == currentCategoryId,
                             onTap: () {
                               notifier.setCategoryFilter(categories[i].id);
@@ -629,7 +632,7 @@ class TransactionsPageState extends ConsumerState<TransactionsPage> {
                     ),
                     SizedBox(height: 4.h),
                     Text(
-                      "${tx.categoryName ?? 'Không xác định'} • $dateString",
+                      "${CategoryTranslator.getCategoryDisplayName(tx.categoryName)} • $dateString",
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(

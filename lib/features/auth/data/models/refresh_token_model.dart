@@ -1,4 +1,4 @@
-import '../../domain/entities/refresh_token.dart';
+﻿import '../../domain/entities/refresh_token.dart';
 
 class RefreshTokenModel extends RefreshToken {
   const RefreshTokenModel({

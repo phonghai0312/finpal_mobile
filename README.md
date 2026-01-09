@@ -1,6 +1,6 @@
-# fridge_to_fork_ai
+# FinPal
 
-A new Flutter project.
+FinPal - Your Personal Finance Pal
 
 ## Getting Started
 

@@ -1,8 +1,8 @@
-/// Stats Repository Implementation
+﻿/// Stats Repository Implementation
 /// Dùng khi có backend - hiện tại mock data
 library;
 
-import 'package:fridge_to_fork_ai/features/transactions/domain/entities/transaction.dart';
+import 'package:finpal/features/transactions/domain/entities/transaction.dart';
 
 import '../../domain/entities/stats_by_category.dart';
 import '../../domain/entities/stats_overview.dart';

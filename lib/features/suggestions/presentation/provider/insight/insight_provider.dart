@@ -1,5 +1,5 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fridge_to_fork_ai/features/suggestions/presentation/provider/insight/insight_notifier.dart';
+﻿import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:finpal/features/suggestions/presentation/provider/insight/insight_notifier.dart';
 
 import '../../../../../core/network/api_client.dart';
 import '../../../data/api/insight_api.dart';

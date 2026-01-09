@@ -1,4 +1,4 @@
-import '../entities/register.dart';
+﻿import '../entities/register.dart';
 import '../repositories/auth_repository.dart';
 
 class RegisterAccount {

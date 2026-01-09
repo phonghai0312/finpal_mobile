@@ -1,4 +1,4 @@
-class StatsMonthlyItem {
+﻿class StatsMonthlyItem {
   final int month;
   final double income;
   final double expense;

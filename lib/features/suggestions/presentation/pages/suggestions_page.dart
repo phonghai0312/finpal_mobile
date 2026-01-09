@@ -1,13 +1,13 @@
-// ignore_for_file: deprecated_member_use, depend_on_referenced_packages, use_build_context_synchronously
+﻿// ignore_for_file: deprecated_member_use, depend_on_referenced_packages, use_build_context_synchronously
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:fridge_to_fork_ai/features/suggestions/domain/entities/insight.dart';
+import 'package:finpal/features/suggestions/domain/entities/insight.dart';
 import 'package:intl/intl.dart';
 import '../../../../../core/presentation/theme/app_colors.dart';
 import '../../../../../core/presentation/widget/header/header_simple.dart';
-import 'package:fridge_to_fork_ai/features/suggestions/presentation/provider/insight/insight_provider.dart';
+import 'package:finpal/features/suggestions/presentation/provider/insight/insight_provider.dart';
 
 class SuggestionsPage extends ConsumerStatefulWidget {
   const SuggestionsPage({super.key});
@@ -35,7 +35,7 @@ class _SuggestionsPageState extends ConsumerState<SuggestionsPage> {
       appBar: const HeaderSimple(title: "Gợi ý tài chính"),
 
       body: RefreshIndicator(
-        color: AppColors.primaryGreen,
+        color: AppColors.bgDarkGreen,
         onRefresh: () async => notifier.refresh(context),
 
         child: Column(
@@ -50,6 +50,40 @@ class _SuggestionsPageState extends ConsumerState<SuggestionsPage> {
                   child: Text(
                     "Error: ${state.errorMessage}",
                     style: TextStyle(color: AppColors.bgError, fontSize: 16.sp),
+                  ),
+                ),
+              )
+            /// Nếu không có dữ liệu
+            else if (state.insights.isEmpty)
+              Expanded(
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.analytics_outlined,
+                        size: 80.sp,
+                        color: Colors.grey[400],
+                      ),
+                      SizedBox(height: 16.h),
+                      Text(
+                        "Chưa có báo cáo tài chính nào",
+                        style: TextStyle(
+                          fontSize: 18.sp,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.grey[700],
+                        ),
+                      ),
+                      SizedBox(height: 8.h),
+                      Text(
+                        "Hệ thống sẽ tự động phân tích và đưa ra gợi ý\nkhi bạn có đủ dữ liệu giao dịch",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 14.sp,
+                          color: Colors.grey[500],
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               )

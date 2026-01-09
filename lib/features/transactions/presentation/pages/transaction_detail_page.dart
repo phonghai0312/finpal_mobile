@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 
 import '../../../../../core/presentation/theme/app_colors.dart';
 import '../../../../../core/presentation/widget/header/header_with_back.dart';
+import '../../../../../core/utils/category_translator.dart';
 import '../../domain/entities/transaction.dart';
 import '../provider/transactiondetail/transaction_detail_notifier.dart';
 import '../provider/transactiondetail/transaction_detail_provider.dart';
@@ -94,7 +95,11 @@ class _TransactionDetailPageState extends ConsumerState<TransactionDetailPage> {
               _formatDate(tx.occurredAt),
               Icons.access_time,
             ),
-            _infoTile("Danh mục", tx.categoryName ?? "", Icons.category),
+            _infoTile(
+              "Danh mục",
+              CategoryTranslator.getCategoryDisplayName(tx.categoryName),
+              Icons.category,
+            ),
             _infoTile("Phương thức", tx.source, Icons.account_balance_wallet),
 
             _editableTile(
@@ -187,7 +192,7 @@ class _TransactionDetailPageState extends ConsumerState<TransactionDetailPage> {
                 ),
                 SizedBox(height: 4.h),
                 Text(
-                  "Giao dịch này được AI phân loại vào danh mục: “${tx.categoryName}” với độ chính xác ${(tx.ai.confidence! * 100).toInt()}%",
+                  "Giao dịch này được AI phân loại vào danh mục: “${CategoryTranslator.getCategoryDisplayName(tx.categoryName)}” với độ chính xác ${(tx.ai.confidence! * 100).toInt()}%",
                   style: TextStyle(
                     fontSize: 12.5.sp,
                     color: Colors.orange[900],

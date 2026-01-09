@@ -1,4 +1,4 @@
-class Login {
+﻿class Login {
   final String id;
   final String email;
   final String password;

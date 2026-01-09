@@ -1,8 +1,8 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:fridge_to_fork_ai/features/onboarding/presentation/provider/onboarding/onboarding_provider.dart';
-import 'package:fridge_to_fork_ai/features/onboarding/presentation/widgets/onboarding%20_item.dart';
+import 'package:finpal/features/onboarding/presentation/provider/onboarding/onboarding_provider.dart';
+import 'package:finpal/features/onboarding/presentation/widgets/onboarding%20_item.dart';
 import '../../../../core/presentation/theme/app_colors.dart';
 
 class OnboardingPage extends ConsumerWidget {

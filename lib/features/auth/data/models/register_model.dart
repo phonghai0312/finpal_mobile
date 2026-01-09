@@ -1,4 +1,4 @@
-import 'package:fridge_to_fork_ai/features/auth/domain/entities/register.dart';
+﻿import 'package:finpal/features/auth/domain/entities/register.dart';
 
 class RegisterModel extends Register {
   RegisterModel({

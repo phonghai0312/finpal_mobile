@@ -1,4 +1,4 @@
-class RefreshToken {
+﻿class RefreshToken {
   final String token;
 
   const RefreshToken({

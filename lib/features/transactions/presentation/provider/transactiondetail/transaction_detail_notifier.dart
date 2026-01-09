@@ -1,9 +1,9 @@
-// ignore_for_file: use_build_context_synchronously
+﻿// ignore_for_file: use_build_context_synchronously
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fridge_to_fork_ai/core/config/routing/app_routes.dart';
-import 'package:fridge_to_fork_ai/features/transactions/presentation/provider/transaction/transaction_provider.dart';
+import 'package:finpal/core/config/routing/app_routes.dart';
+import 'package:finpal/features/transactions/presentation/provider/transaction/transaction_provider.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../domain/entities/transaction.dart';

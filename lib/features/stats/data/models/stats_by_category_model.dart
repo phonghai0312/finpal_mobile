@@ -1,4 +1,4 @@
-import '../../domain/entities/stats_by_category.dart';
+﻿import '../../domain/entities/stats_by_category.dart';
 import '../../domain/entities/stats_period.dart';
 import 'stats_by_category_item_model.dart';
 

@@ -1,6 +1,6 @@
 {
-    "name": "fridge_to_fork_ai",
-    "short_name": "fridge_to_fork_ai",
+    "name": "finpal",
+    "short_name": "finpal",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

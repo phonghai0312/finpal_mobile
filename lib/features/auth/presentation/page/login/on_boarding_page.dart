@@ -1,4 +1,4 @@
-import 'package:fridge_to_fork_ai/core/config/routing/app_routes.dart';
+﻿import 'package:finpal/core/config/routing/app_routes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
