@@ -1,3 +1,4 @@
+
 ﻿import 'package:flutter/material.dart';
 import 'package:finpal/core/config/routing/app_routes.dart';
 import 'package:finpal/core/presentation/widget/navigation/custom_bottom_navigation.dart';
@@ -14,7 +15,6 @@ import 'package:finpal/features/suggestions/presentation/pages/suggestions_page.
 import 'package:finpal/features/welcome/presentation/page/connectsepay/connect_sepay_page.dart';
 import 'package:finpal/features/welcome/presentation/page/welcome/welcome_page.dart';
 import 'package:go_router/go_router.dart';
-
 import '../../../features/auth/presentation/page/login/login_page.dart';
 import 'package:finpal/features/transactions/presentation/pages/transaction_detail_page.dart';
 import 'package:finpal/features/transactions/presentation/pages/create_transaction_page.dart';
@@ -59,6 +59,14 @@ class AppRouter {
       GoRoute(
         path: AppRoutes.sendrequest,
         builder: (context, state) => const SendRequestPage(),
+      ),
+      GoRoute(
+        path: AppRoutes.verifyOtp,
+        builder: (context, state) => const VerifyOtpPage(),
+      ),
+      GoRoute(
+        path: AppRoutes.resetPassword,
+        builder: (context, state) => const ResetPasswordPage(),
       ),
 
       // Transactions

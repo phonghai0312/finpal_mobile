@@ -7,7 +7,6 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../../core/config/routing/app_routes.dart';
 import '../../../../../core/utils/validation_auth.dart';
-import '../../../domain/usecase/send_request.dart';
 
 class SendRequestState {
   final TextEditingController usernameController;
@@ -54,9 +53,7 @@ class SendRequestState {
 }
 
 class SendRequestNotifier extends StateNotifier<SendRequestState> {
-  final SendRequest sendRequestUseCase;
-
-  SendRequestNotifier(this.sendRequestUseCase)
+  SendRequestNotifier()
     : super(SendRequestState(usernameController: TextEditingController())) {
     _initListeners();
   }
@@ -86,58 +83,8 @@ class SendRequestNotifier extends StateNotifier<SendRequestState> {
 
   // Trigger when user presses "Send Code"
   Future<void> onSendCode(BuildContext context) async {
-    final input = state.username.trim();
     if (!state.isValid || state.isLoading) return;
-
-    try {
-      _setLoading(true);
-      await sendRequestUseCase(input);
-      await _handleSuccess(context);
-    } catch (e) {
-      _handleFailure(context, e);
-    }
-  }
-
-  Future<void> _handleSuccess(BuildContext context) async {
-    _setLoading(false);
-    state = state.copyWith(isSuccess: true);
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Đã gửi yêu cầu. Vui lòng kiểm tra email/số điện thoại.'),
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
-  }
-
-  void _handleFailure(BuildContext context, Object error) {
-    final message = _translateError(error.toString());
-    state = state.copyWith(isLoading: false, errorMessage: message);
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.red,
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
-  }
-
-  void _setLoading(bool value) {
-    state = state.copyWith(isLoading: value, errorMessage: null);
-  }
-
-  String _translateError(String errorMessage) {
-    final error = errorMessage.replaceFirst('Exception: ', '').trim();
-
-    switch (error) {
-      case 'Invalid username':
-        return 'Email hoặc số điện thoại không hợp lệ.';
-      case 'User not found':
-        return 'Không tìm thấy người dùng. Vui lòng thử lại.';
-      default:
-        return 'Có lỗi xảy ra. Vui lòng thử lại.';
-    }
+    context.go(AppRoutes.verifyOtp);
   }
 
   // Navigate to Login page
